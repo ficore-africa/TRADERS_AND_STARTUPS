@@ -252,7 +252,7 @@ def create_app():
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
     # Add URL generation configurations
-    app.config['SERVER_NAME'] = os.getenv('SERVER_NAME', 'ficore-labs-records.onrender.com')
+    app.config['SERVER_NAME'] = os.getenv('SERVER_NAME', 'ficore-records.onrender.com')
     app.config['APPLICATION_ROOT'] = os.getenv('APPLICATION_ROOT', '/')
     app.config['PREFERRED_URL_SCHEME'] = os.getenv('PREFERRED_URL_SCHEME', 'https')
 
