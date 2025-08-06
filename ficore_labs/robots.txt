@@ -1,3 +1,4 @@
 User-agent: *
 Disallow: /private/
 Allow: /
+Crawl-delay: 5  # Wait 10 seconds between requests
