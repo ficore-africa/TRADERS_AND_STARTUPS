@@ -88,6 +88,8 @@ def log_audit_action(action, details=None):
     """Log an admin action to audit_logs collection."""
     try:
         db = utils.get_mongo_db()
+        if db is None:
+            raise Exception("Failed to connect to MongoDB")
         db.audit_logs.insert_one({
             'admin_id': str(current_user.id),
             'action': action,
@@ -107,7 +109,7 @@ def dashboard():
     """Admin dashboard with system statistics."""
     try:
         db = utils.get_mongo_db()
-        if not db:
+        if db is None:
             raise Exception("Failed to connect to MongoDB")
         stats = {
             'users': db.users.count_documents({}),
@@ -152,7 +154,7 @@ def manage_users():
     """View and manage users."""
     try:
         db = utils.get_mongo_db()
-        if not db:
+        if db is None:
             raise Exception("Failed to connect to MongoDB")
         users = list(db.users.find({} if utils.is_admin() else {'role': {'$ne': 'admin'}}).sort('created_at', -1))
         for user in users:
@@ -182,11 +184,11 @@ def suspend_user(user_id):
     try:
         ObjectId(user_id)
         db = utils.get_mongo_db()
-        if not db:
+        if db is None:
             raise Exception("Failed to connect to MongoDB")
         user_query = {'_id': ObjectId(user_id)}
         user = db.users.find_one(user_query)
-        if not user:
+        if user is None:
             flash(trans('admin_user_not_found', default='User not found'), 'danger')
             return redirect(url_for('admin.manage_users'))
         result = db.users.update_one(
@@ -221,11 +223,11 @@ def delete_user(user_id):
     try:
         ObjectId(user_id)
         db = utils.get_mongo_db()
-        if not db:
+        if db is None:
             raise Exception("Failed to connect to MongoDB")
         user_query = {'_id': ObjectId(user_id)}
         user = db.users.find_one(user_query)
-        if not user:
+        if user is None:
             flash(trans('admin_user_not_found', default='User not found'), 'danger')
             return redirect(url_for('admin.manage_users'))
         db.records.delete_many({'user_id': user_id})
@@ -268,7 +270,7 @@ def delete_item(collection, item_id):
     try:
         ObjectId(item_id)
         db = utils.get_mongo_db()
-        if not db:
+        if db is None:
             raise Exception("Failed to connect to MongoDB")
         result = db[collection].delete_one({'_id': ObjectId(item_id)})
         if result.deleted_count == 0:
@@ -298,7 +300,7 @@ def manage_user_roles():
     """Manage user roles: list all users and update their roles."""
     try:
         db = utils.get_mongo_db()
-        if not db:
+        if db is None:
             raise Exception("Failed to connect to MongoDB")
         users = list(db.users.find())
         form = RoleForm()
@@ -307,7 +309,7 @@ def manage_user_roles():
             try:
                 ObjectId(user_id)
                 user = db.users.find_one({'_id': ObjectId(user_id)})
-                if not user:
+                if user is None:
                     flash(trans('user_not_found', default='User not found'), 'danger')
                     return redirect(url_for('admin.manage_user_roles'))
                 new_role = form.role.data
@@ -356,7 +358,7 @@ def manage_user_subscriptions():
     """Manage user subscriptions: list all users and update their subscription status."""
     try:
         db = utils.get_mongo_db()
-        if not db:
+        if db is None:
             raise Exception("Failed to connect to MongoDB")
         users = list(db.users.find())
         form = SubscriptionForm()
@@ -365,7 +367,7 @@ def manage_user_subscriptions():
             try:
                 ObjectId(user_id)
                 user = db.users.find_one({'_id': ObjectId(user_id)})
-                if not user:
+                if user is None:
                     flash(trans('user_not_found', default='User not found'), 'danger')
                     return redirect(url_for('admin.manage_user_subscriptions'))
                 plan_durations = {'monthly': 30, 'yearly': 365}
@@ -429,7 +431,7 @@ def manage_user_trials():
     """Manage user trials: list all users and update their trial status, including bulk updates."""
     try:
         db = utils.get_mongo_db()
-        if not db:
+        if db is None:
             raise Exception("Failed to connect to MongoDB")
         users = list(db.users.find())
         form = TrialForm()
@@ -440,7 +442,7 @@ def manage_user_trials():
                 try:
                     ObjectId(user_id)
                     user = db.users.find_one({'_id': ObjectId(user_id)})
-                    if not user:
+                    if user is None:
                         flash(trans('user_not_found', default='User not found'), 'danger')
                         return redirect(url_for('admin.manage_user_trials'))
                     update_data = {
@@ -539,7 +541,7 @@ def audit():
     """View audit logs of admin actions."""
     try:
         db = utils.get_mongo_db()
-        if not db:
+        if db is None:
             raise Exception("Failed to connect to MongoDB")
         logs = list(db.audit_logs.find().sort('timestamp', -1).limit(100))
         for log in logs:
@@ -559,7 +561,7 @@ def manage_feedback():
     """View and filter user feedback."""
     try:
         db = utils.get_mongo_db()
-        if not db:
+        if db is None:
             raise Exception("Failed to connect to MongoDB")
         form = FeedbackFilterForm()
         filter_kwargs = {}
@@ -601,7 +603,7 @@ def manage_debtors():
     """Manage debtors: list all and add new ones."""
     try:
         db = utils.get_mongo_db()
-        if not db:
+        if db is None:
             raise Exception("Failed to connect to MongoDB")
         form = DebtorForm()
         if request.method == 'POST' and form.validate_on_submit():
@@ -638,7 +640,7 @@ def manage_creditors():
     """Manage creditors: list all and add new ones."""
     try:
         db = utils.get_mongo_db()
-        if not db:
+        if db is None:
             raise Exception("Failed to connect to MongoDB")
         form = CreditorForm()
         if request.method == 'POST' and form.validate_on_submit():
@@ -675,7 +677,7 @@ def manage_records():
     """View all income/receipt records."""
     try:
         db = utils.get_mongo_db()
-        if not db:
+        if db is None:
             raise Exception("Failed to connect to MongoDB")
         records = list(get_records(db, {}).sort('created_at', -1))
         for record in records:
@@ -695,7 +697,7 @@ def manage_cashflows():
     """View all payment outflow records."""
     try:
         db = utils.get_mongo_db()
-        if not db:
+        if db is None:
             raise Exception("Failed to connect to MongoDB")
         cashflows = list(get_cashflows(db, {}).sort('created_at', -1))
         for cashflow in cashflows:
@@ -715,7 +717,7 @@ def manage_funds():
     """Manage funding records: list all and add new ones."""
     try:
         db = utils.get_mongo_db()
-        if not db:
+        if db is None:
             raise Exception("Failed to connect to MongoDB")
         form = FundForm()
         if request.method == 'POST' and form.validate_on_submit():
@@ -752,7 +754,7 @@ def manage_kyc():
     """View and manage KYC submissions."""
     try:
         db = utils.get_mongo_db()
-        if not db:
+        if db is None:
             raise Exception("Failed to connect to MongoDB")
         kyc_records = list(db.kyc_records.find().sort('created_at', -1))
         for record in kyc_records:
@@ -772,7 +774,7 @@ def customer_reports():
     """Generate customer reports in HTML, PDF, or CSV format."""
     try:
         db = utils.get_mongo_db()
-        if not db:
+        if db is None:
             raise Exception("Failed to connect to MongoDB")
         format = request.args.get('format', 'html')
         users = list(db.users.find())
@@ -807,7 +809,7 @@ def investor_reports():
     """Generate investor reports summarizing financial health."""
     try:
         db = utils.get_mongo_db()
-        if not db:
+        if db is None:
             raise Exception("Failed to connect to MongoDB")
         format = request.args.get('format', 'html')
         funds = list(db.funds.find())
@@ -842,7 +844,7 @@ def manage_forecasts():
     """View basic financial forecasts."""
     try:
         db = utils.get_mongo_db()
-        if not db:
+        if db is None:
             raise Exception("Failed to connect to MongoDB")
         records = list(get_records(db, {}))
         cashflows = list(get_cashflows(db, {}))
