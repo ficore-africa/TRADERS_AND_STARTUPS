@@ -179,28 +179,6 @@ def initialize_app_data(app):
             else:
                 logger.info(f"Admin user with ID 'admin' already exists with valid password_hash, skipping creation", extra={'session_id': 'no-session-id'})
             
-            # Drop unused collections (one-off migration)
-            unused_collections = [
-                'bills', 'bill_reminders', 'budgets', 'shopping_items', 'shopping_lists',
-                'tool_usage', 'credit_requests', 'ficore_credit_transactions', 'agents'
-            ]
-            migration_flag = db_instance.system_config.find_one({'_id': 'migration_unused_collections_dropped'})
-            if not migration_flag or not migration_flag.get('value'):
-                for collection in unused_collections:
-                    if collection in collections:
-                        db_instance[collection].drop()
-                        logger.info(f"Dropped unused collection: {collection}", extra={'session_id': 'no-session-id'})
-                    else:
-                        logger.info(f"Collection {collection} does not exist, skipping.", extra={'session_id': 'no-session-id'})
-                db_instance.system_config.update_one(
-                    {'_id': 'migration_unused_collections_dropped'},
-                    {'$set': {'value': True}},
-                    upsert=True
-                )
-                logger.info("Marked unused collections drop as completed in system_config", extra={'session_id': 'no-session-id'})
-            else:
-                logger.info("Unused collections already dropped, skipping.", extra={'session_id': 'no-session-id'})
-            
             # Define collection schemas for core business finance modules
             collection_schemas = {
                 'users': {
