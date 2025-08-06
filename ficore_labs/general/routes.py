@@ -9,15 +9,9 @@ from models import create_feedback, get_mongo_db, get_user
 from flask import current_app
 import utils
 from users.routes import get_post_login_redirect  # Import the redirect helper
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 
-# Initialize Flask-Limiter (assuming it's already set up in your app)
-limiter = Limiter(
-    current_app,
-    key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"]  # Optional app-wide defaults
-)
+# Use the existing limiter from utils
+from utils import limiter
 
 # Exempt crawlers from rate limiting
 def exempt_crawlers():
