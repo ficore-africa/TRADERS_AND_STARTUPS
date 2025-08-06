@@ -1,0 +1,303 @@
+/* Container for the profile page */
+.profile-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+/* Header with back arrow and title */
+.profile-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.profile-back-arrow {
+    font-size: 1.5rem;
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: bold;
+    margin-right: 1rem;
+}
+
+.profile-back-arrow:hover {
+    color: var(--accent-blue);
+}
+
+/* Card styling for all profile cards */
+.profile-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+/* Specific styling for Account Type and KYC Status cards */
+.profile-account-type-card, .profile-kyc-status-card {
+    max-width: 400px;
+}
+
+/* Card body styling */
+.profile-card-body {
+    padding: 1.5rem;
+}
+
+/* Headings for sections */
+.profile-section-heading {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+/* Heading within cards (e.g., KYC Status) */
+.profile-heading {
+    font-size: 1.1rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+/* Paragraph text */
+.profile-text {
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+/* Info icon for Account Type */
+.profile-info-icon {
+    cursor: help;
+    color: var(--text-muted);
+    margin-left: 0.5rem;
+}
+
+/* Grid layout for buttons */
+.profile-grid {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+/* Button styling */
+.profile-btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.profile-btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+}
+
+.profile-btn-primary:active {
+    transform: translateY(0);
+}
+
+.profile-btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.profile-btn-primary:hover::before {
+    left: 100%;
+}
+
+/* Specific styling for explore tools button */
+.profile-explore-tools-btn {
+    padding: 1rem 1.5rem;
+    font-size: 1.1rem;
+}
+
+/* Specific styling for subscription status button */
+.profile-subscription-status-btn {
+    border: 1px solid var(--accent-blue);
+    color: var(--accent-blue);
+    background: transparent;
+}
+
+.profile-subscription-status-btn:hover {
+    background: var(--button-secondary-hover);
+    color: var(--text-color);
+}
+
+.profile-btn-outline-primary {
+    border: 1px solid var(--accent-blue);
+    color: var(--accent-blue);
+    background: transparent;
+}
+
+.profile-btn-outline-primary:hover {
+    background: var(--button-secondary-hover);
+    color: var(--text-color);
+}
+
+.profile-btn-danger {
+    background: var(--danger);
+    border: none;
+    color: white;
+}
+
+.profile-btn-danger:hover {
+    background: var(--danger-dark);
+}
+
+/* Icons */
+.profile-icon {
+    margin-right: 0.5rem;
+}
+
+.profile-icon-left {
+    font-size: 1.1rem;
+    width: 30px;
+    text-align: center;
+    margin-right: 1rem;
+    color: var(--text-secondary);
+}
+
+.profile-icon-right {
+    margin-left: auto;
+    color: var(--text-muted);
+}
+
+/* Text utilities */
+.profile-text-muted {
+    color: var(--text-muted);
+}
+
+.profile-text-center {
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+.profile-text-danger {
+    color: var(--danger);
+    margin-top: 0.25rem;
+}
+
+.profile-text-success {
+    color: var(--success);
+}
+
+.profile-text-warning {
+    color: var(--warning);
+}
+
+/* Form styling */
+.profile-form-group {
+    margin-bottom: 1rem;
+}
+
+.profile-form-label {
+    font-size: 0.9rem;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+}
+
+.profile-form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+/* Toggle items */
+.profile-toggle-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--card-border);
+    color: var(--text-color);
+}
+
+.profile-toggle-item:last-child {
+    border-bottom: none;
+}
+
+/* List items */
+.profile-list-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--card-border);
+    color: var(--text-color);
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.profile-list-item:last-child {
+    border-bottom: none;
+}
+
+.profile-list-item:hover {
+    background-color: var(--button-secondary-hover);
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+/* Form check (toggles) */
+.profile-form-check {
+    margin-left: auto;
+}
+
+.profile-form-check-input {
+    margin-top: 0;
+}
+
+/* Divider */
+.profile-divider {
+    margin: 1.5rem 0;
+    border-color: var(--card-border);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .profile-container {
+        padding: 0 0.5rem;
+    }
+
+    .profile-account-type-card, .profile-kyc-status-card {
+        max-width: 100%;
+    }
+
+    .profile-explore-tools-btn {
+        font-size: 1rem;
+        padding: 0.875rem 1.25rem;
+    }
+
+    .profile-btn {
+        font-size: 0.9rem;
+        padding: 0.625rem 1.25rem;
+    }
+}
+/* Target the specific "Learn More" button within the promotion section */
+.promotion-card .promotion-text .btn {
+opacity: 1 !important; /* Ensures it's fully opaque */
+visibility: visible !important; /* Ensures it's not hidden */
+/* If it's hidden by display: none;, you might also need: */
+display: inline-block !important; /* Or 'block', 'flex', etc., depending on its original display type */
+}
+/* If the entire promotion-text div is being hidden, you might need this as well */
+.promotion-card .promotion-text {
+opacity: 1 !important;
+visibility: visible !important;
+display: block !important; /* Or 'flex', etc. */
+}

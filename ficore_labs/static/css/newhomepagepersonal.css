@@ -1,0 +1,520 @@
+/* Define CSS Variables for Colors */
+:root {
+    /* Light Mode Defaults */
+    --body-bg-light: #f8f9fa; /* General page background */
+    --card-bg-light: #fff; /* Background for section cards */
+    --text-color-light: #212529; /* Primary text color */
+    --secondary-text-light: #6c757d; /* Secondary text color (e.g., time, labels) */
+    --border-color-light: #eee; /* Light borders/separators */
+    --warning-bg-light: #ffe0b2;
+    --warning-text-light: #e65100;
+    --light-bg-icon-wrapper-light: #f8f9fa; /* Background for activity/action icons */
+    --hover-bg-light: #e9ecef; /* Hover background for interactive cards */
+    --primary-action-bg-light: rgba(13, 110, 253, 0.1); /* Light primary for action icons */
+    --primary-color-light: #0d6efd; /* Primary color */
+    --secondary-action-bg-light: rgba(108, 117, 125, 0.1); /* Light secondary for service icons */
+}
+
+.dark-mode {
+    /* Dark Mode Overrides */
+    --body-bg-light: #1a1a1a; /* Dark background for the page */
+    --card-bg-light: #2c2c2c; /* Darker background for cards */
+    --text-color-light: #f8f9fa; /* Light text color */
+    --secondary-text-light: #adb5bd; /* Lighter secondary text color */
+    --border-color-light: #444; /* Darker borders/separators */
+    --warning-bg-light: #6a4c00; /* Darker warning background */
+    --warning-text-light: #ffeb3b; /* Lighter warning text */
+    --light-bg-icon-wrapper-light: #3a3a3a; /* Dark background for activity/action icons */
+    --hover-bg-light: #3a3a3a; /* Darker hover background */
+    --primary-action-bg-light: rgba(13, 110, 253, 0.2); /* Slightly more opaque primary for action icons */
+    --primary-color-light: #6baaff; /* Lighter primary color for visibility */
+    --secondary-action-bg-light: rgba(108, 117, 125, 0.2); /* Slightly more opaque secondary for service icons */
+}
+
+/* General Layout */
+.personal-page-container {
+    padding: 1rem;
+    max-width: 960px; /* Or adjust to your desired max width */
+    margin: 0 auto; /* Center the container */
+    background-color: var(--body-bg-light); /* Apply dynamic background */
+    color: var(--text-color-light); /* Apply dynamic text color */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition */
+}
+
+/* No-JS Warning */
+.personal-no-js-warning {
+    background-color: var(--warning-bg-light); /* Dynamic warning background */
+    color: var(--warning-text-light); /* Dynamic warning text */
+    padding: 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+/* Section Cards */
+.personal-section-card {
+    background-color: var(--card-bg-light); /* Dynamic card background */
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Softer shadow */
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transition */
+}
+
+.dark-mode .personal-section-card {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Darker shadow in dark mode */
+}
+
+
+.personal-section-title {
+    font-size: 1.25rem; /* H3 size */
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-color-light); /* Dynamic heading color */
+}
+
+.personal-section-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+/* Balance Display Card */
+.personal-balance-display-card {
+    color: #fff; /* White text for green background (specific to this card) */
+    padding: 1rem; /* Reduced from 1.5rem to 1rem */
+    position: relative;
+    overflow: hidden; /* For any background patterns if added */
+    /* opay-green-bg - You need to define this in your global CSS */
+    background-color: #00b050; 
+}
+
+.personal-balance-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.3rem; /* Reduced from 0.5rem */
+}
+
+.personal-balance-label {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.personal-toggle-visibility-btn {
+    color: #fff; /* Stays white for contrast */
+    opacity: 0.8;
+}
+
+.personal-toggle-visibility-btn:hover {
+    color: #fff;
+    opacity: 1;
+}
+
+.personal-balance-amount-wrapper {
+    display: flex;
+    align-items: baseline;
+    margin-bottom: 1rem; /* Reduced from 1.5rem */
+}
+
+.personal-currency-symbol {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-right: 0.25rem;
+}
+
+.personal-amount-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.personal-balance-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.8rem; /* Reduced from 1rem */
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.personal-add-credits-btn {
+    display: inline-flex;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.personal-add-credits-btn:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    color: #fff;
+}
+
+.personal-add-credits-btn i {
+    margin-right: 0.5rem;
+}
+
+.personal-view-history-link {
+    color: #fff;
+    font-size: 0.9rem;
+    text-decoration: none;
+    opacity: 0.9;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.personal-view-history-link:hover {
+    opacity: 1;
+    color: #fff;
+}
+
+/* Recent Activity */
+.personal-activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.personal-recent-activity-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color-light); /* Dynamic border */
+    transition: border-color 0.3s ease;
+}
+
+.personal-recent-activity-item:last-child {
+    border-bottom: none;
+}
+
+.personal-activity-icon-wrapper {
+    width: 2.5rem;
+    height: 2.5rem;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    background-color: var(--light-bg-icon-wrapper-light); /* Dynamic background for icons */
+    margin-right: 1rem;
+    font-size: 1.2rem;
+    transition: background-color 0.3s ease;
+}
+
+.personal-activity-description {
+    font-size: 0.95rem;
+    color: var(--text-color-light); /* Dynamic text color */
+}
+
+.personal-activity-time {
+    font-size: 0.8rem;
+    color: var(--secondary-text-light); /* Dynamic secondary text color */
+}
+
+.personal-recent-activity-item.personal-no-activity {
+    justify-content: center;
+    text-align: center;
+    padding: 2rem 0;
+    border-bottom: none;
+    color: var(--secondary-text-light); /* Dynamic secondary text color */
+}
+
+/* Quick Actions Grid */
+.personal-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 1rem;
+}
+
+.personal-quick-action-item {
+    background-color: var(--card-bg-light); /* Dynamic background for action items */
+    border-radius: 0.75rem;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    color: var(--text-color-light); /* Dynamic text color */
+    transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out, color 0.3s ease;
+    cursor: pointer;
+}
+
+.personal-quick-action-item:hover {
+    transform: translateY(-3px);
+    background-color: var(--hover-bg-light); /* Dynamic hover background */
+    color: var(--text-color-light); /* Ensure text color remains readable */
+}
+
+.personal-action-icon-wrapper {
+    width: 3.5rem;
+    height: 3.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    background-color: var(--primary-action-bg-light); /* Dynamic primary background for icons */
+    margin-bottom: 0.75rem;
+    font-size: 1.8rem;
+    color: var(--primary-color-light); /* Dynamic primary color for icons */
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.personal-action-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Financial Snapshots */
+.personal-snapshots-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.personal-snapshot-item {
+    background-color: var(--card-bg-light); /* Dynamic background */
+    border-radius: 0.75rem;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: background-color 0.3s ease;
+}
+
+.personal-snapshot-item i {
+    font-size: 1.8rem;
+    min-width: 1.8rem; /* Ensure icon doesn't shrink */
+    color: var(--primary-color-light); /* Icons generally primary, or can be themed individually */
+    transition: color 0.3s ease;
+}
+
+.personal-snapshot-content {
+    flex-grow: 1;
+}
+
+.personal-snapshot-label {
+    font-size: 0.8rem;
+    color: var(--secondary-text-light); /* Dynamic secondary text color */
+}
+
+.personal-snapshot-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-color-light); /* Dynamic text color */
+    display: flex;
+    align-items: baseline;
+}
+
+.personal-snapshot-value .personal-currency-symbol {
+    font-size: 0.9em; /* Smaller symbol relative to value */
+    margin-right: 0.15rem;
+}
+
+.personal-snapshot-value .personal-amount-value {
+    font-size: 1em; /* Inherit from parent */
+}
+
+.personal-status-indicator {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.2em 0.5em;
+    border-radius: 0.25rem;
+    display: inline-block;
+    margin-top: 0.5rem;
+}
+
+/* Specific status indicators - adjust colors as needed, and ensure dark mode versions */
+#budgetStatusLabel {
+    background-color: var(--bs-success-bg-subtle, #d1e7dd); /* Use Bootstrap var */
+    color: var(--bs-success-text-emphasis, #0f5132); /* Use Bootstrap var */
+}
+.dark-mode #budgetStatusLabel {
+    background-color: #198754; /* Darker green */
+    color: #d1e7dd; /* Lighter text */
+}
+
+#billsStatusLabel {
+    background-color: var(--bs-warning-bg-subtle, #fff3cd);
+    color: var(--bs-warning-text-emphasis, #664d03);
+}
+.dark-mode #billsStatusLabel {
+    background-color: #ffc107; /* Darker yellow */
+    color: #343a40; /* Darker text */
+}
+
+#shoppingStatusLabel {
+    background-color: var(--bs-info-bg-subtle, #cff4fc);
+    color: var(--bs-info-text-emphasis, #055160);
+}
+.dark-mode #shoppingStatusLabel {
+    background-color: #0dcaf0; /* Darker cyan */
+    color: #212529; /* Darker text */
+}
+
+
+/* Explore Features / Services Grid */
+.personal-services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 1rem;
+}
+
+.personal-service-grid-item {
+    background-color: var(--card-bg-light); /* Dynamic background */
+    border-radius: 0.75rem;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    color: var(--text-color-light); /* Dynamic text color */
+    transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out, color 0.3s ease;
+    cursor: pointer;
+}
+
+.personal-service-grid-item:hover {
+    transform: translateY(-3px);
+    background-color: var(--hover-bg-light); /* Dynamic hover background */
+    color: var(--text-color-light);
+}
+
+.personal-service-icon-wrapper {
+    width: 3.5rem;
+    height: 3.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    background-color: var(--secondary-action-bg-light); /* Dynamic secondary background for icons */
+    margin-bottom: 0.75rem;
+    font-size: 1.8rem;
+    color: var(--secondary-text-light); /* Dynamic secondary color for icons */
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.personal-service-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+
+/* Promotion Card */
+.personal-promotion-card {
+    background-color: var(--primary-color-light); /* Dynamic primary color for promotion */
+    color: #fff; /* Text remains white for contrast on primary color */
+    padding: 1.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: background-color 0.3s ease;
+}
+
+.personal-promotion-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.personal-promotion-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    /* Consider object-fit: cover; if images might have inconsistent aspect ratios */
+}
+
+.personal-promotion-text h4 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    color: #fff; /* Stays white */
+}
+
+.personal-promotion-text p {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+    color: #fff; /* Stays white */
+}
+
+.personal-promotion-card .btn-outline-light {
+    border-color: #fff;
+    color: #fff;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.personal-promotion-card .btn-outline-light:hover {
+    background-color: #fff;
+    color: var(--primary-color-light); /* Uses the dynamic primary color on hover */
+}
+
+/* Animation for click */
+.animate-click {
+    animation: personal-click-effect 0.2s ease-out;
+}
+
+@keyframes personal-click-effect {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(0.97);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Responsive adjustments */
+@media (min-width: 576px) { /* Small devices (landscape phones, 576px and up) */
+    .personal-page-container {
+        padding: 1.5rem;
+    }
+
+    .personal-balance-amount-wrapper {
+        margin-bottom: 1.5rem; /* Adjusted for smaller screens */
+    }
+
+    .personal-quick-action-item,
+    .personal-service-grid-item {
+        padding: 1.5rem;
+    }
+
+    .personal-promotion-content {
+        flex-direction: row;
+        gap: 1.5rem;
+        text-align: left;
+    }
+
+    .personal-promotion-image {
+        max-width: 120px; /* Adjust as needed */
+        margin-bottom: 0;
+    }
+
+    .personal-promotion-text {
+        flex-grow: 1;
+    }
+}
+
+@media (min-width: 768px) { /* Medium devices (tablets, 768px and up) */
+    .personal-page-container {
+        padding: 2rem;
+    }
+
+    .personal-actions-grid,
+    .personal-snapshots-summary-grid,
+    .personal-services-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* More columns for wider screens */
+    }
+
+    .personal-section-card {
+        padding: 1.5rem;
+    }
+}

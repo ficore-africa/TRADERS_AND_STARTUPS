@@ -1,0 +1,39 @@
+{
+    "name": "FiCore Africa",
+    "short_name": "FiCore",
+    "description": "Manage your finances with ease",
+    "start_url": "/general/home",
+    "display": "standalone",
+    "background_color": "#F2EFEA",
+    "theme_color": "#0F3D57",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "/static/img/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/img/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/img/favicon-32x32.png",
+            "sizes": "32x32",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/img/favicon-16x16.png",
+            "sizes": "16x16",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/img/apple-touch-icon.png",
+            "sizes": "180x180",
+            "type": "image/png"
+        }
+    ],
+    "lang": "en",
+    "dir": "ltr"
+}

@@ -1,0 +1,88 @@
+/* General icon styles */
+.bi, .fab {
+    transition: all 0.3s ease;
+}
+
+/* Bootstrap Icons */
+.bi-arrow-up-circle { color: #ff6f61; font-size: 1.5rem; }
+.bi-box-arrow-in-right { color: #007bff; font-size: 1.2rem; }
+.bi-calculator { color: #dc3545; font-size: 1.5rem; }
+.bi-cart { color: #17a2b8; font-size: 1.8rem; }
+.bi-cash-coin { color: #28a745; font-size: 1.5rem; }
+.bi-chat { color: #25d366; font-size: 1.3rem; }
+.bi-chat-fill { color: #25d366; font-size: 1.2rem; }
+.bi-check-circle { color: #28a745; font-size: 1.3rem; }
+.bi-check-circle-fill { color: #28a745; font-size: 1.2rem; }
+.bi-chevron-right { color: #6c757d; font-size: 1.2rem; }
+.bi-coin { color: #28a745; font-size: 1.5rem; }
+.bi-envelope { color: #6610f2; font-size: 1.3rem; }
+.bi-envelope-fill { color: #6610f2; font-size: 1.2rem; }
+.bi-exclamation-circle-fill { color: #dc3545; font-size: 1.2rem; }
+.bi-exclamation-triangle { color: #ffc107; font-size: 1.3rem; }
+.bi-exclamation-triangle-fill { color: #ffc107; font-size: 1.2rem; }
+.bi-eye, .bi-eye-slash { color: #343a40; font-size: 1.4rem; }
+.bi-file-earmark-text { color: #6c757d; font-size: 1.5rem; }
+.bi-globe { color: #007bff; font-size: 1.4rem; }
+.bi-house { color: #343a40; font-size: 1.5rem; }
+.bi-info-circle { color: #17a2b8; font-size: 1.4rem; }
+.bi-info-circle-fill { color: #17a2b8; font-size: 1.2rem; }
+.bi-journal-minus { color: #6c757d; font-size: 1.5rem; }
+.bi-moon-stars, .bi-sun { color: #6c757d; font-size: 1.4rem; }
+.bi-person { color: #007bff; font-size: 1.5rem; }
+.bi-person-plus { color: #17a2b8; font-size: 1.5rem; }
+.bi-person-workspace { color: #007bff; font-size: 1.5rem; }
+.bi-pie-chart { color: #007bff; font-size: 1.5rem; }
+.bi-plus-circle { color: #28a745; font-size: 1.6rem; }
+.bi-question-circle { color: #ff6f61; font-size: 1.4rem; border: 1px solid #ff6f61; border-radius: 50%; padding: 2px; }
+.bi-receipt { color: #ffc107; font-size: 1.5rem; }
+.bi-shield-fill-check { color: #28a745; font-size: 1.2rem; }
+.bi-speedometer { color: #343a40; font-size: 1.5rem; }
+.bi-wallet, .bi-wallet2 { color: #6610f2; font-size: 1.5rem; }
+.bi-whatsapp { color: #25d366; font-size: 1.3rem; }
+.bi-x-circle { color: #dc3545; font-size: 1.3rem; }
+
+/* Font Awesome Icons */
+.fab.fa-linkedin { color: #0077b5; font-size: 1.5rem; }
+.fab.fa-x-twitter { color: #000000; font-size: 1.5rem; }
+.fab.fa-facebook { color: #1877f2; font-size: 1.5rem; }
+
+/* Contextual styles */
+.header-right .bi:hover { transform: scale(1.1); }
+.bottom-nav .bi { font-size: 1.5rem; color: #343a40; }
+.bottom-nav .nav-item.active .bi { color: #007bff; }
+.footer-links .bi { font-size: 1.2rem; color: #6c757d; }
+.footer-links .bi:hover { color: #007bff; }
+.notification-icon .bi { font-size: 1.3rem; }
+.alert-container .bi { font-size: 1.2rem; margin-right: 8px; }
+
+/* Dark mode adjustments */
+.dark-mode .bi { color: #e9ecef; }
+.dark-mode .bottom-nav .bi { color: #d1d4d7; }
+.dark-mode .bottom-nav .nav-item.active .bi { color: #4dabf7; }
+.dark-mode .fab { color: #d1d4d7; }
+.dark-mode .bi-bell { color: #ff6f61; }
+.dark-mode .bi-question-circle { color: #ff8a80; border-color: #ff8a80; }
+
+/* Animations */
+.header-right .icon-btn .bi:hover {
+    animation: bounce 0.4s ease-in-out;
+}
+
+.social-icons .fab:hover {
+    animation: spin 0.5s linear;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .bi, .fab { font-size: 1.2rem !important; }
+    .footer-links .bi, .social-icons .fab { font-size: 1rem !important; }
+}

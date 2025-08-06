@@ -1,0 +1,262 @@
+/* --- fintech-like Top Header Styling --- */
+.fintech-top-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.75rem; /* Reduced padding */
+    background-color: #fff;
+    border-bottom: 1px solid #f0f0f0;
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1030;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.fintech-top-header .header-left,
+.fintech-top-header .header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem; /* Reduced gap between items */
+}
+
+.fintech-top-header .profile-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+}
+
+.fintech-top-header .profile-avatar {
+    width: 32px; /* Smaller avatar */
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 0.3rem; /* Reduced margin */
+    border: 1px solid #e0e0e0;
+}
+
+.fintech-top-header .greeting-text {
+    font-size: 0.85rem; /* Smaller font size for greeting */
+    font-weight: 600;
+    color: #333;
+}
+
+.fintech-top-header .ficore-logo {
+    height: 25px; /* Adjusted logo size */
+    margin-right: 0.5rem;
+}
+
+.fintech-top-header .brand-text {
+    font-size: 1rem; /* Slightly smaller brand text */
+    font-weight: 700;
+    color: #333;
+}
+
+.fintech-top-header .icon-btn {
+    background: none;
+    border: none;
+    color: #555;
+    font-size: 1.1rem; /* Smaller icons */
+    padding: 0.3rem; /* Reduced padding */
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+}
+
+.fintech-top-header .icon-btn:hover {
+    background-color: #f0f0f0;
+    color: #000;
+}
+
+.fintech-top-header .help-icon-btn {
+    font-size: 1rem; /* Further reduced font for help icon */
+}
+
+.fintech-top-header .help-icon-btn .help-text {
+    font-size: 0.6rem; /* Even smaller text for "HELP" */
+    font-weight: 600;
+    margin-top: 0.1rem;
+    line-height: 1;
+}
+
+.fintech-top-header .notification-bell {
+    position: relative;
+}
+
+.fintech-top-header .notification-badge {
+    position: absolute;
+    top: 0px; /* Adjusted position */
+    right: 0px; /* Adjusted position */
+    padding: 0.25em 0.45em; /* Smaller badge */
+    font-size: 0.55rem; /* Smaller font for badge */
+    line-height: 1;
+    border-radius: 50%;
+    background-color: var(--bs-danger, #dc3545) !important;
+}
+
+/* Adjust main content padding to avoid being hidden by fixed header */
+.main-content {
+    padding-top: 60px; /* Adjusted padding-top based on reduced header height */
+}
+
+/* Existing styles from base.html (ensure they are placed after the new header styles if in the same file) */
+.notification-card {
+    border-bottom: 1px solid #e9ecef;
+    padding: 0.75rem 0;
+}
+.notification-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.notification-icon {
+    font-size: 1.25rem;
+}
+.notification-content {
+    flex-grow: 1;
+}
+.notification-description {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+.notification-time {
+    font-size: 0.8rem;
+}
+.language-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.language-toggle span {
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+/* IMPORTANT: Dark mode adjustments for toggles and header */
+.dark-mode .fintech-top-header {
+    background-color: #212529; /* Dark background for header */
+    border-bottom-color: #343a40; /* Darker border */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.dark-mode .fintech-top-header .greeting-text,
+.dark-mode .fintech-top-header .brand-text {
+    color: #f8f9fa; /* Light text color in dark mode */
+}
+
+.dark-mode .language-toggle,
+.dark-mode .icon-btn#darkModeToggle,
+.dark-mode .fintech-top-header .icon-btn { /* Target all icon buttons in dark mode */
+    color: #ffffff; /* White color for icons and text in dark mode */
+}
+
+.dark-mode .fintech-top-header .icon-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2); /* Lighter hover effect in dark mode */
+    color: #ffffff; /* Keep color white on hover */
+}
+
+
+/* Dialogflow Messenger Custom Styling */
+df-messenger {
+    --df-messenger-font-family: 'Poppins', sans-serif;
+    --df-messenger-bot-message: #007bff;
+    --df-messenger-user-message: #28a745;
+    --df-messenger-titlebar-background: #343a40;
+    --df-messenger-titlebar-font-color: #ffffff;
+    --df-messenger-chat-background: #f8f9fa;
+    --df-messenger-input-background: #ffffff;
+    --df-messenger-input-font-color: #212529;
+    --df-messenger-button-titlebar-color: #ffffff;
+    z-index: 1000;
+    --df-messenger-chat-window-height: 500px;
+    --df-messenger-chat-window-width: 350px;
+}
+/* Ensure chatbot is visible in dark mode */
+.dark-mode df-messenger {
+    --df-messenger-chat-background: #212529;
+    --df-messenger-input-background: #343a40;
+    --df-messenger-input-font-color: #ffffff;
+}
+/* Language Toggle */
+.language-toggle {
+    margin: 1rem 0;
+    background: var(--gradient-primary);
+    text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    transition: color 0.3s ease;
+}
+/* Ensure language toggle in header matches icon-btn styling */
+.icon-btn.language-toggle {
+    padding: 0.4rem; /* Reduced padding */
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem; /* Even tighter gap for header */
+}
+
+.icon-btn.language-toggle:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Dark Mode Toggle Styles in Header */
+.icon-btn#darkModeToggle {
+    padding: 0.4rem; /* Reduced padding */
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    color: #212529;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.icon-btn#darkModeToggle:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure consistency with header-right layout */
+.header-right .icon-btn {
+    position: relative;
+    line-height: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .language-toggle span {
+        font-size: 0.75rem; /* Further reduced for small screens */
+    }
+    .icon-btn.language-toggle,
+    .icon-btn#darkModeToggle {
+        padding: 0.3rem; /* Further reduced for small screens */
+    }
+}
+.btn.btn-link.language-toggle{ /* Corrected selector */
+    margin: 1rem 0;
+    background: var(--gradient-primary);
+    text-align: center;
+}
+.language-toggle a {
+    color: var(--accent-blue);
+    text-decoration: none;
+    margin: 0 0.5rem;
+    font-size: clamp(0.875rem, 2vw, 0.9375rem);
+    transition: var(--transition-base);
+}
+
+.language-toggle a:hover {
+    color: #2563eb;
+    text-decoration: underline;
+}
