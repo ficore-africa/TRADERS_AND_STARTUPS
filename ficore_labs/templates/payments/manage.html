@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}{{ t('payments_manage', default='Manage Payments') }} - FiCore{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="page-title">
+        <h1>{{ t('payments_manage', default='Manage Payments') }}</h1>
+        <small class="subtext">{{ t('payments_subtitle', default='Kuɗin Da Ka Biya Wasu') }}</small>
+    </div>
+    <div class="mb-4">
+        <a href="{{ url_for('payments.index') }}" class="btn btn-secondary">{{ t('general_back', default='Back') }}</a>
+        {% if can_interact %}
+            <a href="{{ url_for('payments.add') }}" class="btn btn-primary">{{ t('payments_add_title', default='Add Money Out') }}</a>
+        {% else %}
+            <a href="{{ url_for('general_bp.subscription_required') }}" class="btn btn-primary">{{ t('payments_add_title', default='Add Money Out') }}</a>
+        {% endif %}
+    </div>
+    {% if payments|length > 0 %}
+        <div class="mb-4">
+            <input type="text" id="searchInput" class="form-control" placeholder="{{ t('general_search', default='Search payments...') }}">
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered" id="paymentsTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>{{ t('payments_party_name', default='Party Name') }}</th>
+                        <th>{{ t('general_amount', default='Amount') }}</th>
+                        <th>{{ t('general_date', default='Date') }}</th>
+                        <th>{{ t('payments_payment_method', default='Payment Method') }}</th>
+                        <th>{{ t('general_category', default='Category') }}</th>
+                        <th>{{ t('general_actions', default='Actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                        <tr>
+                            <td data-label="{{ t('payments_party_name', default='Party Name') }}">{{ payment.party_name }}</td>
+                            <td data-label="{{ t('general_amount', default='Amount') }}">{{ format_currency(payment.amount) }}</td>
+                            <td data-label="{{ t('general_date', default='Date') }}">{{ format_date(payment.created_at) }}</td>
+                            <td data-label="{{ t('payments_payment_method', default='Payment Method') }}">{{ payment.method or '-' }}</td>
+                            <td data-label="{{ t('general_category', default='Category') }}">{{ payment.category or '-' }}</td>
+                            <td data-label="{{ t('general_actions', default='Actions') }}">
+                                {% if can_interact %}
+                                    <a href="{{ url_for('payments.edit', id=payment._id) }}" 
+                                       class="btn btn-primary btn-sm"
+                                       data-bs-toggle="tooltip" 
+                                       title="{{ t('general_edit', default='Edit') }}">
+                                        {{ t('general_edit', default='Edit') }}
+                                    </a>
+                                    <form action="{{ url_for('payments.delete', id=payment._id) }}" method="POST" class="d-inline">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-danger btn-sm" 
+                                                onclick="return confirm('{{ t('general_confirm_delete', default='Are you sure?') }}')"
+                                                data-bs-toggle="tooltip" 
+                                                title="{{ t('general_delete', default='Delete') }}">
+                                            {{ t('general_delete', default='Delete') }}
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <a href="{{ url_for('general_bp.subscription_required') }}" 
+                                       class="btn btn-primary btn-sm disabled"
+                                       data-bs-toggle="tooltip" 
+                                       title="{{ t('general_edit', default='Edit') }}">
+                                        {{ t('general_edit', default='Edit') }}
+                                    </a>
+                                    <button class="btn btn-danger btn-sm disabled" 
+                                            data-bs-toggle="tooltip" 
+                                            title="{{ t('general_delete', default='Delete') }}"
+                                            onclick="alert('{{ t('payments_subscription_required', default='Your trial has expired or you do not have an active subscription. Please subscribe to delete payments.') }}')">
+                                        {{ t('general_delete', default='Delete') }}
+                                    </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <p class="text-muted">{{ t('payments_no_records', default='No money out recorded') }}</p>
+            <p class="mt-2">{{ t('payments_add_first', default='Start by logging your first money out.') }}</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+
+    const searchInput = document.getElementById('searchInput');
+    const table = document.getElementById('paymentsTable');
+    const rows = table.getElementsByTagName('tr');
+
+    searchInput.addEventListener('input', function() {
+        const filter = searchInput.value.toLowerCase();
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            const cells = row.getElementsByTagName('td');
+            let match = false;
+            for (let j = 0; j < cells.length - 1; j++) {
+                if (cells[j].textContent.toLowerCase().includes(filter)) {
+                    match = true;
+                    break;
+                }
+            }
+            row.style.display = match ? '' : 'none';
+        }
+    });
+});
+</script>
+{% endblock %}

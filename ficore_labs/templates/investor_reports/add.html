@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ t('investor_reports_create_title', default='Add New Investor Report') }} - FiCore{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="page-title">
+        <h1>{{ t('investor_reports_create_title', default='Add New Investor Report') }}</h1>
+        <small class="subtext">{{ t('investor_reports_subtitle', default='Share Updates with Investors') }}</small>
+    </div>
+    {% if not can_interact %}
+        <div class="alert alert-warning" role="alert">
+            {{ t('investor_reports_subscription_required', default='Your trial has expired or you do not have an active subscription. Please subscribe to add a new investor report.') }}
+            <a href="{{ url_for('general_bp.subscription_required') }}" class="alert-link">{{ t('general_subscribe', default='Subscribe Now') }}</a>
+        </div>
+    {% else %}
+        <form action="{{ url_for('investor_reports.add') }}" method="POST" class="row g-3">
+            {{ form.hidden_tag() }}
+            <input type="hidden" name="type" value="investor_report">
+            <div class="col-12">
+                <label for="title" class="form-label">{{ t('investor_reports_title', default='Report Title') }}</label>
+                {{ form.title(class="form-control", required=True) }}
+                {% if form.title.errors %}
+                    <p class="text-danger mt-1">{{ form.title.errors[0] }}</p>
+                {% endif %}
+            </div>
+            <div class="col-12">
+                <label for="report_date" class="form-label">{{ t('investor_reports_date', default='Report Date') }}</label>
+                {{ form.report_date(class="form-control", type="date", required=True) }}
+                {% if form.report_date.errors %}
+                    <p class="text-danger mt-1">{{ form.report_date.errors[0] }}</p>
+                {% endif %}
+            </div>
+            <div class="col-12">
+                <label for="summary" class="form-label">{{ t('investor_reports_summary', default='Summary') }}</label>
+                {{ form.summary(class="form-control", rows=5, required=True) }}
+                {% if form.summary.errors %}
+                    <p class="text-danger mt-1">{{ form.summary.errors[0] }}</p>
+                {% endif %}
+            </div>
+            <div class="col-12">
+                <label for="financial_highlights" class="form-label">{{ t('investor_reports_financial_highlights', default='Financial Highlights') }}</label>
+                {{ form.financial_highlights(class="form-control", rows=5) }}
+                {% if form.financial_highlights.errors %}
+                    <p class="text-danger mt-1">{{ form.financial_highlights.errors[0] }}</p>
+                {% endif %}
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary w-100">{{ t('general_submit', default='Submit') }}</button>
+            </div>
+        </form>
+    {% endif %}
+</div>
+{% endblock %}

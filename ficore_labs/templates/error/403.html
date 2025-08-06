@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}{{ t('general_forbidden', default='Forbidden') }}{% endblock %}
+{% block content %}
+<div class="container my-5 text-center">
+    <h1>{{ t('general_forbidden_403', default='403 Forbidden') }}</h1>
+    <p>{{ t('general_access_denied', default='You do not have permission to access this page.') }}</p>
+    <a href="{{ url_for('index') }}" class="btn btn-primary">{{ t('general_return_to_home', default='Return to Home') }}</a>
+</div>
+{% endblock %}

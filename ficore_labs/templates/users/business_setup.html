@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}
+{{ t('general_complete_business_setup', default='Complete Business Setup') | escape }}
+{% endblock %}
+{% block content %}
+<div class="container my-5">
+    <div class="form-container card p-4 shadow-sm">
+        <h2 class="card-title text-center mb-4" id="setup-form-title">
+            {{ t('general_complete_business_setup_' + current_user.role, default='Complete ' + (current_user.role | capitalize) + ' Business Setup') | escape }}
+        </h2>
+        <p class="text-center text-muted mb-4">
+            {% if current_user.role == 'trader' %}
+                {{ t('general_trader_setup_desc', default='Provide your business details to set up your trader account with Business Finance.') | escape }}
+            {% elif current_user.role == 'startup' %}
+                {{ t('general_startup_setup_desc', default='Provide your business details to set up your startup account with Business Finance.') | escape }}
+            {% else %}
+                {{ t('general_provide_business_details', default='Please provide your business details to complete the setup.') | escape }}
+            {% endif %}
+            <br>
+            {{ t('general_trial_info', default='Your 30-day free trial starts now. Subscribe to continue after the trial ends.') | escape }}
+            <a href="{{ url_for('subscribe_bp.subscribe') | escape }}" class="text-primary" aria-label="{{ t('general_learn_subscription', default='Learn about subscription plans') | escape }}">
+                {{ t('general_learn_subscription', default='Learn about subscription plans') | escape }}
+            </a>
+        </p>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-4" role="alert">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'success' if category == 'success' else 'danger' if category == 'danger' else 'info' }} alert-dismissible fade show">
+                            {{ message | escape }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ t('general_close', default='Close') | escape }}"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST" class="needs-validation" novalidate aria-labelledby="setup-form-title">
+            {{ form.hidden_tag() }}
+            
+            <div class="form-group mb-3">
+                <label class="form-label" for="business_name">{{ t('general_business_name', default='Business Name') | escape }}</label>
+                {{ form.business_name(class="form-control" + (" is-invalid" if form.business_name.errors else ""), required=True, id="business_name", placeholder=t('general_business_name_placeholder', default='Enter your business name'), **{"aria-describedby": "businessNameFeedback" if form.business_name.errors else "", "aria-required": "true"}) | safe }}
+                {% if form.business_name.errors %}
+                    <div id="businessNameFeedback" class="invalid-feedback" role="alert">
+                        {% for error in form.business_name.errors %}
+                            {{ error | escape }}<br>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group mb-3">
+                <label class="form-label" for="address">{{ t('general_address', default='Address') | escape }}</label>
+                {{ form.address(class="form-control" + (" is-invalid" if form.address.errors else ""), rows=4, required=True, id="address", placeholder=t('general_address_placeholder', default='Enter your business address'), **{"aria-describedby": "addressFeedback" if form.address.errors else "", "aria-required": "true"}) | safe }}
+                {% if form.address.errors %}
+                    <div id="addressFeedback" class="invalid-feedback" role="alert">
+                        {% for error in form.address.errors %}
+                            {{ error | escape }}<br>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group mb-3">
+                <label class="form-label" for="industry">{{ t('general_industry', default='Industry') | escape }}</label>
+                {{ form.industry(class="form-select" + (" is-invalid" if form.industry.errors else ""), required=True, id="industry", **{"aria-describedby": "industryFeedback" if form.industry.errors else "", "aria-required": "true"}) | safe }}
+                {% if form.industry.errors %}
+                    <div id="industryFeedback" class="invalid-feedback" role="alert">
+                        {% for error in form.industry.errors %}
+                            {{ error | escape }}<br>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group mb-3">
+                <label class="form-label" for="products_services">{{ t('general_products_services', default='Products/Services') | escape }}</label>
+                {{ form.products_services(class="form-control" + (" is-invalid" if form.products_services.errors else ""), rows=4, required=True, id="products_services", placeholder=t('general_products_services_placeholder', default='Describe your products or services'), **{"aria-describedby": "productsServicesFeedback" if form.products_services.errors else "", "aria-required": "true"}) | safe }}
+                {% if form.products_services.errors %}
+                    <div id="productsServicesFeedback" class="invalid-feedback" role="alert">
+                        {% for error in form.products_services.errors %}
+                            {{ error | escape }}<br>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group mb-3">
+                <label class="form-label" for="phone_number">{{ t('general_phone_number', default='Phone Number') | escape }}</label>
+                {{ form.phone_number(class="form-control" + (" is-invalid" if form.phone_number.errors else ""), required=True, id="phone_number", placeholder=t('general_phone_number_placeholder', default='Enter your phone number (e.g., +2341234567890)'), **{"aria-describedby": "phoneNumberFeedback" if form.phone_number.errors else "", "aria-required": "true"}) | safe }}
+                {% if form.phone_number.errors %}
+                    <div id="phoneNumberFeedback" class="invalid-feedback" role="alert">
+                        {% for error in form.phone_number.errors %}
+                            {{ error | escape }}<br>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group mb-3">
+                <label class="form-label" for="language">{{ t('general_language', default='Language') | escape }}</label>
+                {{ form.language(class="form-select" + (" is-invalid" if form.language.errors else ""), required=True, id="language", **{"aria-describedby": "languageFeedback" if form.language.errors else "", "aria-required": "true"}) | safe }}
+                {% if form.language.errors %}
+                    <div id="languageFeedback" class="invalid-feedback" role="alert">
+                        {% for error in form.language.errors %}
+                            {{ error | escape }}<br>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group mb-4">
+                <div class="form-check">
+                    {{ form.terms(class="form-check-input" + (" is-invalid" if form.terms.errors else ""), required=True, id="terms", **{"aria-describedby": "termsFeedback" if form.terms.errors else "", "aria-required": "true"}) | safe }}
+                    <label class="form-check-label" for="terms">
+                        {{ t('general_agree_to_terms', default='By signing up, you agree to our') | escape }} 
+                        <a href="{{ url_for('general_bp.terms') | escape }}" aria-label="{{ t('general_terms', default='Terms of Service') | escape }}">{{ t('general_terms', default='Terms of Service') | escape }}</a>
+                    </label>
+                    {% if form.terms.errors %}
+                        <div id="termsFeedback" class="invalid-feedback" role="alert">
+                            {% for error in form.terms.errors %}
+                                {{ error | escape }}<br>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="row g-2">
+                <div class="col-12 col-md-6 mx-auto">
+                    {{ form.submit(class="btn btn-primary w-100", **{"aria-label": t('general_submit', default='Submit business details') | escape}) | safe }}
+                </div>
+                <div class="col-12 col-md-6 mx-auto">
+                    {{ form.back(class="btn btn-secondary w-100", **{"aria-label": t('general_back', default='Go back') | escape}) | safe }}
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+    (function () {
+        'use strict';
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
+{% endblock %}

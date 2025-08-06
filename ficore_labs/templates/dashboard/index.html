@@ -1,0 +1,678 @@
+{% extends "base.html" %}
+{% block title %}
+{{ trans('dashboard_title', default='Dashboard') | escape }}
+{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">{{ trans('general_home', default='Home') | escape }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ trans('dashboard_title', default='Dashboard') | escape }}</li>
+        </ol>
+    </nav>
+
+    <!-- Page Title -->
+    <div class="page-title">
+        <h2>{{ trans('dashboard_title', default='Dashboard') | escape }}</h2>
+    </div>
+
+    {% if current_user.is_authenticated %}
+        {% if current_user.role == 'admin' %}
+            <p class="alert alert-info">{{ trans('admin_view_all_data', default='You are viewing all users\' data as an admin.') | escape }}</p>
+        {% endif %}
+
+        {% if not can_interact %}
+            <div class="alert alert-warning">
+                {{ trans('subscription_required', default='Your trial or subscription has expired. Please subscribe to continue managing data.') | escape }}
+                <a href="{{ url_for('subscribe_bp.subscribe') }}" class="btn btn-primary">{{ trans('subscribe_now', default='Subscribe Now') | escape }}</a>
+            </div>
+        {% endif %}
+
+        <!-- Business Finance Stats -->
+        {% if current_user.role in ['trader', 'startup', 'admin'] %}
+        <div class="mb-5">
+            <h3 class="text-primary">
+                <i class="bi bi-bar-chart-fill me-2"></i>
+                {{ trans('business_finance_overview', default='Business Finance Overview') | escape }}
+            </h3>
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <div class="text-primary mb-2">
+                                <i class="bi bi-person-plus-fill fa-2x"></i>
+                            </div>
+                            <h6 class="card-title">{{ trans('general_debtors', default='Debtors') | escape }}</h6>
+                            <p class="card-text">
+                                <span class="h5 text-primary">{{ stats.total_debtors }}</span><br>
+                                <small class="text-muted">{{ stats.total_debtors_amount | format_currency }}</small>
+                            </p>
+                            <a href="{{ url_for('debtors.index') }}" class="btn btn-outline-primary btn-sm">{{ trans('general_view', default='View') | escape }}</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <div class="text-primary mb-2">
+                                <i class="bi bi-person-dash-fill fa-2x"></i>
+                            </div>
+                            <h6 class="card-title">{{ trans('general_creditors', default='Creditors') | escape }}</h6>
+                            <p class="card-text">
+                                <span class="h5 text-primary">{{ stats.total_creditors }}</span><br>
+                                <small class="text-muted">{{ stats.total_creditors_amount | format_currency }}</small>
+                            </p>
+                            <a href="{{ url_for('creditors.index') }}" class="btn btn-outline-primary btn-sm">{{ trans('general_view', default='View') | escape }}</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <div class="text-primary mb-2">
+                                <i class="bi bi-bank fa-2x"></i>
+                            </div>
+                            <h6 class="card-title">{{ trans('general_funds', default='Funds') | escape }}</h6>
+                            <p class="card-text">
+                                <span class="h5 text-primary">{{ stats.total_funds }}</span><br>
+                                <small class="text-muted">{{ stats.total_funds_amount | format_currency }}</small>
+                            </p>
+                            <a href="{{ url_for('funds.index') }}" class="btn btn-outline-primary btn-sm">{{ trans('general_view', default='View') | escape }}</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <div class="text-primary mb-2">
+                                <i class="bi bi-cash-stack fa-2x"></i>
+                            </div>
+                            <h6 class="card-title">{{ trans('receipts_money_in', default='Income') | escape }}</h6>
+                            <p class="card-text">
+                                <span class="h5 text-primary">{{ stats.total_receipts }}</span><br>
+                                <small class="text-muted">{{ stats.total_receipts_amount | format_currency }}</small>
+                            </p>
+                            <a href="{{ url_for('receipts.index') }}" class="btn btn-outline-primary btn-sm">{{ trans('general_view', default='View') | escape }}</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <div class="text-primary mb-2">
+                                <i class="bi bi-wallet2 fa-2x"></i>
+                            </div>
+                            <h6 class="card-title">{{ trans('payments_money_out', default='Expenses') | escape }}</h6>
+                            <p class="card-text">
+                                <span class="h5 text-primary">{{ stats.total_payments }}</span><br>
+                                <small class="text-muted">{{ stats.total_payments_amount | format_currency }}</small>
+                            </p>
+                            <a href="{{ url_for('payments.index') }}" class="btn btn-outline-primary btn-sm">{{ trans('general_view', default='View') | escape }}</a>
+                        </div>
+                    </div>
+                </div>
+                {% if current_user.role in ['startup', 'admin'] %}
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <div class="text-primary mb-2">
+                                <i class="bi bi-graph-up fa-2x"></i>
+                            </div>
+                            <h6 class="card-title">{{ trans('forecasts_dashboard', default='Forecasts') | escape }}</h6>
+                            <p class="card-text">
+                                <span class="h5 text-primary">{{ stats.total_forecasts }}</span><br>
+                                <small class="text-muted">{{ stats.total_forecasts_amount | format_currency }}</small>
+                            </p>
+                            <a href="{{ url_for('forecasts.index') }}" class="btn btn-outline-primary btn-sm">{{ trans('general_view', default='View') | escape }}</a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        {% if can_interact %}
+        <div class="mb-4">
+            <h3>{{ trans('general_quick_actions', default='Quick Actions') | escape }}</h3>
+            <div class="d-flex flex-wrap gap-2">
+                <!-- Trader-specific actions -->
+                <a href="{{ url_for('creditors.add') }}" class="btn btn-primary">{{ trans('creditors_create_what_you_owe', default='Create What You Owe') | escape }}</a>
+                <a href="{{ url_for('debtors.add') }}" class="btn btn-primary">{{ trans('debtors_create_what_they_owe_you', default='Create What They Owe You') | escape }}</a>
+                <a href="{{ url_for('payments.add') }}" class="btn btn-primary">{{ trans('payments_add_money_out', default='Add Money Out') | escape }}</a>
+                <a href="{{ url_for('receipts.add') }}" class="btn btn-primary">{{ trans('receipts_add_money_in', default='Add Money In') | escape }}</a>
+                <a href="{{ url_for('funds.add') }}" class="btn btn-primary">{{ trans('funds_add', default='Add Fund') | escape }}</a>
+                <!-- Admin-specific action -->
+                {% if current_user.role == 'admin' %}
+                    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-warning">{{ trans('admin_dashboard', default='Admin Dashboard') | escape }}</a>
+                {% endif %}
+                <!-- Startup-specific actions -->
+                {% if current_user.role in ['startup', 'admin'] %}
+                    <a href="{{ url_for('reports.customer_reports') }}" class="btn btn-primary">{{ trans('reports_customer', default='Customer Reports') | escape }}</a>
+                    <a href="{{ url_for('reports.investor_reports') }}" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ trans('investor_reports_tooltip', default='View investor reports') | escape }}">
+                        <i class="bi bi-file-earmark-bar-graph me-1"></i>{{ trans('investor_reports_dashboard', default='Investor Reports') | escape }}
+                    </a>
+                    <a href="{{ url_for('reports.index') }}" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ trans('business_reports_tooltip', default='View business reports') | escape }}">
+                        <i class="bi bi-journal-minus me-1"></i>{{ trans('business_reports', default='Reports') | escape }}
+                    </a>
+                    <a href="{{ url_for('forecasts.index') }}" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ trans('forecasts_tooltip', default='View forecasts') | escape }}">
+                        <i class="bi bi-graph-up me-1"></i>{{ trans('forecasts_dashboard', default='Forecasts') | escape }}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Business Finance Data -->
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h3>{{ trans('creditors_what_you_owe', default='What You Owe') | escape }}</h3>
+                        <small class="text-muted">{{ trans('creditors_what_you_owe_subtext', default='Track your creditors') | escape }}</small>
+                        {% if recent_creditors %}
+                            <table class="table table-striped mt-3">
+                                <thead>
+                                    <tr>
+                                        <th>{{ trans('general_name', default='Name') | escape }}</th>
+                                        <th>{{ trans('general_amount', default='Amount') | escape }}</th>
+                                        {% if can_interact %}
+                                        <th>{{ trans('general_actions', default='Actions') | escape }}</th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for creditor in recent_creditors %}
+                                        <tr>
+                                            <td>{{ creditor.name | escape }}</td>
+                                            <td>{{ creditor.amount_owed | format_currency }}</td>
+                                            {% if can_interact %}
+                                            <td>
+                                                <button class="btn btn-secondary btn-sm actions-btn"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#creditorActionsModal"
+                                                        data-id="{{ creditor._id }}"
+                                                        data-name="{{ creditor.name }}"
+                                                        data-amount="{{ creditor.amount_owed }}"
+                                                        data-contact="{{ creditor.contact or '' }}"
+                                                        data-date="{{ creditor.created_at | format_date }}"
+                                                        data-description="{{ creditor.description or '' }}">
+                                                    {{ trans('general_actions', default='Actions') | escape }}
+                                                </button>
+                                            </td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <p>{{ trans('creditors_no_what_you_owe', default='You don\'t owe anyone yet.') | escape }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h3>{{ trans('debtors_what_they_owe_you', default='What They Owe You') | escape }}</h3>
+                        <small class="text-muted">{{ trans('debtors_what_they_owe_you_subtext', default='Track your debtors') | escape }}</small>
+                        {% if recent_debtors %}
+                            <table class="table table-striped mt-3">
+                                <thead>
+                                    <tr>
+                                        <th>{{ trans('general_name', default='Name') | escape }}</th>
+                                        <th>{{ trans('general_amount', default='Amount') | escape }}</th>
+                                        {% if can_interact %}
+                                        <th>{{ trans('general_actions', default='Actions') | escape }}</th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for debtor in recent_debtors %}
+                                        <tr>
+                                            <td>{{ debtor.name | escape }}</td>
+                                            <td>{{ debtor.amount_owed | format_currency }}</td>
+                                            {% if can_interact %}
+                                            <td>
+                                                <button class="btn btn-secondary btn-sm actions-btn"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#debtorActionsModal"
+                                                        data-id="{{ debtor._id }}"
+                                                        data-name="{{ debtor.name }}"
+                                                        data-amount="{{ debtor.amount_owed }}"
+                                                        data-contact="{{ debtor.contact or '' }}"
+                                                        data-date="{{ debtor.created_at | format_date }}"
+                                                        data-reminders="{{ debtor.get('reminder_count', 0) }}"
+                                                        data-description="{{ debtor.description or '' }}">
+                                                    {{ trans('general_actions', default='Actions') | escape }}
+                                                </button>
+                                            </td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <p>{{ trans('debtors_no_what_they_owe_you', default='No one owes you yet.') | escape }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h3>{{ trans('payments_money_out', default='Money Out') | escape }}</h3>
+                        <small class="text-muted">{{ trans('payments_money_out_subtext', default='Track your expenses and payments') | escape }}</small>
+                        {% if recent_payments %}
+                            <table class="table table-striped mt-3">
+                                <thead>
+                                    <tr>
+                                        <th>{{ trans('payments_recipient', default='Recipient') | escape }}</th>
+                                        <th>{{ trans('general_amount', default='Amount') | escape }}</th>
+                                        {% if can_interact %}
+                                        <th>{{ trans('general_actions', default='Actions') | escape }}</th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for payment in recent_payments %}
+                                        <tr>
+                                            <td>{{ payment.recipient | escape }}</td>
+                                            <td>{{ payment.amount | format_currency }}</td>
+                                            {% if can_interact %}
+                                            <td>
+                                                <button class="btn btn-secondary btn-sm actions-btn"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#paymentActionsModal"
+                                                        data-id="{{ payment._id }}"
+                                                        data-recipient="{{ payment.recipient }}"
+                                                        data-amount="{{ payment.amount }}"
+                                                        data-date="{{ payment.created_at | format_date }}"
+                                                        data-description="{{ payment.description or '' }}">
+                                                    {{ trans('general_actions', default='Actions') | escape }}
+                                                </button>
+                                            </td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <p>{{ trans('payments_no_money_out', default='No money out recorded yet.') | escape }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h3>{{ trans('receipts_money_in', default='Money In') | escape }}</h3>
+                        <small class="text-muted">{{ trans('receipts_money_in_subtext', default='Track your income and receipts') | escape }}</small>
+                        {% if recent_receipts %}
+                            <table class="table table-striped mt-3">
+                                <thead>
+                                    <tr>
+                                        <th>{{ trans('receipts_payer', default='Payer') | escape }}</th>
+                                        <th>{{ trans('general_amount', default='Amount') | escape }}</th>
+                                        {% if can_interact %}
+                                        <th>{{ trans('general_actions', default='Actions') | escape }}</th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for receipt in recent_receipts %}
+                                        <tr>
+                                            <td>{{ receipt.payer | escape }}</td>
+                                            <td>{{ receipt.amount | format_currency }}</td>
+                                            {% if can_interact %}
+                                            <td>
+                                                <button class="btn btn-secondary btn-sm actions-btn"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#receiptActionsModal"
+                                                        data-id="{{ receipt._id }}"
+                                                        data-payer="{{ receipt.payer }}"
+                                                        data-amount="{{ receipt.amount }}"
+                                                        data-date="{{ receipt.created_at | format_date }}"
+                                                        data-description="{{ receipt.description or '' }}">
+                                                    {{ trans('general_actions', default='Actions') | escape }}
+                                                </button>
+                                            </td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <p>{{ trans('receipts_no_money_in', default='No money in recorded yet.') | escape }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h3>{{ trans('funds_title', default='Funds') | escape }}</h3>
+                        <small class="text-muted">{{ trans('funds_subtext', default='Track your business funds') | escape }}</small>
+                        {% if recent_funds %}
+                            <table class="table table-striped mt-3">
+                                <thead>
+                                    <tr>
+                                        <th>{{ trans('funds_source', default='Source') | escape }}</th>
+                                        <th>{{ trans('general_amount', default='Amount') | escape }}</th>
+                                        {% if can_interact %}
+                                        <th>{{ trans('general_actions', default='Actions') | escape }}</th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for fund in recent_funds %}
+                                        <tr>
+                                            <td>{{ fund.source | escape }}</td>
+                                            <td>{{ fund.amount | format_currency }}</td>
+                                            {% if can_interact %}
+                                            <td>
+                                                <button class="btn btn-secondary btn-sm actions-btn"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#fundActionsModal"
+                                                        data-id="{{ fund._id }}"
+                                                        data-source="{{ fund.source }}"
+                                                        data-amount="{{ fund.amount }}"
+                                                        data-date="{{ fund.created_at | format_date }}"
+                                                        data-description="{{ fund.description or '' }}">
+                                                    {{ trans('general_actions', default='Actions') | escape }}
+                                                </button>
+                                            </td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <p>{{ trans('funds_no_funds', default='No funds recorded yet.') | escape }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="text-center py-5">
+            <h3>{{ trans('dashboard_welcome_to_ficore', default='Welcome to Business Finance') | escape }}</h3>
+            <p class="text-muted">{{ trans('dashboard_please_login', default='Please log in to view your dashboard.') | escape }}</p>
+            <a href="{{ url_for('users.login') }}" class="btn btn-primary">{{ trans('general_login', default='Log In') | escape }}</a>
+        </div>
+    {% endif %}
+
+    <!-- Creditor Actions Modal -->
+    <div class="modal fade" id="creditorActionsModal" tabindex="-1" aria-labelledby="creditorActionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="creditorActionsModalLabel">{{ trans('creditors_what_you_owe', default='What You Owe') | escape }}</h5>
+                    <button class="btn-close" data-bs-dismiss="modal" aria-label="{{ trans('general_close', default='Close') | escape }}"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>{{ trans('general_name', default='Name') | escape }}:</strong> <span id="creditorModalName"></span></p>
+                            <p><strong>{{ trans('general_amount', default='Amount') | escape }}:</strong> <span id="creditorModalAmount"></span></p>
+                            <p><strong>{{ trans('general_contact', default='Contact') | escape }}:</strong> <span id="creditorModalContact"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>{{ trans('general_description', default='Description') | escape }}:</strong> <span id="creditorModalDescription"></span></p>
+                            <p><strong>{{ trans('general_date', default='Date') | escape }}:</strong> <span id="creditorModalDate"></span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a id="creditorViewBtn" class="btn btn-info" href="#">{{ trans('general_view', default='View') | escape }}</a>
+                    {% if can_interact %}
+                    <a id="creditorEditBtn" class="btn btn-primary" href="#">{{ trans('general_edit', default='Edit') | escape }}</a>
+                    <form id="creditorDeleteForm" action="#" method="POST" style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('{{ trans('general_confirm_delete', default='Are you sure?') | escape }}')">
+                            {{ trans('general_delete', default='Delete') | escape }}
+                        </button>
+                    </form>
+                    {% endif %}
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ trans('general_close', default='Close') | escape }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Debtor Actions Modal -->
+    <div class="modal fade" id="debtorActionsModal" tabindex="-1" aria-labelledby="debtorActionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="debtorActionsModalLabel">{{ trans('debtors_what_they_owe_you', default='What They Owe You') | escape }}</h5>
+                    <button class="btn-close" data-bs-dismiss="modal" aria-label="{{ trans('general_close', default='Close') | escape }}"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>{{ trans('general_name', default='Name') | escape }}:</strong> <span id="debtorModalName"></span></p>
+                            <p><strong>{{ trans('general_amount', default='Amount') | escape }}:</strong> <span id="debtorModalAmount"></span></p>
+                            <p><strong>{{ trans('general_contact', default='Contact') | escape }}:</strong> <span id="debtorModalContact"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>{{ trans('general_description', default='Description') | escape }}:</strong> <span id="debtorModalDescription"></span></p>
+                            <p><strong>{{ trans('general_date', default='Date') | escape }}:</strong> <span id="debtorModalDate"></span></p>
+                            <p><strong>{{ trans('debtors_reminders', default='Reminders') | escape }}:</strong> <span id="debtorModalReminders"></span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a id="debtorViewBtn" class="btn btn-info" href="#">{{ trans('general_view', default='View') | escape }}</a>
+                    {% if can_interact %}
+                    <a id="debtorEditBtn" class="btn btn-primary" href="#">{{ trans('general_edit', default='Edit') | escape }}</a>
+                    <form id="debtorDeleteForm" action="#" method="POST" style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('{{ trans('general_confirm_delete', default='Are you sure?') | escape }}')">
+                            {{ trans('general_delete', default='Delete') | escape }}
+                        </button>
+                    </form>
+                    {% endif %}
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ trans('general_close', default='Close') | escape }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Actions Modal -->
+    <div class="modal fade" id="paymentActionsModal" tabindex="-1" aria-labelledby="paymentActionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="paymentActionsModalLabel">{{ trans('payments_money_out', default='Money Out') | escape }}</h5>
+                    <button class="btn-close" data-bs-dismiss="modal" aria-label="{{ trans('general_close', default='Close') | escape }}"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>{{ trans('payments_recipient', default='Recipient') | escape }}:</strong> <span id="paymentModalRecipient"></span></p>
+                            <p><strong>{{ trans('general_amount', default='Amount') | escape }}:</strong> <span id="paymentModalAmount"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>{{ trans('general_description', default='Description') | escape }}:</strong> <span id="paymentModalDescription"></span></p>
+                            <p><strong>{{ trans('general_date', default='Date') | escape }}:</strong> <span id="paymentModalDate"></span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a id="paymentViewBtn" class="btn btn-info" href="#">{{ trans('general_view', default='View') | escape }}</a>
+                    {% if can_interact %}
+                    <a id="paymentEditBtn" class="btn btn-primary" href="#">{{ trans('general_edit', default='Edit') | escape }}</a>
+                    <form id="paymentDeleteForm" action="#" method="POST" style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('{{ trans('general_confirm_delete', default='Are you sure?') | escape }}')">
+                            {{ trans('general_delete', default='Delete') | escape }}
+                        </button>
+                    </form>
+                    {% endif %}
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ trans('general_close', default='Close') | escape }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt Actions Modal -->
+    <div class="modal fade" id="receiptActionsModal" tabindex="-1" aria-labelledby="receiptActionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="receiptActionsModalLabel">{{ trans('receipts_money_in', default='Money In') | escape }}</h5>
+                    <button class="btn-close" data-bs-dismiss="modal" aria-label="{{ trans('general_close', default='Close') | escape }}"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>{{ trans('receipts_payer', default='Payer') | escape }}:</strong> <span id="receiptModalPayer"></span></p>
+                            <p><strong>{{ trans('general_amount', default='Amount') | escape }}:</strong> <span id="receiptModalAmount"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>{{ trans('general_description', default='Description') | escape }}:</strong> <span id="receiptModalDescription"></span></p>
+                            <p><strong>{{ trans('general_date', default='Date') | escape }}:</strong> <span id="receiptModalDate"></span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a id="receiptViewBtn" class="btn btn-info" href="#">{{ trans('general_view', default='View') | escape }}</a>
+                    {% if can_interact %}
+                    <a id="receiptEditBtn" class="btn btn-primary" href="#">{{ trans('general_edit', default='Edit') | escape }}</a>
+                    <form id="receiptDeleteForm" action="#" method="POST" style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('{{ trans('general_confirm_delete', default='Are you sure?') | escape }}')">
+                            {{ trans('general_delete', default='Delete') | escape }}
+                        </button>
+                    </form>
+                    {% endif %}
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ trans('general_close', default='Close') | escape }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fund Actions Modal -->
+    <div class="modal fade" id="fundActionsModal" tabindex="-1" aria-labelledby="fundActionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="fundActionsModalLabel">{{ trans('funds_title', default='Funds') | escape }}</h5>
+                    <button class="btn-close" data-bs-dismiss="modal" aria-label="{{ trans('general_close', default='Close') | escape }}"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>{{ trans('funds_source', default='Source') | escape }}:</strong> <span id="fundModalSource"></span></p>
+                            <p><strong>{{ trans('general_amount', default='Amount') | escape }}:</strong> <span id="fundModalAmount"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>{{ trans('general_description', default='Description') | escape }}:</strong> <span id="fundModalDescription"></span></p>
+                            <p><strong>{{ trans('general_date', default='Date') | escape }}:</strong> <span id="fundModalDate"></span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a id="fundViewBtn" class="btn btn-info" href="#">{{ trans('general_view', default='View') | escape }}</a>
+                    {% if can_interact %}
+                    <a id="fundEditBtn" class="btn btn-primary" href="#">{{ trans('general_edit', default='Edit') | escape }}</a>
+                    <form id="fundDeleteForm" action="#" method="POST" style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('{{ trans('general_confirm_delete', default='Are you sure?') | escape }}')">
+                            {{ trans('general_delete', default='Delete') | escape }}
+                        </button>
+                    </form>
+                    {% endif %}
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ trans('general_close', default='Close') | escape }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // JavaScript to handle modal data population
+    document.addEventListener('DOMContentLoaded', function () {
+        const modals = [
+            {
+                id: 'creditorActionsModal',
+                fields: ['Name', 'Amount', 'Contact', 'Description', 'Date'],
+                viewBtnId: 'creditorViewBtn',
+                editBtnId: 'creditorEditBtn',
+                deleteFormId: 'creditorDeleteForm'
+            },
+            {
+                id: 'debtorActionsModal',
+                fields: ['Name', 'Amount', 'Contact', 'Description', 'Date', 'Reminders'],
+                viewBtnId: 'debtorViewBtn',
+                editBtnId: 'debtorEditBtn',
+                deleteFormId: 'debtorDeleteForm'
+            },
+            {
+                id: 'paymentActionsModal',
+                fields: ['Recipient', 'Amount', 'Description', 'Date'],
+                viewBtnId: 'paymentViewBtn',
+                editBtnId: 'paymentEditBtn',
+                deleteFormId: 'paymentDeleteForm'
+            },
+            {
+                id: 'receiptActionsModal',
+                fields: ['Payer', 'Amount', 'Description', 'Date'],
+                viewBtnId: 'receiptViewBtn',
+                editBtnId: 'receiptEditBtn',
+                deleteFormId: 'receiptDeleteForm'
+            },
+            {
+                id: 'fundActionsModal',
+                fields: ['Source', 'Amount', 'Description', 'Date'],
+                viewBtnId: 'fundViewBtn',
+                editBtnId: 'fundEditBtn',
+                deleteFormId: 'fundDeleteForm'
+            }
+        ];
+
+        modals.forEach(modal => {
+            const modalElement = document.getElementById(modal.id);
+            modalElement.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const id = button.getAttribute('data-id');
+                modal.fields.forEach(field => {
+                    const element = document.getElementById(`${modal.id.replace('ActionsModal', 'Modal')}${field}`);
+                    if (element) {
+                        element.textContent = button.getAttribute(`data-${field.toLowerCase()}`) || 'N/A';
+                    }
+                });
+                const viewBtn = document.getElementById(modal.viewBtnId);
+                const editBtn = document.getElementById(modal.editBtnId);
+                const deleteForm = document.getElementById(modal.deleteFormId);
+                const blueprint = modal.id.toLowerCase().includes('creditor') ? 'creditors' :
+                                 modal.id.toLowerCase().includes('debtor') ? 'debtors' :
+                                 modal.id.toLowerCase().includes('payment') ? 'payments' :
+                                 modal.id.toLowerCase().includes('receipt') ? 'receipts' : 'funds';
+                if (viewBtn) {
+                    viewBtn.href = `/${blueprint}/view_page/${id}`;
+                }
+                if (editBtn) {
+                    editBtn.href = `/${blueprint}/edit/${id}`;
+                }
+                if (deleteForm) {
+                    deleteForm.action = `/${blueprint}/delete/${id}`;
+                }
+            });
+        });
+
+        // Enable Bootstrap tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %}

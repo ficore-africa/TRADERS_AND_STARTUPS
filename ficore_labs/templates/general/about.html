@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}{{ t('general_about', default='About FiCore Africa') }}{% endblock %}
+{% block content %}
+<div class="container my-5">
+    <h1 class="text-center mb-4">{{ t('general_about_ficore_africa', default='About FiCore Africa') }}</h1>
+    <div class="card">
+        <div class="card-body">
+            <p class="card-text">
+                {{ t('general_about_description', default='FiCore Africa is a comprehensive platform designed to empower small and medium enterprises (SMEs) and startups across Africa with tools for financial management, business operations, and financial literacy.') }}
+            </p>
+            <p class="card-text">
+                {{ t('general_about_mission', default='Our mission is to provide accessible and intuitive tools for business management fostering financial empowerment and economic growth across the continent.') }}
+            </p>
+            <p class="card-text">
+                {{ t('general_about_tools', default='From daily transactions and debtors tracking, to creditors records, and startup finance tools. FiCore offers tailored solutions and support for immediate insights.') }}
+            </p>
+            <div class="text-center mt-4">
+                <a href="{{ url_for('index') }}" class="btn btn-primary">
+                    {{ t('general_explore_tools', default='Explore Our Tools') }}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <section class="why-section mt-5">
+        <h3 class="text-center"><i class="fas fa-info-circle"></i> {{ t('general_why_ficore', default='Why FiCore Africa?') }}</h3>
+        <ul class="why-list list-unstyled text-center">
+            <li><i class="fas fa-check-circle"></i> {{ t('general_localized', default='Built for Africa with Naira support and regional insights') }}</li>
+            <li><i class="fas fa-check-circle"></i> {{ t('general_empowers', default='Empowers individuals, businesses, and agents with tailored tools') }}</li>
+            <li><i class="fas fa-check-circle"></i> {{ t('general_actionable', default='Actionable insights for smarter financial decisions') }}</li>
+            <li><i class="fas fa-check-circle"></i> {{ t('general_secure', default='Advisory-only platform – we don’t store or access your funds') }}</li>
+        </ul>
+    </section>
+</div>
+{% endblock %}

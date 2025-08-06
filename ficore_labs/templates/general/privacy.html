@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+{% block title %}{{ t('general_privacy_title', default='Privacy Policy') }}{% endblock %}
+{% block content %}
+<div class="privacy-page py-5">
+    <div class="container">
+        <h1 class="text-center mb-4">{{ t('general_privacy_title', default='Privacy Policy') }}</h1>
+        <p class="text-center mb-5">{{ t('general_privacy_intro', default='Our Privacy Policy outlines how we collect, use, and protect your personal information.') }}</p>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <p>{{ t('general_privacy_content', default='At FiCore Africa, we are committed to safeguarding your privacy. We collect only the data necessary to provide our services, such as your contact and transaction details. We do not share your personal information with third parties except as required by law. By using our services, you consent to our data practices as outlined in this policy.') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+{# No additional scripts needed, dark mode and language toggle are handled globally in base.html #}
+{% endblock %}

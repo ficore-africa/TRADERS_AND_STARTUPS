@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="{{ lang | e }}">
+<head>
+    {% extends "base.html" %}
+    {% block title %}{{ t('subscribe_title', default='Subscribe to FiCore') | e }}{% endblock %}
+    {% block extra_head %}
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <style>
+        .pricing-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin: 10px;
+        }
+        .pricing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .pricing-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        .pricing-card .price {
+            font-size: 2rem;
+            color: #28a745;
+            margin: 10px 0;
+        }
+        .pricing-card .btn-subscribe {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .pricing-card .btn-subscribe:hover {
+            background-color: #218838;
+        }
+        .trial-status {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+        .dark-mode .pricing-card {
+            border-color: #444;
+            background-color: #333;
+            color: #fff;
+        }
+        .dark-mode .pricing-card .btn-subscribe {
+            background-color: #218838;
+        }
+        .dark-mode .pricing-card .btn-subscribe:hover {
+            background-color: #1e7e34;
+        }
+    </style>
+    {% endblock %}
+</head>
+<body>
+    {% block content %}
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">{{ t('subscribe_title', default='Subscribe to FiCore') | e }}</h1>
+        
+        {% if current_user.is_authenticated %}
+            <div class="trial-status text-center">
+                {% if current_user.is_subscribed %}
+                    <p class="text-success">{{ t('subscribe_already_subscribed', default='You are already subscribed! Your plan is active until ') | e }}{{ current_user.subscription_end | format_date }}</p>
+                {% elif current_user.is_trial and not is_trial_expired(current_user.trial_end, current_user.is_trial, current_user.is_subscribed, current_user.subscription_end) %}
+                    <p>{{ t('subscribe_trial_active', default='Your trial is active until ') | e }}{{ current_user.trial_end | format_date }}</p>
+                {% else %}
+                    <p class="text-warning">{{ t('subscribe_trial_expired', default='Your trial has expired. Subscribe to continue using all features.') | e }}</p>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <div class="row justify-content-center">
+            {% for plan in plans %}
+            <div class="col-md-4">
+                <div class="pricing-card">
+                    <h3>{{ plan.name | e }}</h3>
+                    <div class="price">{{ plan.price | format_currency }}</div>
+                    <p>{{ plan.description | e }}</p>
+                    <button class="btn-subscribe" onclick="initiatePayment('{{ plan.plan_code | e }}')">{{ t('subscribe_button', default='Subscribe Now') | e }}</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endblock %}
+
+    {% block page_scripts %}
+    <script>
+        function initiatePayment(planCode) {
+            fetch('{{ url_for("subscribe_bp.initiate_payment") | e }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: `plan_code=${encodeURIComponent(planCode)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.authorization_url) {
+                    window.location.href = data.authorization_url;
+                } else {
+                    showToast('{{ t("subscribe_payment_init_error", default="Failed to initiate payment") | e }}', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error initiating payment:', error);
+                showToast('{{ t("general_error", default="An error occurred") | e }}', 'error');
+            });
+        }
+    </script>
+    {% endblock %}
+</body>
+</html>

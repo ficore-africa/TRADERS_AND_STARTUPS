@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}{{ t('investor_reports_manage', default='Manage Investor Reports') }} - FiCore{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="page-title">
+        <h1>{{ t('investor_reports_manage', default='Manage Investor Reports') }}</h1>
+        <small class="subtext">{{ t('investor_reports_subtitle', default='Share Updates with Investors') }}</small>
+    </div>
+    <div class="mb-4">
+        <a href="{{ url_for('investor_reports.index') }}" class="btn btn-secondary">{{ t('general_back', default='Back') }}</a>
+        {% if can_interact %}
+            <a href="{{ url_for('investor_reports.add') }}" class="btn btn-primary">{{ t('investor_reports_create_title', default='Add New Report') }}</a>
+        {% else %}
+            <div class="alert alert-warning d-inline-block" role="alert">
+                {{ t('investor_reports_subscription_required', default='Your trial has expired or you do not have an active subscription. Please subscribe to add new reports.') }}
+                <a href="{{ url_for('general_bp.subscription_required') }}" class="alert-link">{{ t('general_subscribe', default='Subscribe Now') }}</a>
+            </div>
+        {% endif %}
+    </div>
+    {% if reports|length > 0 %}
+        <div class="mb-4">
+            <input type="text" id="searchInput" class="form-control" placeholder="{{ t('general_search', default='Search reports...') }}">
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered" id="reportsTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>{{ t('investor_reports_title', default='Title') }}</th>
+                        <th>{{ t('investor_reports_date', default='Report Date') }}</th>
+                        <th>{{ t('general_created_at', default='Created At') }}</th>
+                        <th>{{ t('general_actions', default='Actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in reports %}
+                        <tr>
+                            <td data-label="{{ t('investor_reports_title', default='Title') }}">{{ report.title }}</td>
+                            <td data-label="{{ t('investor_reports_date', default='Report Date') }}">{{ format_date(report.report_date) }}</td>
+                            <td data-label="{{ t('general_created_at', default='Created At') }}">{{ format_date(report.created_at) }}</td>
+                            <td data-label="{{ t('general_actions', default='Actions') }}">
+                                {% if can_interact %}
+                                    <a href="{{ url_for('investor_reports.edit', id=report._id) }}" 
+                                       class="btn btn-primary btn-sm"
+                                       data-bs-toggle="tooltip" 
+                                       title="{{ t('general_edit', default='Edit') }}">
+                                        {{ t('general_edit', default='Edit') }}
+                                    </a>
+                                    <form action="{{ url_for('investor_reports.delete', id=report._id) }}" method="POST" class="d-inline">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-danger btn-sm" 
+                                                onclick="return confirm('{{ t('general_confirm_delete', default='Are you sure?') }}')"
+                                                data-bs-toggle="tooltip" 
+                                                title="{{ t('general_delete', default='Delete') }}">
+                                            {{ t('general_delete', default='Delete') }}
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <span class="text-muted">{{ t('general_subscription_required', default='Subscription required') }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <p class="text-muted">{{ t('investor_reports_no_records', default='No investor reports recorded yet') }}</p>
+            <p class="mt-2">{{ t('investor_reports_create_first', default='Start by adding your first investor report.') }}</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+
+    const searchInput = document.getElementById('searchInput');
+    const table = document.getElementById('reportsTable');
+    const rows = table.getElementsByTagName('tr');
+
+    searchInput.addEventListener('input', function() {
+        const filter = searchInput.value.toLowerCase();
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            const cells = row.getElementsByTagName('td');
+            let match = false;
+            for (let j = 0; j < cells.length - 1; j++) {
+                if (cells[j].textContent.toLowerCase().includes(filter)) {
+                    match = true;
+                    break;
+                }
+            }
+            row.style.display = match ? '' : 'none';
+        }
+    });
+});
+</script>
+{% endblock %}

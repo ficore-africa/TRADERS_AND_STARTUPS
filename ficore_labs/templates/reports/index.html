@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}{{ t('reports_title', default='Reports') }} - Business Finance{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="page-title mb-4">
+        <h1>{{ t('reports_title', default='Reports') }}</h1>
+        <small class="subtext">{{ t('reports_subtitle', default='Business Financial Reports') }}</small>
+        {% if not can_interact %}
+        <div class="alert alert-warning mt-3">
+            {{ t('subscription_required', default='Your trial has expired. Subscribe to continue managing your data or view your reports below in read-only mode.') }}
+            <a href="{{ url_for('subscribe.index') }}" class="btn btn-primary btn-sm ms-2">{{ t('subscribe_now', default='Subscribe Now') }}</a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="row g-4">
+        <!-- Profit/Loss Report Card -->
+        {% if current_user.role in ['trader', 'startup'] %}
+        <div class="col-md-6 col-lg-4">
+            <a href="{{ url_for('reports.profit_loss') }}" class="text-decoration-none">
+                <div class="card h-100 report-card">
+                    <div class="card-body d-flex flex-column">
+                        <div class="report-icon mb-3">
+                            <i class="fas fa-chart-line text-success"></i>
+                        </div>
+                        <h5 class="card-title">{{ t('reports_profit_loss', default='Profit/Loss Report') }}</h5>
+                        <p class="card-text text-muted flex-grow-1">
+                            {{ t('profit_loss_description', default='View detailed profit and loss statements for your business performance analysis.') }}
+                        </p>
+                        <div class="mt-auto">
+                            <span class="btn btn-outline-primary btn-sm">{{ t('view_report', default='View Report') }} <i class="fas fa-arrow-right ms-1"></i></span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Debtors/Creditors Report Card -->
+        {% if current_user.role in ['trader', 'startup'] %}
+        <div class="col-md-6 col-lg-4">
+            <a href="{{ url_for('reports.debtors_creditors') }}" class="text-decoration-none">
+                <div class="card h-100 report-card">
+                    <div class="card-body d-flex flex-column">
+                        <div class="report-icon mb-3">
+                            <i class="fas fa-users text-warning"></i>
+                        </div>
+                        <h5 class="card-title">{{ t('reports_debtors_creditors', default='Debtors/Creditors Report') }}</h5>
+                        <p class="card-text text-muted flex-grow-1">
+                            {{ t('debtors_creditors_description', default='Track outstanding receivables and payables to manage cash flow effectively.') }}
+                        </p>
+                        <div class="mt-auto">
+                            <span class="btn btn-outline-primary btn-sm">{{ t('view_report', default='View Report') }} <i class="fas fa-arrow-right ms-1"></i></span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Funds Report Card -->
+        {% if current_user.role == 'startup' %}
+        <div class="col-md-6 col-lg-4">
+            <a href="{{ url_for('reports.funds') }}" class="text-decoration-none">
+                <div class="card h-100 report-card">
+                    <div class="card-body d-flex flex-column">
+                        <div class="report-icon mb-3">
+                            <i class="fas fa-money-bill-wave text-info"></i>
+                        </div>
+                        <h5 class="card-title">{{ t('reports_funds', default='Funds Report') }}</h5>
+                        <p class="card-text text-muted flex-grow-1">
+                            {{ t('funds_description', default='Monitor funding sources and amounts for your business.') }}
+                        </p>
+                        <div class="mt-auto">
+                            <span class="btn btn-outline-primary btn-sm">{{ t('view_report', default='View Report') }} <i class="fas fa-arrow-right ms-1"></i></span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Forecasts Report Card -->
+        {% if current_user.role == 'startup' %}
+        <div class="col-md-6 col-lg-4">
+            <a href="{{ url_for('reports.forecasts') }}" class="text-decoration-none">
+                <div class="card h-100 report-card">
+                    <div class="card-body d-flex flex-column">
+                        <div class="report-icon mb-3">
+                            <i class="fas fa-chart-pie text-primary"></i>
+                        </div>
+                        <h5 class="card-title">{{ t('reports_forecasts', default='Forecasts Report') }}</h5>
+                        <p class="card-text text-muted flex-grow-1">
+                            {{ t('forecasts_description', default='Review projected revenue and expenses for strategic planning.') }}
+                        </p>
+                        <div class="mt-auto">
+                            <span class="btn btn-outline-primary btn-sm">{{ t('view_report', default='View Report') }} <i class="fas fa-arrow-right ms-1"></i></span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Investor Reports Card -->
+        {% if current_user.role == 'startup' %}
+        <div class="col-md-6 col-lg-4">
+            <a href="{{ url_for('reports.investor_reports') }}" class="text-decoration-none">
+                <div class="card h-100 report-card">
+                    <div class="card-body d-flex flex-column">
+                        <div class="report-icon mb-3">
+                            <i class="fas fa-file-alt text-secondary"></i>
+                        </div>
+                        <h5 class="card-title">{{ t('reports_investor_reports', default='Investor Reports') }}</h5>
+                        <p class="card-text text-muted flex-grow-1">
+                            {{ t('investor_reports_description', default='Generate financial reports for investors with key metrics.') }}
+                        </p>
+                        <div class="mt-auto">
+                            <span class="btn btn-outline-primary btn-sm">{{ t('view_report', default='View Report') }} <i class="fas fa-arrow-right ms-1"></i></span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Customer Reports Card (for admins) -->
+        {% if current_user.role == 'admin' %}
+        <div class="col-md-6 col-lg-4">
+            <a href="{{ url_for('reports.customer_reports') }}" class="text-decoration-none">
+                <div class="card h-100 report-card">
+                    <div class="card-body d-flex flex-column">
+                        <div class="report-icon mb-3">
+                            <i class="fas fa-user-shield text-danger"></i>
+                        </div>
+                        <h5 class="card-title">{{ t('reports_customer_reports', default='Customer Reports') }}</h5>
+                        <p class="card-text text-muted flex-grow-1">
+                            {{ t('customer_reports_description', default='View aggregated data on customer financial activities.') }}
+                        </p>
+                        <div class="mt-auto">
+                            <span class="btn btn-outline-primary btn-sm">{{ t('view_report', default='View Report') }} <i class="fas fa-arrow-right ms-1"></i></span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

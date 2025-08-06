@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="{{ lang | e }}">
+<head>
+    {% extends "base.html" %}
+    {% block title %}{{ t('subscribe_required_title', default='Subscription Required') | e }}{% endblock %}
+    {% block extra_head %}
+    <style>
+        .subscription-required-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        .subscription-required-card h2 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+        .subscription-required-card p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+        .subscription-required-card .btn-subscribe {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .subscription-required-card .btn-subscribe:hover {
+            background-color: #218838;
+        }
+        .dark-mode .subscription-required-card {
+            border-color: #444;
+            background-color: #333;
+            color: #fff;
+        }
+        .dark-mode .subscription-required-card .btn-subscribe {
+            background-color: #218838;
+        }
+        .dark-mode .subscription-required-card .btn-subscribe:hover {
+            background-color: #1e7e34;
+        }
+    </style>
+    {% endblock %}
+</head>
+<body>
+    {% block content %}
+    <div class="container mt-5">
+        <div class="subscription-required-card">
+            <h2>{{ t('subscribe_required_title', default='Subscription Required') | e }}</h2>
+            <p>
+                {% if current_user.is_trial and not is_trial_expired(current_user.trial_end, current_user.is_trial, current_user.is_subscribed, current_user.subscription_end) %}
+                    {{ t('subscribe_trial_active', default='Your trial is active until ') | e }}{{ current_user.trial_end | format_date }}
+                {% elif current_user.is_trial %}
+                    {{ t('subscribe_trial_expired', default='Your trial has expired. Subscribe to continue using all features.') | e }}
+                {% else %}
+                    {{ t('subscribe_no_subscription', default='You do not have an active subscription. Subscribe to access all features.') | e }}
+                {% endif %}
+            </p>
+            <a href="{{ url_for('subscribe_bp.subscribe') }}" class="btn-subscribe">
+                {{ t('general_subscribe_now', default='Subscribe Now') | e }}
+            </a>
+        </div>
+    </div>
+    {% endblock %}
+</body>
+</html>

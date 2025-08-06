@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{{ t('receipts_edit_title', default='Edit Money In') }} - FiCore{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="page-title">
+        <h1>{{ t('receipts_edit_title', default='Edit Money In') }}</h1>
+        <small class="subtext">{{ t('receipts_subtitle', default='Kuɗin Da Aka Biyaka') }}</small>
+    </div>
+    {% if not can_interact %}
+        <div class="alert alert-warning" role="alert">
+            {{ t('receipts_subscription_required', default='Your trial has expired or you do not have an active subscription. Please subscribe to edit receipts.') }}
+            <a href="{{ url_for('general_bp.subscription_required') }}" class="alert-link">{{ t('general_subscribe', default='Subscribe now') }}</a>
+        </div>
+    {% endif %}
+    <form action="{{ url_for('receipts.edit', id=receipt._id) }}" method="POST" class="row g-3" {% if not can_interact %}onsubmit="return false;"{% endif %}>
+        {{ form.hidden_tag() }}
+        <div class="col-12">
+            <label for="party_name" class="form-label">{{ t('receipts_party_name', default='Party Name') }}</label>
+            {{ form.party_name(class="form-control", required=True, disabled=not can_interact) }}
+            {% if form.party_name.errors %}
+                <p class="text-danger mt-1">{{ form.party_name.errors[0] }}</p>
+            {% endif %}
+        </div>
+        <div class="col-12">
+            <label for="date" class="form-label">{{ t('general_date', default='Date') }}</label>
+            {{ form.date(class="form-control", type="date", required=True, disabled=not can_interact) }}
+            {% if form.date.errors %}
+                <p class="text-danger mt-1">{{ form.date.errors[0] }}</p>
+            {% endif %}
+        </div>
+        <div class="col-12">
+            <label for="amount" class="form-label">{{ t('general_amount', default='Amount') }}</label>
+            {{ form.amount(class="form-control", type="number", step="0.01", required=True, disabled=not can_interact) }}
+            {% if form.amount.errors %}
+                <p class="text-danger mt-1">{{ form.amount.errors[0] }}</p>
+            {% endif %}
+        </div>
+        <div class="col-12">
+            <label for="method" class="form-label">{{ t('receipts_payment_method', default='Payment Method') }}</label>
+            {{ form.method(class="form-control", disabled=not can_interact) }}
+            {% if form.method.errors %}
+                <p class="text-danger mt-1">{{ form.method.errors[0] }}</p>
+            {% endif %}
+        </div>
+        <div class="col-12">
+            <label for="category" class="form-label">{{ t('general_category', default='Category') }}</label>
+            {{ form.category(class="form-control", disabled=not can_interact) }}
+            {% if form.category.errors %}
+                <p class="text-danger mt-1">{{ form.category.errors[0] }}</p>
+            {% endif %}
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary w-100" {% if not can_interact %}disabled{% endif %}>{{ t('general_save', default='Save') }}</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

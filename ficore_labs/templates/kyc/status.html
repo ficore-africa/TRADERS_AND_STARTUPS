@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h1>KYC Status</h1>
+    <p>Your KYC status is: {{ status|capitalize }}</p>
+    {% if allow_resubmit %}
+        <a href="{{ url_for('kyc.submit') }}" class="btn btn-primary">Resubmit KYC</a>
+    {% endif %}
+</div>
+{% endblock %}

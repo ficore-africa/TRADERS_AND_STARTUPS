@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} - FiCore{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h1>{{ title }}</h1>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ t('admin_users', default='Users') }}</h5>
+                    <p class="card-text">{{ stats.users }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ t('admin_records', default='Income Records') }}</h5>
+                    <p class="card-text">{{ stats.records }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ t('admin_cashflows', default='Payment Outflows') }}</h5>
+                    <p class="card-text">{{ stats.cashflows }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ t('admin_debtors', default='Debtors') }}</h5>
+                    <p class="card-text">{{ stats.debtors }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ t('admin_creditors', default='Creditors') }}</h5>
+                    <p class="card-text">{{ stats.creditors }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ t('admin_funds', default='Funds') }}</h5>
+                    <p class="card-text">{{ stats.funds }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ t('admin_audit_logs', default='Audit Logs') }}</h5>
+                    <p class="card-text">{{ stats.audit_logs }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ t('admin_feedback', default='Feedback') }}</h5>
+                    <p class="card-text">{{ stats.feedback }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2>{{ t('admin_quick_actions', default='Quick Actions') }}</h2>
+    <div class="d-grid gap-2">
+        <a href="{{ url_for('admin.manage_users') }}" class="btn btn-primary">{{ t('admin_manage_users', default='Manage Users') }}</a>
+        <a href="{{ url_for('admin.manage_user_roles') }}" class="btn btn-primary">{{ t('admin_manage_user_roles', default='Manage User Roles') }}</a>
+        <a href="{{ url_for('admin.manage_user_subscriptions') }}" class="btn btn-primary">{{ t('admin_manage_user_subscriptions', default='Manage User Subscriptions') }}</a>
+        <a href="{{ url_for('admin.manage_debtors') }}" class="btn btn-primary">{{ t('admin_manage_debtors', default='Manage Debtors') }}</a>
+        <a href="{{ url_for('admin.manage_creditors') }}" class="btn btn-primary">{{ t('admin_manage_creditors', default='Manage Creditors') }}</a>
+        <a href="{{ url_for('admin.manage_funds') }}" class="btn btn-primary">{{ t('admin_manage_funds', default='Manage Funds') }}</a>
+        <a href="{{ url_for('admin.manage_records') }}" class="btn btn-primary">{{ t('admin_manage_records', default='Manage Income Records') }}</a>
+        <a href="{{ url_for('admin.manage_cashflows') }}" class="btn btn-primary">{{ t('admin_manage_cashflows', default='Manage Payment Outflows') }}</a>
+        <a href="{{ url_for('admin.customer_reports') }}" class="btn btn-primary">{{ t('admin_customer_reports', default='Customer Reports') }}</a>
+        <a href="{{ url_for('admin.investor_reports') }}" class="btn btn-primary">{{ t('admin_investor_reports', default='Investor Reports') }}</a>
+        <a href="{{ url_for('admin.manage_forecasts') }}" class="btn btn-primary">{{ t('admin_forecasts', default='Financial Forecasts') }}</a>
+        <a href="{{ url_for('admin.audit') }}" class="btn btn-primary">{{ t('admin_audit_logs', default='View Audit Logs') }}</a>
+        <a href="{{ url_for('admin.manage_feedback') }}" class="btn btn-primary">{{ t('admin_manage_feedback', default='Manage Feedback') }}</a>
+        <a href="{{ url_for('kyc.admin') }}" class="btn btn-primary">{{ t('admin_manage_kyc', default='Manage KYC Submissions') }}</a>
+    </div>
+
+    <h2 class="mt-4">{{ t('admin_recent_users', default='Recent Users') }}</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>{{ t('admin_username', default='Username') }}</th>
+                <th>{{ t('admin_email', default='Email') }}</th>
+                <th>{{ t('user_role', default='Role') }}</th>
+                <th>{{ t('subscription_status', default='Subscription Status') }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in recent_users %}
+            <tr>
+                <td>{{ user._id }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.role }}</td>
+                <td>
+                    {% if user.is_trial_active %}
+                        {{ 'Subscribed' if user.is_subscribed else 'Trial' }}
+                    {% else %}
+                        {{ t('subscription_expired', default='Expired') }}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

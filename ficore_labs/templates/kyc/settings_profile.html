@@ -1,0 +1,532 @@
+{% extends 'base.html' %}
+{% block title %}{{ t('settings_my_profile', default='My Profile') }} - FiCore{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex align-items-center mb-4">
+        <a href="{{ url_for('dashboard.index') }}" class="back-arrow me-3">←</a>
+        <h1>{{ t('settings_hello_user', default='Hello') }}, {{ user.display_name or user._id }}!</h1>
+        <div class="profile-pic-container ms-auto">
+            <img src="{% if user.profile_picture %}{{ url_for('settings.get_profile_picture', user_id=user._id) }}{% else %}{{ url_for('static', filename='img/default_profile.png') }}{% endif %}" alt="{{ t('settings_profile_picture', default='Profile Picture') }}" class="profile-pic" onerror="this.src='{{ url_for('static', filename='img/ficore_records_logo.png') }}';">
+            <label for="profile_picture" class="edit-profile-pic-icon">✎</label>
+            <input type="file" id="profile_picture" name="profile_picture" accept="image/*" style="display: none;">
+        </div>
+    </div>
+
+    <div class="card card-body mb-3">
+        <p class="mb-0">{{ t('settings_account_type', default='Account Type') }}: 
+            <strong>
+                {% if user.role == 'personal' %}
+                    {{ t('settings_personal_account', default='Personal Account') }}
+                {% elif user.role == 'trader' %}
+                    {{ t('settings_trader_account', default='Trader Account') }}
+                {% elif user.role == 'agent' %}
+                    {{ t('settings_agent_account', default='Agent Account') }}
+                {% elif user.role == 'admin' %}
+                    {{ t('settings_admin_account', default='Admin Account') }}
+                {% endif %}
+            </strong> 
+            <span class="info-icon" title="{{ t('settings_' + user.role + '_account_info', default=user.role|capitalize + ' account gives you access to specific features tailored to your role.') }}">ⓘ</span>
+        </p>
+    </div>
+
+    <!-- KYC Status Section -->
+    <div class="card card-body mb-3">
+        <h5>{{ t('kyc_status', default='KYC Status') }}</h5>
+        <p>{{ user.kyc_status|capitalize }}</p>
+        {% if user.kyc_status != 'approved' %}
+            <a href="{{ url_for('kyc.submit') }}" class="btn btn-primary">{{ t('submit_kyc', default='Submit KYC') }}</a>
+        {% endif %}
+    </div>
+
+    <!-- Explore Your Tools Button Section -->
+    <div class="d-grid mb-4">
+        {% if user.role == 'personal' %}
+            <button class="btn btn-primary btn-lg explore-tools-btn" onclick="location.href='{{ url_for('personal.index') }}'">
+                <i class="bi bi-compass me-2"></i> {{ t('settings_explore_personal_tools', default='Explore Your Personal Finance Tools') }}
+            </button>
+            <small class="text-muted text-center mt-2">{{ t('settings_explore_personal_description', default='Access budgeting, bill tracking, financial health scoring, and more!') }}</small>
+        {% elif user.role == 'trader' %}
+            <button class="btn btn-primary btn-lg explore-tools-btn" onclick="location.href='{{ url_for('general_bp.home') }}'">
+                <i class="bi bi-briefcase me-2"></i> {{ t('settings_explore_business_tools', default='Explore Your Business Tools') }}
+            </button>
+            <small class="text-muted text-center mt-2">{{ t('settings_explore_business_description', default='Manage debtors, creditors, inventory, payments, and business analytics!') }}</small>
+        {% elif user.role == 'agent' %}
+            <button class="btn btn-primary btn-lg explore-tools-btn" onclick="location.href='{{ url_for('agents_bp.agent_portal') }}'">
+                <i class="bi bi-people me-2"></i> {{ t('settings_explore_agent_tools', default='Explore Your Agent Dashboard') }}
+            </button>
+            <small class="text-muted text-center mt-2">{{ t('settings_explore_agent_description', default='Access your agent dashboard to help users and manage your activities!') }}</small>
+        {% elif user.role == 'admin' %}
+            <button class="btn btn-primary btn-lg explore-tools-btn" onclick="location.href='{{ url_for('admin.dashboard') }}'">
+                <i class="bi bi-gear me-2"></i> {{ t('settings_explore_admin_tools', default='Explore Admin Dashboard') }}
+            </button>
+            <small class="text-muted text-center mt-2">{{ t('settings_explore_admin_description', default='Access administrative tools to manage users, system settings, and analytics!') }}</small>
+        {% endif %}
+    </div>
+
+    <div class="d-grid mb-4">
+        <button class="btn btn-outline-primary" onclick="location.href='{{ url_for('general_bp.feedback') }}'">
+            <i class="bi bi-chat-dots me-2"></i> {{ t('settings_provide_feedback', default='Provide Feedback') }}
+        </button>
+    </div>
+
+    <section class="profile-section mb-4">
+        <h2>{{ t('settings_personal_data', default='Personal Data') }}</h2>
+        <div class="card card-body">
+            <form method="POST" action="{{ url_for('settings.profile') }}" enctype="multipart/form-data">
+                {{ form.csrf_token }}
+
+                <div class="form-group mb-3">
+                    <label for="full_name" class="form-label">{{ t('settings_full_name', default='Full Name') }}</label>
+                    {{ form.full_name(placeholder=t('settings_full_name_placeholder', default='Enter your full name')) }}
+                    {% if form.full_name.errors %}
+                        {% for error in form.full_name.errors %}
+                            <p class="text-danger mt-1">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="phone" class="form-label">{{ t('settings_phone_number', default='Phone Number') }}</label>
+                    {{ form.phone(placeholder=t('settings_phone_placeholder', default='+234xxxxxxxxx')) }}
+                    {% if form.phone.errors %}
+                        {% for error in form.phone.errors %}
+                            <p class="text-danger mt-1">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="email" class="form-label">{{ t('general_email', default='Email') }}</label>
+                    {{ form.email(placeholder=t('settings_email_placeholder', default='your@email.com')) }}
+                    {% if form.email.errors %}
+                        {% for error in form.email.errors %}
+                            <p class="text-danger mt-1">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                {% if user.role == 'personal' %}
+                <hr class="my-4">
+                <h5>{{ t('settings_personal_information', default='Personal Information') }}</h5>
+                
+                <div class="form-group mb-3">
+                    <label for="first_name" class="form-label">{{ t('general_first_name', default='First Name') }}</label>
+                    {{ form.first_name(placeholder=t('settings_first_name_placeholder', default='Enter your first name')) }}
+                    {% if form.first_name.errors %}
+                        {% for error in form.first_name.errors %}
+                            <p class="text-danger mt-1">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="last_name" class="form-label">{{ t('general_last_name', default='Last Name') }}</label>
+                    {{ form.last_name(placeholder=t('settings_last_name_placeholder', default='Enter your last name')) }}
+                    {% if form.last_name.errors %}
+                        {% for error in form.last_name.errors %}
+                            <p class="text-danger mt-1">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="personal_address" class="form-label">{{ t('general_address', default='Address') }}</label>
+                    {{ form.personal_address(placeholder=t('settings_address_placeholder', default='Enter your address')) }}
+                    {% if form.personal_address.errors %}
+                        {% for error in form.personal_address.errors %}
+                            <p class="text-danger mt-1">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                {% elif user.role == 'trader' %}
+                <hr class="my-4">
+                <h5>{{ t('settings_business_information', default='Business Information') }}</h5>
+                
+                <div class="form-group mb-3">
+                    <label for="business_name" class="form-label">{{ t('settings_business_name', default='Business Name') }}</label>
+                    {{ form.business_name(placeholder=t('settings_business_name_placeholder', default='Your Business Name')) }}
+                    {% if form.business_name.errors %}
+                        {% for error in form.business_name.errors %}
+                            <p class="text-danger mt-1">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label for="business_address" class="form-label">{{ t('settings_business_address', default='Business Address') }}</label>
+                    {{ form.business_address(placeholder=t('settings_business_address_placeholder', default='Your Business Address')) }}
+                    {% if form.business_address.errors %}
+                        {% for error in form.business_address.errors %}
+                            <p class="text-danger mt-1">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label for="industry" class="form-label">{{ t('settings_industry', default='Industry') }}</label>
+                    {{ form.industry(placeholder=t('settings_industry_placeholder', default='e.g., Retail, Services, Manufacturing')) }}
+                    {% if form.industry.errors %}
+                        {% for error in form.industry.errors %}
+                            <p class="text-danger mt-1">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="products_services" class="form-label">{{ t('settings_products_services', default='Products/Services') }}</label>
+                    {{ form.products_services(placeholder=t('settings_products_services_placeholder', default='e.g., Clothing, Consulting')) }}
+                    {% if form.products_services.errors %}
+                        {% for error in form.products_services.errors %}
+                            <p class="text-danger mt-1">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                {% elif user.role == 'agent' %}
+                <hr class="my-4">
+                <h5>{{ t('settings_agent_information', default='Agent Information') }}</h5>
+                
+                <div class="form-group mb-3">
+                    <label for="agent_name" class="form-label">{{ t('settings_agent_name', default='Agent Name') }}</label>
+                    {{ form.agent_name(placeholder=t('settings_agent_name_placeholder', default='Enter agent name')) }}
+                    {% if form.agent_name.errors %}
+                        {% for error in form.agent_name.errors %}
+                            <p class="text-danger mt-1">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="agent_id" class="form-label">{{ t('settings_agent_id', default='Agent ID') }}</label>
+                    {{ form.agent_id(placeholder=t('settings_agent_id_placeholder', default='Enter agent ID')) }}
+                    {% if form.agent_id.errors %}
+                        {% for error in form.agent_id.errors %}
+                            <p class="text-danger mt-1">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="area" class="form-label">{{ t('settings_area', default='Area') }}</label>
+                    {{ form.area(placeholder=t('settings_area_placeholder', default='Enter your area')) }}
+                    {% if form.area.errors %}
+                        {% for error in form.area.errors %}
+                            <p class="text-danger mt-1">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="agent_role" class="form-label">{{ t('settings_agent_role', default='Role') }}</label>
+                    {{ form.agent_role(placeholder=t('settings_agent_role_placeholder', default='e.g., Sales Agent, Support Agent')) }}
+                    {% if form.agent_role.errors %}
+                        {% for error in form.agent_role.errors %}
+                            <p class="text-danger mt-1">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <div class="text-center">
+                    {{ form.submit }}
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <section class="profile-section mb-4">
+        <h2>{{ t('settings_app_settings', default='App Settings') }}</h2>
+        <div class="card card-body">
+            <a href="{{ url_for('settings.language') }}" class="list-item">
+                <i class="bi bi-translate icon-left"></i> {{ t('settings_language', default='Language') }}
+                <i class="bi bi-chevron-right icon-right"></i>
+            </a>
+            <div class="list-item toggle-item">
+                <i class="bi bi-currency-dollar icon-left"></i> {{ t('settings_show_kobo', default='Show kobo (Amounts in the format 00.00)') }}
+                <div class="form-check form-switch ms-auto">
+                    <input class="form-check-input" type="checkbox" id="showKoboToggle" {% if user.settings.get('show_kobo') %}checked{% endif %}>
+                    <label class="form-check-label" for="showKoboToggle"></label>
+                </div>
+            </div>
+            <div class="list-item toggle-item">
+                <i class="bi bi-eye-slash icon-left"></i> {{ t('settings_incognito_mode', default='Incognito mode (Hide balance)') }}
+                <div class="form-check form-switch ms-auto">
+                    <input class="form-check-input" type="checkbox" id="incognitoModeToggle" {% if user.settings.get('incognito_mode') %}checked{% endif %}>
+                    <label class="form-check-label" for="incognitoModeToggle"></label>
+                </div>
+            </div>
+            <div class="list-item toggle-item">
+                <i class="bi bi-volume-up icon-left"></i> {{ t('settings_app_sounds', default='App sounds') }}
+                <div class="form-check form-switch ms-auto">
+                    <input class="form-check-input" type="checkbox" id="appSoundsToggle" {% if user.settings.get('app_sounds') %}checked{% endif %}>
+                    <label class="form-check-label" for="appSoundsToggle"></label>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="profile-section mb-4">
+        <h2>{{ t('settings_security', default='Security') }}</h2>
+        <div class="card card-body">
+            <div class="list-item toggle-item">
+                <i class="bi bi-fingerprint icon-left"></i> {{ t('settings_use_fingerprint_password', default='Use Fingerprint ID (For password)') }}
+                <div class="form-check form-switch ms-auto">
+                    <input class="form-check-input" type="checkbox" id="fingerprintPasswordToggle" {% if user.security_settings.get('fingerprint_password') %}checked{% endif %}>
+                    <label class="form-check-label" for="fingerprintPasswordToggle"></label>
+                </div>
+            </div>
+            <div class="list-item toggle-item">
+                <i class="bi bi-fingerprint icon-left"></i> {{ t('settings_use_fingerprint_pin', default='Use Fingerprint ID (For transaction PIN)') }}
+                <div class="form-check form-switch ms-auto">
+                    <input class="form-check-input" type="checkbox" id="fingerprintPinToggle" {% if user.security_settings.get('fingerprint_pin') %}checked{% endif %}>
+                    <label class="form-check-label" for="fingerprintPinToggle"></label>
+                </div>
+            </div>
+            <div class="list-item toggle-item">
+                <i class="bi bi-shield-lock icon-left"></i> {{ t('settings_hide_sensitive_data', default='Hide sensitive data (Disable screenshots)') }}
+                <div class="form-check form-switch ms-auto">
+                    <input class="form-check-input" type="checkbox" id="hideSensitiveDataToggle" {% if user.security_settings.get('hide_sensitive_data') %}checked{% endif %}>
+                    <label class="form-check-label" for="hideSensitiveDataToggle"></label>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="profile-section mb-4">
+        <h2>{{ t('general_about', default='About') }}</h2>
+        <div class="card card-body">
+            <a href="{{ url_for('general_bp.contact') }}" class="list-item">
+                <i class="bi bi-headset icon-left"></i> {{ t('settings_support', default='Support (Our contacts)') }}
+                <i class="bi bi-chevron-right icon-right"></i>
+            </a>
+            <a href="{{ url_for('general_bp.feedback') }}" class="list-item">
+                <i class="bi bi-star icon-left"></i> {{ t('settings_rate_app', default='Rate the app (Tell us about your experience)') }}
+                <i class="bi bi-chevron-right icon-right"></i>
+            </a>
+            <a href="{{ url_for('general_bp.about') }}" class="list-item">
+                <i class="bi bi-info-circle icon-left"></i> {{ t('settings_about_ficore', default='About FiCore') }}
+                <i class="bi bi-chevron-right icon-right"></i>
+            </a>
+        </div>
+    </section>
+
+    <div class="d-grid mb-4">
+        <button class="btn btn-danger" onclick="location.href='{{ url_for('users.logout') }}'">
+            <i class="bi bi-box-arrow-right me-2"></i> {{ t('general_logout', default='Log out') }}
+        </button>
+    </div>
+
+</div>
+
+<style>
+    .profile-pic-container {
+        position: relative;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        overflow: hidden;
+        background-color: #eee;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .profile-pic {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .edit-profile-pic-icon {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background-color: var(--button-primary-bg);
+        color: white;
+        border-radius: 50%;
+        padding: 4px;
+        font-size: 0.8em;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        cursor: pointer;
+    }
+    .profile-section h2 {
+        font-size: 1.2em;
+        margin-bottom: 15px;
+        color: var(--text-color);
+        font-weight: 600;
+    }
+    .list-item, .toggle-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--card-border);
+        color: var(--text-color);
+        text-decoration: none;
+        transition: background-color 0.3s ease;
+    }
+    .list-item:last-child, .toggle-item:last-child {
+        border-bottom: none;
+    }
+    .list-item:hover {
+        background-color: var(--button-secondary-hover);
+        color: var(--text-color);
+        text-decoration: none;
+    }
+    .icon-left {
+        font-size: 1.1em;
+        width: 30px;
+        text-align: center;
+        margin-right: 15px;
+        color: var(--text-secondary);
+    }
+    .icon-right {
+        margin-left: auto;
+        color: var(--text-muted);
+    }
+    .toggle-item .form-check-input {
+        margin-top: 0;
+    }
+    .back-arrow {
+        font-size: 1.5rem;
+        color: var(--text-color);
+        text-decoration: none;
+        font-weight: bold;
+    }
+    .back-arrow:hover {
+        color: var(--accent-blue);
+    }
+    .info-icon {
+        cursor: help;
+        color: var(--text-muted);
+        margin-left: 5px;
+    }
+    
+    /* Explore Tools Button Styling */
+    .explore-tools-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 16px 24px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .explore-tools-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    }
+    
+    .explore-tools-btn:active {
+        transform: translateY(0);
+    }
+    
+    .explore-tools-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .explore-tools-btn:hover::before {
+        left: 100%;
+    }
+    
+    @media (max-width: 768px) {
+        .explore-tools-btn {
+            font-size: 1rem;
+            padding: 14px 20px;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Handle settings toggles
+        document.querySelectorAll('.form-check-input[type="checkbox"]').forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                const settingName = this.id;
+                const value = this.checked;
+
+                if (settingName.includes('fingerprint') && value) {
+                    if (!navigator.credentials || !window.PublicKeyCredential) {
+                        alert('{{ t('settings_fingerprint_not_supported', default='Fingerprint authentication is not supported on this device.') }}');
+                        this.checked = false;
+                        return;
+                    }
+                }
+
+                fetch('/settings/api/update-user-setting', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        setting: settingName,
+                        value: value
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        alert('{{ t('settings_failed_to_update_setting', default='Failed to update setting') }}: ' + (data.message || '{{ t('general_unknown_error', default='Unknown error') }}'));
+                        this.checked = !value;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating setting:', error);
+                    alert('{{ t('general_error_occurred', default='An error occurred. Please try again.') }}');
+                    this.checked = !value;
+                });
+            });
+        });
+
+        // Handle profile picture upload
+        document.getElementById('profile_picture').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                alert('{{ t('settings_invalid_image', default='Please upload a valid image file.') }}');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                alert('{{ t('settings_image_too_large', default='Image size must be less than 5MB.') }}');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('profile_picture', file);
+            formData.append('csrf_token', '{{ csrf_token() }}');
+
+            fetch('/settings/api/upload-profile-picture', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.querySelector('.profile-pic').src = data.image_url;
+                    alert('{{ t('settings_profile_picture_updated', default='Profile picture updated successfully.') }}');
+                } else {
+                    alert('{{ t('settings_failed_to_upload_picture', default='Failed to upload profile picture') }}: ' + (data.message || '{{ t('general_unknown_error', default='Unknown error') }}'));
+                }
+            })
+            .catch(error => {
+                console.error('Error uploading profile picture:', error);
+                alert('{{ t('general_error_occurred', default='An error occurred. Please try again.') }}');
+            });
+        });
+    });
+</script>
+
+{% endblock %}

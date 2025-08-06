@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+{% block title %}{{ t('general_contact_title', default='Contact Us') }}{% endblock %}
+{% block content %}
+<div class="contact-page py-5">
+    <div class="container">
+        <h1 class="text-center mb-4">{{ t('general_contact_title', default='Contact Us') }}</h1>
+        <p class="text-center mb-5">{{ t('general_contact_intro', default='Get in touch with FiCore Africa through the following channels:') }}</p>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex align-items-center">
+                        <i class="bi bi-envelope-fill me-3"></i>
+                        <div>
+                            <strong>{{ t('general_email_label', default='Email') }}</strong><br>
+                            <a href="mailto:ficoreafrica@gmail.com">ficoreafrica@gmail.com</a>
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex align-items-center">
+                        <i class="bi bi-facebook me-3"></i>
+                        <div>
+                            <strong>{{ t('general_facebook_label', default='Facebook') }}</strong><br>
+                            <a href="https://www.facebook.com/profile.php?id=61575627944628&mibextid=ZbWKwL" target="_blank" rel="noopener noreferrer">FiCore Africa</a>
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex align-items-center">
+                        <i class="bi bi-linkedin me-3"></i>
+                        <div>
+                            <strong>{{ t('general_linkedin_label', default='LinkedIn') }}</strong><br>
+                            <a href="https://www.linkedin.com/in/ficore-africa-58913a363/" target="_blank" rel="noopener noreferrer">FiCore Africa</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+{# No additional scripts needed, dark mode and language toggle are handled globally in base.html #}
+{% endblock %}

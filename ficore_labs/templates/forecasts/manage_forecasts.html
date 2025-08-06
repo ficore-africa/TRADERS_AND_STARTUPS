@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}{{ t('forecasts_manage', default='Manage Forecasts') }} - FiCore{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="page-title">
+        <h1>{{ t('forecasts_manage', default='Manage Forecasts') }}</h1>
+        <small class="subtext">{{ t('forecasts_subtitle', default='Plan Your Financial Future') }}</small>
+    </div>
+    <div class="mb-4">
+        <a href="{{ url_for('forecasts.index') }}" class="btn btn-secondary">{{ t('general_back', default='Back') }}</a>
+        <a href="{{ url_for('forecasts.add') }}" 
+           class="btn btn-primary"
+           {% if not can_interact %}disabled data-bs-toggle="tooltip" title="{{ t('forecasts_subscription_required', default='Your trial or subscription has expired. Please subscribe to add forecasts.') }}"{% endif %}>
+            {{ t('forecasts_create_title', default='Add New Forecast') }}
+        </a>
+    </div>
+    {% if forecasts|length > 0 %}
+        <div class="mb-4">
+            <input type="text" id="searchInput" class="form-control" placeholder="{{ t('general_search', default='Search forecasts...') }}">
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered" id="forecastsTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>{{ t('forecasts_title', default='Title') }}</th>
+                        <th>{{ t('forecasts_projected_revenue', default='Projected Revenue') }}</th>
+                        <th>{{ t('forecasts_projected_expenses', default='Projected Expenses') }}</th>
+                        <th>{{ t('forecasts_net_profit', default='Net Profit') }}</th>
+                        <th>{{ t('forecasts_date', default='Forecast Date') }}</th>
+                        <th>{{ t('general_actions', default='Actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for forecast in forecasts %}
+                        <tr>
+                            <td data-label="{{ t('forecasts_title', default='Title') }}">{{ forecast.title }}</td>
+                            <td data-label="{{ t('forecasts_projected_revenue', default='Projected Revenue') }}">{{ format_currency(forecast.projected_revenue) }}</td>
+                            <td data-label="{{ t('forecasts_projected_expenses', default='Projected Expenses') }}">{{ format_currency(forecast.projected_expenses) }}</td>
+                            <td data-label="{{ t('forecasts_net_profit', default='Net Profit') }}">{{ format_currency(forecast.projected_revenue - forecast.projected_expenses) }}</td>
+                            <td data-label="{{ t('forecasts_date', default='Forecast Date') }}">{{ format_date(forecast.forecast_date) }}</td>
+                            <td data-label="{{ t('general_actions', default='Actions') }}">
+                                <a href="{{ url_for('forecasts.edit', id=forecast._id) }}" 
+                                   class="btn btn-primary btn-sm"
+                                   {% if not can_interact %}disabled data-bs-toggle="tooltip" title="{{ t('forecasts_subscription_required', default='Your trial or subscription has expired. Please subscribe to edit forecasts.') }}"{% endif %}>
+                                    {{ t('general_edit', default='Edit') }}
+                                </a>
+                                <form action="{{ url_for('forecasts.delete', id=forecast._id) }}" method="POST" class="d-inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-danger btn-sm" 
+                                            onclick="return confirm('{{ t('general_confirm_delete', default='Are you sure?') }}')"
+                                            {% if not can_interact %}disabled data-bs-toggle="tooltip" title="{{ t('forecasts_subscription_required', default='Your trial or subscription has expired. Please subscribe to delete forecasts.') }}"{% endif %}>
+                                        {{ t('general_delete', default='Delete') }}
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <p class="text-muted">{{ t('forecasts_no_records', default='No forecasts recorded yet') }}</p>
+            <p class="mt-2">{{ t('forecasts_create_first', default='Start by adding your first forecast.') }}</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+
+    const searchInput = document.getElementById('searchInput');
+    const table = document.getElementById('forecastsTable');
+    const rows = table.getElementsByTagName('tr');
+
+    searchInput.addEventListener('input', function() {
+        const filter = searchInput.value.toLowerCase();
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            const cells = row.getElementsByTagName('td');
+            let match = false;
+            for (let j = 0; j < cells.length - 1; j++) {
+                if (cells[j].textContent.toLowerCase().includes(filter)) {
+                    match = true;
+                    break;
+                }
+            }
+            row.style.display = match ? '' : 'none';
+        }
+    });
+});
+</script>
+{% endblock %}

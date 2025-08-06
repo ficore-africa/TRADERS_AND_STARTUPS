@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% from "_ficore_report_header.html" import ficore_report_header %}
+{% block title %}{{ t('investor_reports_details', default='Investor Report Details') }} - FiCore{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    {{ ficore_report_header(current_user) }}
+    <div class="page-title">
+        <h1>{{ t('investor_reports_details', default='Investor Report Details') }}</h1>
+        <small class="text-muted">{{ report.title }}</small>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>{{ t('investor_reports_title', default='Title') }}:</strong> {{ report.title }}</p>
+                    <p><strong>{{ t('investor_reports_date', default='Report Date') }}:</strong> {{ format_date(report.report_date) }}</p>
+                    <p><strong>{{ t('general_created_at', default='Created At') }}:</strong> {{ format_date(report.created_at) }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>{{ t('investor_reports_summary', default='Summary') }}:</strong> {{ report.summary }}</p>
+                    <p><strong>{{ t('investor_reports_financial_highlights', default='Financial Highlights') }}:</strong> {{ report.financial_highlights or t('general_no_highlights', default='No highlights provided') }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="dropdown d-inline-block">
+                <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    {{ t('general_actions', default='Actions') }}
+                </button>
+                <ul class="dropdown-menu">
+                    {% if can_interact %}
+                        <li><a class="dropdown-item download-report-btn" 
+                               data-id="{{ report._id }}"
+                               href="#">{{ t('investor_reports_download_report', default='Download Report') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('investor_reports.generate_report_csv', id=report._id) }}">{{ t('investor_reports_download_report_csv', default='Download Report CSV') }}</a></li>
+                    {% else %}
+                        <li><span class="dropdown-item-text text-muted">{{ t('general_subscription_required', default='Subscription required') }}</span></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <a href="{{ url_for('investor_reports.index') }}" 
+               class="btn btn-secondary btn-sm"
+               data-bs-toggle="tooltip" 
+               title="{{ t('general_back', default='Back') }}">
+                {{ t('general_back', default='Back') }}
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Download Report Modal -->
+<div class="modal fade" id="downloadReportModal" tabindex="-1" aria-labelledby="downloadReportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="downloadReportModalLabel">{{ t('investor_reports_download_report', default='Download Investor Report') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ t('general_close', default='Close') }}"></button>
+            </div>
+            <div class="modal-body">
+                <p>{{ t('investor_reports_download_report_confirm', default='Generate and download investor report as PDF for') }} {{ report.title }}?</p>
+            </div>
+            <div class="modal-footer">
+                <a id="confirmDownloadReportBtn" class="btn btn-primary" href="#">
+                    {{ t('investor_reports_download_report', default='Download Report') }}
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {{ t('general_cancel', default='Cancel') }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+
+    {% if can_interact %}
+        document.querySelectorAll('.download-report-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const reportId = button.dataset.id;
+                document.getElementById('confirmDownloadReportBtn').setAttribute('href', `/investor_reports/generate_report/${reportId}`);
+                new bootstrap.Modal(document.getElementById('downloadReportModal')).show();
+            });
+        });
+    {% endif %}
+});
+</script>
+{% endblock %}

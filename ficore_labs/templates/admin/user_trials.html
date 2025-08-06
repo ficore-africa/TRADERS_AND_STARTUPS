@@ -1,0 +1,106 @@
+<script type="text/javascript">
+    var gk_isXlsx = false;
+    var gk_xlsxFileLookup = {};
+    var gk_fileData = {};
+    function filledCell(cell) {
+        return cell !== '' && cell != null;
+    }
+    function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                    row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                    headerRowIndex = 0;
+                }
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+    }
+</script>
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ title }}</h1>
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+<h2>{{ trans('trial_update', default='Update Trial') }}</h2>
+<form method="POST" action="{{ url_for('admin.manage_user_trials') }}">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        <label>{{ trans('general_user', default='User') }}</label>
+        <select name="user_id" class="form-select" required>
+            <option value="">{{ trans('general_select_user', default='Select User') }}</option>
+            {% for user in users %}
+                <option value="{{ user._id }}">{{ user.email }} ({{ user._id }})</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <label>{{ form.is_trial.label }}</label>
+        {{ form.is_trial }}
+    </div>
+    <div class="form-group">
+        <label>{{ form.trial_end.label }}</label>
+        {{ form.trial_end }}
+    </div>
+    {{ form.submit }}
+</form>
+<h2>{{ trans('bulk_trial_update', default='Bulk Trial Update') }}</h2>
+<form method="POST" action="{{ url_for('admin.manage_user_trials') }}">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        <label>{{ form.bulk_trial_days.label }}</label>
+        {{ form.bulk_trial_days }}
+    </div>
+    <div class="form-group">
+        <label>{{ form.bulk_trial_start.label }}</label>
+        {{ form.bulk_trial_start }}
+    </div>
+    <div class="form-group">
+        <label>{{ form.bulk_trial_end.label }}</label>
+        {{ form.bulk_trial_end }}
+    </div>
+    {{ form.bulk_submit }}
+</form>
+<h2>{{ trans('admin_users_list', default='Users List') }}</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>{{ trans('admin_username', default='Username') }}</th>
+            <th>{{ trans('admin_email', default='Email') }}</th>
+            <th>{{ trans('trial_status', default='Trial Status') }}</th>
+            <th>{{ trans('trial_end', default='Trial End') }}</th>
+            <th>{{ trans('subscription_status', default='Subscription Status') }}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user._id }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ 'Active' if user.is_trial and user.is_trial_active else 'Inactive' }}</td>
+            <td>{{ user.trial_end.strftime('%Y-%m-%d') if user.trial_end else 'N/A' }}</td>
+            <td>{{ 'Subscribed' if user.is_subscribed and user.is_trial_active else 'Not Subscribed' }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{{ url_for('admin.manage_user_subscriptions') }}" class="btn btn-secondary">{{ trans('admin_manage_subscriptions', default='Manage Subscriptions') }}</a>
+{% endblock %}

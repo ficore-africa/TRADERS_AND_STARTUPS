@@ -1,0 +1,87 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script>{% extends "base.html" %}
+{% block content %}
+<h1>{{ title }}</h1>
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+{% if not (current_user.is_trial_active or current_user.is_subscribed) %}
+<div class="alert alert-warning">
+    {{ trans('subscription_required', default='Your trial or subscription has expired. Please subscribe to view forecasts.') }}
+    <a href="{{ url_for('personal_bp.subscribe') }}" class="btn btn-primary">{{ trans('subscribe_now', default='Subscribe Now') }}</a>
+</div>
+{% endif %}
+<h2>{{ trans('forecast_summary', default='Financial Forecast Summary') }}</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>{{ trans('forecast_metric', default='Metric') }}</th>
+            <th>{{ trans('forecast_value', default='Value') }}</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{ trans('total_income', default='Total Income') }}</td>
+            <td>₦{{ forecast.total_income | format_currency }}</td>
+        </tr>
+        <tr>
+            <td>{{ trans('total_expenses', default='Total Expenses') }}</td>
+            <td>₦{{ forecast.total_expenses | format_currency }}</td>
+        </tr>
+        <tr>
+            <td>{{ trans('net_cashflow', default='Net Cashflow') }}</td>
+            <td>₦{{ forecast.net_cashflow | format_currency }}</td>
+        </tr>
+        <tr>
+            <td>{{ trans('projected_income', default='Projected Income') }}</td>
+            <td>₦{{ forecast.projected_income | format_currency }}</td>
+        </tr>
+        <tr>
+            <td>{{ trans('projected_expenses', default='Projected Expenses') }}</td>
+            <td>₦{{ forecast.projected_expenses | format_currency }}</td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}

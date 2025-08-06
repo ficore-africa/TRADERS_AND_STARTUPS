@@ -1,0 +1,346 @@
+{% extends "base.html" %}
+{% from "_ficore_report_header.html" import ficore_report_header %}
+{% block title %}{{ t('debtors_debt_details', default='Debt Details') }} - FiCore{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    {{ ficore_report_header(current_user) }}
+    <div class="page-title">
+        <h1>{{ t('debtors_debt_details', default='Debt Details') }}</h1>
+        <small class="text-muted">{{ debtor.name }}</small>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>{{ t('general_name', default='Name') }}:</strong> {{ debtor.name }}</p>
+                    <p><strong>{{ t('debtors_amount_owed', default='Amount Owed') }}:</strong> {{ format_currency(debtor.amount_owed) }}</p>
+                    <p><strong>{{ t('general_contact', default='Contact') }}:</strong> {{ debtor.contact or 'N/A' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>{{ t('general_description', default='Description') }}:</strong> {{ debtor.description or t('general_no_description', default='No description provided') }}</p>
+                    <p><strong>{{ t('debtors_date_recorded', default='Date Recorded') }}:</strong> {{ format_date(debtor.created_at) }}</p>
+                    <p><strong>{{ t('debtors_reminders_sent', default='Reminders Sent') }}:</strong> {{ debtor.get('reminder_count', 0) }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="dropdown d-inline-block">
+                <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    {{ t('general_actions', default='Actions') }}
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item download-iou-btn" 
+                           data-id="{{ debtor._id }}"
+                           href="#"
+                           {% if not can_interact %}class="disabled" data-bs-toggle="tooltip" title="{{ t('debtors_subscription_required', default='Your trial or subscription has expired. Please subscribe to generate IOUs.') }}"{% endif %}>
+                           {{ t('debtors_download_iou', default='Download IOU') }}
+                    </a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('debtors.generate_iou_csv', id=debtor._id) }}"
+                           {% if not can_interact %}class="disabled" data-bs-toggle="tooltip" title="{{ t('debtors_subscription_required', default='Your trial or subscription has expired. Please subscribe to generate IOUs.') }}"{% endif %}>
+                           {{ t('debtors_download_iou_csv', default='Download IOU CSV') }}
+                    </a></li>
+                    {% if debtor.contact %}
+                    <li><a class="dropdown-item share-btn" 
+                           data-id="{{ debtor._id }}" 
+                           data-contact="{{ debtor.contact }}"
+                           href="#"
+                           {% if not can_interact %}class="disabled" data-bs-toggle="tooltip" title="{{ t('debtors_subscription_required', default='Your trial or subscription has expired. Please subscribe to share IOUs.') }}"{% endif %}>
+                           {{ t('debtors_share_iou', default='Share IOU') }}
+                    </a></li>
+                    <li><a class="dropdown-item reminder-btn" 
+                           data-id="{{ debtor._id }}" 
+                           data-name="{{ debtor.name }}" 
+                           data-amount="{{ debtor.amount_owed }}" 
+                           data-contact="{{ debtor.contact }}" 
+                           data-date="{{ format_date(debtor.created_at) }}"
+                           href="#"
+                           {% if not can_interact %}class="disabled" data-bs-toggle="tooltip" title="{{ t('debtors_subscription_required', default='Your trial or subscription has expired. Please subscribe to send reminders.') }}"{% endif %}>
+                           {{ t('debtors_reminder', default='Reminder') }}
+                    </a></li>
+                    <li><a class="dropdown-item snooze-btn" 
+                           data-id="{{ debtor._id }}" 
+                           data-name="{{ debtor.name }}"
+                           href="#"
+                           {% if not can_interact %}class="disabled" data-bs-toggle="tooltip" title="{{ t('debtors_subscription_required', default='Your trial or subscription has expired. Please subscribe to send reminders.') }}"{% endif %}>
+                           {{ t('debtors_snooze', default='Snooze') }}
+                    </a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <a href="{{ url_for('debtors.index') }}" 
+               class="btn btn-secondary btn-sm"
+               data-bs-toggle="tooltip" 
+               title="{{ t('general_back', default='Back') }}">
+                {{ t('general_back', default='Back') }}
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Download IOU Modal -->
+<div class="modal fade" id="downloadIouModal" tabindex="-1" aria-labelledby="downloadIouModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="downloadIouModalLabel">{{ t('debtors_download_iou', default='Download IOU') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ t('general_close', default='Close') }}"></button>
+            </div>
+            <div class="modal-body">
+                <p>{{ t('debtors_download_iou_confirm', default='Generate and download IOU as PDF for') }} {{ debtor.name }}?</p>
+            </div>
+            <div class="modal-footer">
+                <a id="confirmDownloadIouBtn" class="btn btn-primary" href="#"
+                   {% if not can_interact %}class="disabled" data-bs-toggle="tooltip" title="{{ t('debtors_subscription_required', default='Your trial or subscription has expired. Please subscribe to generate IOUs.') }}"{% endif %}>
+                    {{ t('debtors_download_iou', default='Download IOU') }}
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {{ t('general_cancel', default='Cancel') }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reminder Modal -->
+<div class="modal fade" id="reminderModal" tabindex="-1" aria-labelledby="reminderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reminderModalLabel">{{ t('debtors_send_reminder', default='Send Reminder') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ t('general_close', default='Close') }}"></button>
+            </div>
+            <div class="modal-body">
+                <form id="reminderForm">
+                    <div class="mb-3">
+                        <label for="reminderType" class="form-label">{{ t('debtors_reminder_type', default='Reminder Type') }}</label>
+                        <select class="form-select" id="reminderType" required {% if not can_interact %}disabled{% endif %}>
+                            <option value="sms">{{ t('general_sms', default='SMS') }}</option>
+                            <option value="whatsapp">{{ t('general_whatsapp', default='WhatsApp') }}</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="reminderMessage" class="form-label">{{ t('general_message', default='Message') }}</label>
+                        <textarea class="form-control" id="reminderMessage" rows="4" required {% if not can_interact %}disabled{% endif %}></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="sendReminderBtn"
+                        {% if not can_interact %}disabled data-bs-toggle="tooltip" title="{{ t('debtors_subscription_required', default='Your trial or subscription has expired. Please subscribe to send reminders.') }}"{% endif %}>
+                    {{ t('debtors_send_reminder', default='Send Reminder') }}
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {{ t('general_cancel', default='Cancel') }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Snooze Modal -->
+<div class="modal fade" id="snoozeModal" tabindex="-1" aria-labelledby="snoozeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="snoozeModalLabel">{{ t('debtors_snooze_reminder', default='Snooze Reminder') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ t('general_close', default='Close') }}"></button>
+            </div>
+            <div class="modal-body">
+                <form id="snoozeForm">
+                    <div class="mb-3">
+                        <label for="snoozeDays" class="form-label">{{ t('debtors_snooze_duration', default='Snooze Duration') }}</label>
+                        <select class="form-select" id="snoozeDays" required {% if not can_interact %}disabled{% endif %}>
+                            <option value="1">{{ t('general_1_day', default='1 Day') }}</option>
+                            <option value="3">{{ t('general_3_days', default='3 Days') }}</option>
+                            <option value="7">{{ t('general_7_days', default='7 Days') }}</option>
+                            <option value="14">{{ t('general_14_days', default='14 Days') }}</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="snoozeReminderBtn"
+                        {% if not can_interact %}disabled data-bs-toggle="tooltip" title="{{ t('debtors_subscription_required', default='Your trial or subscription has expired. Please subscribe to send reminders.') }}"{% endif %}>
+                    {{ t('debtors_snooze', default='Snooze') }}
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {{ t('general_cancel', default='Cancel') }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+
+    let currentDebtData = {
+        _id: '{{ debtor._id }}',
+        name: '{{ debtor.name }}',
+        amount_owed: '{{ debtor.amount_owed }}',
+        contact: '{{ debtor.contact or '' }}',
+        created_at: '{{ format_date(debtor.created_at) }}'
+    };
+
+    // Download IOU button functionality
+    document.querySelectorAll('.download-iou-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const debtId = button.dataset.id;
+            document.getElementById('confirmDownloadIouBtn').setAttribute('href', `/debtors/generate_iou/${debtId}`);
+            new bootstrap.Modal(document.getElementById('downloadIouModal')).show();
+        });
+    });
+
+    // Share IOU functionality
+    document.querySelectorAll('.share-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const debtId = button.dataset.id;
+            const contact = button.dataset.contact;
+            if (!contact) {
+                alert('{{ t('debtors_no_contact', default='No contact provided for sharing') }}');
+                return;
+            }
+            fetch(`/debtors/share/${debtId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.open(data.whatsapp_link, '_blank');
+                    } else {
+                        alert('{{ t('debtors_share_failed', default='Failed to share IOU') }}: ' + (data.message || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error sharing IOU:', error);
+                    alert('{{ t('debtors_share_error', default='Error sharing IOU') }}');
+                });
+        });
+    });
+
+    // Reminder button functionality
+    document.querySelectorAll('.reminder-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const name = button.dataset.name;
+            const amount = parseFloat(button.dataset.amount).toLocaleString();
+            const date = button.dataset.date;
+            const contact = button.dataset.contact;
+            
+            currentDebtData = {
+                _id: button.dataset.id,
+                name,
+                amount_owed: button.dataset.amount,
+                contact,
+                created_at: date
+            };
+            
+            const defaultMessage = `Hi ${name}, just a reminder you owe {{ t('general_currency_symbol', default='₦') }}${amount} recorded on FiCore Records (${date}). Please settle soon.`;
+            document.getElementById('reminderMessage').value = defaultMessage;
+            
+            new bootstrap.Modal(document.getElementById('reminderModal')).show();
+        });
+    });
+
+    // Send reminder functionality
+    document.getElementById('sendReminderBtn').addEventListener('click', function() {
+        if (!currentDebtData) return;
+        
+        const reminderType = document.getElementById('reminderType').value;
+        const message = document.getElementById('reminderMessage').value;
+        
+        if (!message.trim()) {
+            alert('{{ t('general_message_required', default='Message is required') }}');
+            return;
+        }
+        
+        this.disabled = true;
+        this.textContent = '{{ t('general_sending', default='Sending...') }}';
+        
+        fetch('/debtors/send_reminder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                debtId: currentDebtData._id,
+                recipient: currentDebtData.contact,
+                message,
+                type: reminderType
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('{{ t('debtors_reminder_sent_success', default='Reminder sent successfully') }}');
+                bootstrap.Modal.getInstance(document.getElementById('reminderModal')).hide();
+                location.reload();
+            } else {
+                alert('{{ t('debtors_reminder_send_failed', default='Failed to send reminder') }}: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error sending reminder:', error);
+            alert('{{ t('debtors_reminder_send_error', default='Error sending reminder') }}');
+        })
+        .finally(() => {
+            this.disabled = false;
+            this.textContent = '{{ t('debtors_send_reminder', default='Send Reminder') }}';
+        });
+    });
+
+    // Snooze button functionality
+    document.querySelectorAll('.snooze-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            currentDebtData = {
+                _id: button.dataset.id,
+                name: button.dataset.name
+            };
+            
+            new bootstrap.Modal(document.getElementById('snoozeModal')).show();
+        });
+    });
+
+    // Snooze reminder functionality
+    document.getElementById('snoozeReminderBtn').addEventListener('click', function() {
+        if (!currentDebtData) return;
+        
+        const snoozeDays = parseInt(document.getElementById('snoozeDays').value);
+        
+        this.disabled = true;
+        this.textContent = '{{ t('general_snoozing', default='Snoozing...') }}';
+        
+        fetch('/debtors/send_reminder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                debtId: currentDebtData._id,
+                snooze_days: snoozeDays
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('{{ t('debtors_snooze_set_success', default='Snooze set successfully') }}');
+                bootstrap.Modal.getInstance(document.getElementById('snoozeModal')).hide();
+                location.reload();
+            } else {
+                alert('{{ t('debtors_snooze_set_failed', default='Failed to set snooze') }}: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error setting snooze:', error);
+            alert('{{ t('debtors_snooze_set_error', default='Error setting snooze') }}');
+        })
+        .finally(() => {
+            this.disabled = false;
+            this.textContent = '{{ t('debtors_snooze', default='Snooze') }}';
+        });
+    });
+});
+</script>
+{% endblock %}

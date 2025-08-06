@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+{% block title %}{{ t('general_terms_title', default='Terms of Service') }}{% endblock %}
+{% block content %}
+<div class="terms-page py-5">
+    <div class="container">
+        <h1 class="text-center mb-4">{{ t('general_terms_title', default='Terms of Service') }}</h1>
+        <p class="text-center mb-5">{{ t('general_terms_intro', default='By using FiCore tools, you agree to our Terms of Service.') }}</p>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <p>{{ t('general_terms_content', default='These Terms govern your use of FiCore tools. You agree to use our services lawfully and responsibly. Your continued use of our services constitutes acceptance of these Terms.') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+{# No additional scripts needed, dark mode and language toggle are handled globally in base.html #}
+{% endblock %}

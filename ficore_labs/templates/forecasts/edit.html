@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}{{ t('forecasts_edit_title', default='Edit Forecast') }} - FiCore{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="page-title">
+        <h1>{{ t('forecasts_edit_title', default='Edit Forecast') }}</h1>
+        <small class="subtext">{{ t('forecasts_subtitle', default='Plan Your Financial Future') }}</small>
+    </div>
+    <form action="{{ url_for('forecasts.edit', id=forecast._id) }}" method="POST" class="row g-3" {% if not can_interact %}disabled{% endif %}>
+        {{ form.hidden_tag() }}
+        <div class="col-12">
+            <label for="title" class="form-label">{{ t('forecasts_title', default='Forecast Title') }}</label>
+            {{ form.title(class="form-control", required=True, disabled=not can_interact) }}
+            {% if form.title.errors %}
+                <p class="text-danger mt-1">{{ form.title.errors[0] }}</p>
+            {% endif %}
+        </div>
+        <div class="col-12">
+            <label for="projected_revenue" class="form-label">{{ t('forecasts_projected_revenue', default='Projected Revenue') }}</label>
+            {{ form.projected_revenue(class="form-control", type="number", step="0.01", required=True, disabled=not can_interact) }}
+            {% if form.projected_revenue.errors %}
+                <p class="text-danger mt-1">{{ form.projected_revenue.errors[0] }}</p>
+            {% endif %}
+        </div>
+        <div class="col-12">
+            <label for="projected_expenses" class="form-label">{{ t('forecasts_projected_expenses', default='Projected Expenses') }}</label>
+            {{ form.projected_expenses(class="form-control", type="number", step="0.01", required=True, disabled=not can_interact) }}
+            {% if form.projected_expenses.errors %}
+                <p class="text-danger mt-1">{{ form.projected_expenses.errors[0] }}</p>
+            {% endif %}
+        </div>
+        <div class="col-12">
+            <label for="forecast_date" class="form-label">{{ t('forecasts_date', default='Forecast Date') }}</label>
+            {{ form.forecast_date(class="form-control", type="date", required=True, disabled=not can_interact) }}
+            {% if form.forecast_date.errors %}
+                <p class="text-danger mt-1">{{ form.forecast_date.errors[0] }}</p>
+            {% endif %}
+        </div>
+        <div class="col-12">
+            <label for="description" class="form-label">{{ t('general_description', default='Description') }}</label>
+            {{ form.description(class="form-control", disabled=not can_interact) }}
+            {% if form.description.errors %}
+                <p class="text-danger mt-1">{{ form.description.errors[0] }}</p>
+            {% endif %}
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary w-100" 
+                    {% if not can_interact %}disabled data-bs-toggle="tooltip" title="{{ t('forecasts_subscription_required', default='Your trial or subscription has expired. Please subscribe to edit forecasts.') }}"{% endif %}>
+                {{ t('general_save', default='Save') }}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+{% block page_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+});
+</script>
+{% endblock %}

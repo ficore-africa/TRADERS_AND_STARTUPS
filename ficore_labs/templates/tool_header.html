@@ -1,0 +1,117 @@
+<div class="tool-header mb-4">
+    <div class="container-fluid">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item">
+                            <a href="{{ url_for('personal.dashboard.index') }}" class="text-decoration-none">
+                                <i class="fas fa-home"></i> {{ t('general_dashboard', default='Dashboard') }}
+                            </a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <span class="text-muted">{{ t('general_personal_finance', default='Personal Finance') }}</span>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">
+                            {{ tool_title }}
+                        </li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="btn-group" role="group" aria-label="{{ t('general_personal_finance_tools', default='Personal Finance Tools') }}">
+                    <a href="{{ url_for('personal.budget.main') }}" class="btn btn-outline-primary btn-sm {{ 'active' if request.endpoint == 'personal.budget.main' else '' }}" 
+                       data-bs-toggle="tooltip" title="{{ t('budget_title', default='Budget Planner') }}">
+                        <i class="fas fa-calculator"></i>
+                    </a>
+                    <a href="{{ url_for('personal.bill.main') }}" class="btn btn-outline-primary btn-sm {{ 'active' if request.endpoint == 'personal.bill.main' else '' }}" 
+                       data-bs-toggle="tooltip" title="{{ t('bill_title', default='Bill Manager') }}">
+                        <i class="fas fa-file-invoice"></i>
+                    </a>
+                    <a href="{{ url_for('personal.emergency_fund.main') }}" class="btn btn-outline-primary btn-sm {{ 'active' if request.endpoint == 'personal.emergency_fund.main' else '' }}" 
+                       data-bs-toggle="tooltip" title="{{ t('emergency_fund_title', default='Emergency Fund') }}">
+                        <i class="fas fa-shield-alt"></i>
+                    </a>
+                    <a href="{{ url_for('personal.financial_health.main') }}" class="btn btn-outline-primary btn-sm {{ 'active' if request.endpoint == 'personal.financial_health.main' else '' }}" 
+                       data-bs-toggle="tooltip" title="{{ t('financial_health_title', default='Health Score') }}">
+                        <i class="fas fa-heartbeat"></i>
+                    </a>
+                    <a href="{{ url_for('personal.net_worth.main') }}" class="btn btn-outline-primary btn-sm {{ 'active' if request.endpoint == 'personal.net_worth.main' else '' }}" 
+                       data-bs-toggle="tooltip" title="{{ t('net_worth_title', default='Net Worth') }}">
+                        <i class="fas fa-chart-line"></i>
+                    </a>
+                    <a href="{{ url_for('learning_hub.main') }}" class="btn btn-outline-primary btn-sm {{ 'active' if request.endpoint == 'learning_hub.main' else '' }}" 
+                       data-bs-toggle="tooltip" title="{{ t('learning_hub_title', default='Learning Hub') }}">
+                        <i class="fas fa-graduation-cap"></i>
+                    </a>
+                    <a href="{{ url_for('personal.quiz.main') }}" class="btn btn-outline-primary btn-sm {{ 'active' if request.endpoint == 'personal.quiz.main' else '' }}" 
+                       data-bs-toggle="tooltip" title="{{ t('quiz_title', default='Financial Quiz') }}">
+                        <i class="fas fa-question-circle"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.tool-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1rem 0;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.tool-header .breadcrumb {
+    background: transparent;
+    margin-bottom: 0;
+}
+
+.tool-header .breadcrumb-item a {
+    color: rgba(255, 255, 255, 0.8);
+    transition: color 0.3s ease;
+}
+
+.tool-header .breadcrumb-item a:hover {
+    color: white;
+}
+
+.tool-header .breadcrumb-item.active {
+    color: white;
+    font-weight: 600;
+}
+
+.tool-header .btn-outline-primary {
+    border-color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+}
+
+.tool-header .btn-outline-primary:hover,
+.tool-header .btn-outline-primary.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .tool-header .btn-group {
+        flex-wrap: wrap;
+    }
+    
+    .tool-header .btn-sm {
+        margin: 0.1rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}{{ t('reports_debtors_creditors', default='Debtors/Creditors Report') }} - Business Finance{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>{{ t('reports_debtors_creditors', default='Debtors/Creditors Report') }}</h1>
+    <small class="text-muted">{{ t('debtors_creditors_description', default='Track outstanding receivables and payables to manage cash flow effectively.') }}</small>
+    
+    {% if not can_interact %}
+    <div class="alert alert-warning mt-3">
+        {{ t('read_only_mode', default='Your trial has expired. You can view your data but cannot generate new reports. Subscribe to continue.') }}
+        <a href="{{ url_for('subscribe.index') }}" class="btn btn-primary btn-sm ms-2">{{ t('subscribe_now', default='Subscribe Now') }}</a>
+    </div>
+    {% endif %}
+
+    {% if can_interact %}
+    <form method="POST" class="mt-4">
+        {{ form.hidden_tag() }}
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label for="{{ form.start_date.id }}" class="form-label">{{ form.start_date.label }}</label>
+                {{ form.start_date(class="form-control") }}
+            </div>
+            <div class="col-md-4">
+                <label for="{{ form.end_date.id }}" class="form-label">{{ form.end_date.label }}</label>
+                {{ form.end_date(class="form-control") }}
+            </div>
+            <div class="col-md-4">
+                <label for="{{ form.format.id }}" class="form-label">{{ t('report_format', default='Format') }}</label>
+                {{ form.format(class="form-control") }}
+            </div>
+            <div class="col-md-12 mt-3">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </div>
+    </form>
+    {% endif %}
+
+    {% if records %}
+    <div class="table-responsive mt-4">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>{{ t('general_date', default='Date') }}</th>
+                    <th>{{ t('general_name', default='Name') }}</th>
+                    <th>{{ t('general_type', default='Type') }}</th>
+                    <th>{{ t('general_amount_owed', default='Amount Owed') }}</th>
+                    <th>{{ t('general_description', default='Description') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ record.created_at }}</td>
+                    <td>{{ record.name }}</td>
+                    <td>{{ t(record.type, default=record.type) }}</td>
+                    <td>{{ record.amount_owed | format_currency }}</td>
+                    <td>{{ record.description }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="3">{{ t('reports_total_debtors', default='Total Debtors') }}</th>
+                    <th>{{ records | selectattr('type', 'equalto', 'debtor') | sum(attribute='amount_owed') | format_currency }}</th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <th colspan="3">{{ t('reports_total_creditors', default='Total Creditors') }}</th>
+                    <th>{{ records | selectattr('type', 'equalto', 'creditor') | sum(attribute='amount_owed') | format_currency }}</th>
+                    <th></th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    {% else %}
+    <p class="mt-4 text-muted">{{ t('no_data', default='No debtor/creditor data available for the selected period.') }}</p>
+    {% endif %}
+</div>
+{% endblock %}

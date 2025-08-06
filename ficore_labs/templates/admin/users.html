@@ -1,0 +1,110 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script>{% extends "base.html" %}
+{% block title %}
+{{ trans('admin_manage_users', default='Manage Users') | escape }}
+{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">{{ trans('admin_manage_users', default='Manage Users') | escape }}</h1>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary mb-4">{{ trans('general_back_to_dashboard', default='Back to Dashboard') | escape }}</a>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message | escape }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    {% if not (current_user.is_trial_active or current_user.is_subscribed) %}
+        <div class="alert alert-warning">
+            {{ trans('subscription_required', default='Your trial or subscription has expired. Please subscribe to continue managing users.') }}
+            <a href="{{ url_for('personal_bp.subscribe') }}" class="btn btn-primary">{{ trans('subscribe_now', default='Subscribe Now') }}</a>
+        </div>
+    {% endif %}
+    {% if users %}
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>{{ trans('general_username', default='Username') | escape }}</th>
+                        <th>{{ trans('general_email', default='Email') | escape }}</th>
+                        <th>{{ trans('general_role', default='Role') | escape }}</th>
+                        <th>{{ trans('subscription_status', default='Subscription Status') | escape }}</th>
+                        <th>{{ trans('general_status', default='Status') | escape }}</th>
+                        {% if current_user.is_trial_active or current_user.is_subscribed %}
+                        <th>{{ trans('general_actions', default='Actions') | escape }}</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>{{ user._id | escape }}</td>
+                            <td>{{ user.email | escape }}</td>
+                            <td>{{ trans('general_' + user.role, default=user.role.capitalize()) | escape }}</td>
+                            <td>{{ 'Subscribed' if user.is_subscribed and user.is_trial_active else 'Trial' if user.is_trial and user.is_trial_active else 'Expired' | escape }}</td>
+                            <td>{{ trans('admin_suspended', default='Suspended') if user.get('suspended') else trans('admin_active', default='Active') | escape }}</td>
+                            {% if current_user.is_trial_active or current_user.is_subscribed %}
+                            <td>
+                                {% if not user.get('suspended') %}
+                                    <form action="{{ url_for('admin.suspend_user', user_id=user._id) }}" method="POST" class="d-inline">
+                                        <button type="submit" class="btn btn-warning btn-sm">{{ trans('admin_suspend', default='Suspend') | escape }}</button>
+                                    </form>
+                                {% endif %}
+                                <form action="{{ url_for('admin.delete_user', user_id=user._id) }}" method="POST" class="d-inline">
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('{{ trans('general_confirm_delete', default='Are you sure?') | escape }}')">{{ trans('general_delete', default='Delete') | escape }}</button>
+                                </form>
+                            </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <p class="text-muted">{{ trans('admin_no_users', default='No users found') | escape }}</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

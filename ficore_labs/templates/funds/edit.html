@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}{{ t('funds_edit_title', default='Edit Fund') }} - FiCore{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="page-title">
+        <h1>{{ t('funds_edit_title', default='Edit Fund') }}</h1>
+        <small class="subtext">{{ t('funds_subtitle', default='Track Your Funds') }}</small> <!-- Updated subtitle -->
+    </div>
+    <form action="{{ url_for('funds.edit', id=fund._id) }}" method="POST" class="row g-3" {% if not can_interact %}disabled{% endif %}>
+        {{ form.hidden_tag() }}
+        <div class="col-12">
+            <label for="source" class="form-label">{{ t('funds_source', default='Funding Source') }}</label>
+            {{ form.source(class="form-control", required=True, disabled=not can_interact) }}
+            {% if form.source.errors %}
+                <p class="text-danger mt-1">{{ form.source.errors[0] }}</p>
+            {% endif %}
+        </div>
+        <div class="col-12">
+            <label for="amount" class="form-label">{{ t('funds_amount', default='Amount') }}</label>
+            {{ form.amount(class="form-control", type="number", step="0.01", required=True, disabled=not can_interact) }}
+            {% if form.amount.errors %}
+                <p class="text-danger mt-1">{{ form.amount.errors[0] }}</p>
+            {% endif %}
+        </div>
+        <div class="col-12">
+            <label for="category" class="form-label">{{ t('funds_category', default='Category') }}</label>
+            {{ form.category(class="form-select", required=True, disabled=not can_interact) }}
+            {% if form.category.errors %}
+                <p class="text-danger mt-1">{{ form.category.errors[0] }}</p>
+            {% endif %}
+        </div>
+        <div class="col-12">
+            <label for="description" class="form-label">{{ t('general_description', default='Description') }}</label>
+            {{ form.description(class="form-control", disabled=not can_interact) }}
+            {% if form.description.errors %}
+                <p class="text-danger mt-1">{{ form.description.errors[0] }}</p>
+            {% endif %}
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary w-100" 
+                    {% if not can_interact %}disabled data-bs-toggle="tooltip" title="{{ t('funds_subscription_required', default='Your trial or subscription has expired. Please subscribe to edit funds.') }}"{% endif %}>
+                {{ t('general_save', default='Save') }}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+{% block page_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+});
+</script>
+{% endblock %}

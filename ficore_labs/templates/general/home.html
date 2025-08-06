@@ -1,0 +1,448 @@
+{% extends 'base.html' %}
+{% block title %}{{ t('general_business_home', default='Business & Agent Home') | e }}{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <noscript>
+        <div style="padding: 1rem; background: #ffebee; border: 1px solid #ef5350; margin-bottom: 1rem;">
+            {{ t('general_javascript_required', default='JavaScript is required to use this dashboard. Please enable it in your browser.') | e }}
+        </div>
+    </noscript>
+
+    {% if current_user.is_authenticated %}
+        <!-- Financial Snapshots -->
+        <section class="section-card financial-snapshots">
+            <h3 class="section-title">{{ t('general_snapshots', default='Financial Snapshots') | e }}</h3>
+            <div class="summary-cards">
+                <div class="summary-card debt-card">
+                    <div class="card-header d-flex align-items-center gap-3">
+                        <i class="bi bi-arrow-up-circle card-icon text-danger"></i>
+                        <span class="fw-bold">{{ t('general_i_owe', default='I Owe') | e }}</span>
+                    </div>
+                    <div class="card-amount text-danger mt-3" id="totalIOwe">
+                        <span class="currency-symbol">₦</span>
+                        <span class="amount-value" data-amount="{{ total_i_owe }}">{{ format_currency(total_i_owe) }}</span>
+                    </div>
+                </div>
+                <div class="summary-card credit-card">
+                    <div class="card-header d-flex align-items-center gap-3">
+                        <i class="bi bi-arrow-down-circle card-icon text-success"></i>
+                        <span class="fw-bold">{{ t('general_i_am_owed', default='I Am Owed') | e }}</span>
+                    </div>
+                    <div class="card-amount text-success mt-3" id="totalIAmOwed">
+                        <span class="currency-symbol">₦</span>
+                        <span class="amount-value" data-amount="{{ total_i_am_owed }}">{{ format_currency(total_i_am_owed) }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="net-position-card">
+                <div class="net-position-info">
+                    <span class="net-label fw-bold">{{ t('general_net_position', default='Net Position') | e }}:</span>
+                    <span class="net-amount" id="netPosition" data-amount="{{ total_i_am_owed - total_i_owe }}">₦{{ format_currency(total_i_am_owed - total_i_owe) }}</span>
+                    <span class="net-status" id="netStatus">({{ t('general_balanced', default='Balanced') if (total_i_am_owed - total_i_owe) == 0 else t('general_owed_to_you', default='Owed to you') if (total_i_am_owed - total_i_owe) > 0 else t('general_you_owe', default='You owe') | e }})</span>
+                </div>
+                <a href="{{ url_for('business.view_data') | e }}" class="btn btn-primary btn-sm" aria-label="{{ t('general_details', default='Details') | e }}">
+                    {{ t('general_details', default='Details') | e }}
+                </a>
+            </div>
+            <div class="mt-3 text-end">
+                <button class="btn btn-link" onclick="toggleAmountVisibility()" data-bs-toggle="tooltip" data-bs-title="{{ t('general_toggle_visibility', default='Toggle amount visibility') | e }}">
+                    <i id="visibilityIcon" class="bi bi-eye"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Cashflow Overview -->
+        <div class="section-card financial-snapshots">
+            <p class="spacer">{{ t('general_cashflow_overview', default='Cashflow Overview') | e }}</p>
+            <div class="stat-cards-container">
+                <div class="stat-card net-cashflow">
+                    <div class="snapshot-icon">
+                        <i class="bi bi-graph-up text-success"></i>
+                    </div>
+                    <div class="snapshot-info">
+                        <div class="snapshot-label fw-bold">{{ t('general_net_cashflow_mtd', default='Net Cashflow (MTD)') | e }}</div>
+                        <div class="stat-card-value" id="netCashflow" data-original-amount="{{ net_cashflow }}">₦{{ format_currency(net_cashflow) }}</div>
+                    </div>
+                </div>
+                <div class="stat-card receipts">
+                    <div class="snapshot-icon">
+                        <i class="bi bi-arrow-down-circle text-success"></i>
+                    </div>
+                    <div class="snapshot-info">
+                        <div class="snapshot-label fw-bold">{{ t('general_receipts_mtd', default='Receipts (MTD)') | e }}</div>
+                        <div class="stat-card-value" id="totalReceipts" data-original-amount="{{ total_receipts }}">₦{{ format_currency(total_receipts) }}</div>
+                    </div>
+                </div>
+                <div class="stat-card payments">
+                    <div class="snapshot-icon">
+                        <i class="bi bi-arrow-up-circle text-danger"></i>
+                    </div>
+                    <div class="snapshot-info">
+                        <div class="snapshot-label fw-bold">{{ t('general_payments_mtd', default='Payments (MTD)') | e }}</div>
+                        <div class="stat-card-value" id="totalPayments" data-original-amount="{{ total_payments }}">₦{{ format_currency(total_payments) }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="section-card recent-activity">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="section-title mb-0">{{ t('general_recent_activity', default='Recent Activity') | e }}</h3>
+                <a href="#" class="btn btn-link btn-sm p-0 text-decoration-none" id="viewAllActivities" onclick="toggleRecentActivities()">
+                    {{ t('general_view_all', default='View All') | e }}
+                </a>
+            </div>
+            <div id="recentActivityList">
+                <div class="recent-activity-card">
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="bi bi-info-circle text-muted"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-description">{{ t('general_no_recent_activity', default='No recent activity') | e }}</div>
+                            <div class="activity-time text-muted">{{ t('general_start_adding', default='Start by adding a debt or transaction') | e }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <section class="quick-actions-section">
+            <h3 class="quick-actions-heading">{{ t('general_quick_actions', default='Quick Actions') | e }}</h3>
+            <div class="quick-actions">
+                {% for tool in tools_for_template %}
+                    {% if not is_read_only or tool.url == url_for('business.view_data') or tool.url == url_for('subscribe_bp.subscribe') %}
+                        <a href="{{ tool.url | default('#') | e }}" class="quick-action-card {{ tool.class | default('') }} text-decoration-none {{ 'disabled' if is_read_only and tool.url != url_for('business.view_data') and tool.url != url_for('subscribe_bp.subscribe') }}" aria-label="{{ t(tool.label_key, default=tool.label) | e }}" {% if is_read_only and tool.url != url_for('business.view_data') and tool.url != url_for('subscribe_bp.subscribe') %}aria-disabled="true"{% endif %}>
+                            {% if tool.badge %}
+                                <span class="badge bg-danger position-absolute top-0 end-0 translate-middle rounded-pill">{{ tool.badge }}</span>
+                            {% endif %}
+                            <i class="bi {{ tool.icon | default('bi-circle') | e }} action-icon"></i>
+                            <div class="action-label">{{ t(tool.label_key, default=tool.label) | e }}</div>
+                        </a>
+                    {% endif %}
+                {% endfor %}
+                {% if not is_read_only %}
+                    <a href="{{ url_for('users.logout') | e }}" class="quick-action-card text-decoration-none" aria-label="{{ t('general_logout', default='Logout') | e }}">
+                        <i class="bi bi-box-arrow-right action-icon"></i>
+                        <div class="action-label">{{ t('general_logout', default='Logout') | e }}</div>
+                    </a>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- Explore Features -->
+        <div class="section-card explore-section">
+            <h3 class="section-title">{{ t('general_explore_features', default='Explore Features') | e }}</h3>
+            {% for feature in explore_features_for_template %}
+                {% if not is_read_only or feature.url == url_for('business.view_data') %}
+                    <a href="{{ feature.url | default('#') | e }}" class="explore-card text-decoration-none {{ 'disabled' if is_read_only and feature.url != url_for('business.view_data') }}" aria-label="{{ t(feature.label_key, default=feature.label) | e }}" {% if is_read_only and feature.url != url_for('business.view_data') %}aria-disabled="true"{% endif %}>
+                        <div class="explore-card-icon">
+                            <i class="bi {{ feature.icon | default('bi-circle') | e }} text-primary"></i>
+                        </div>
+                        <div class="explore-card-text">
+                            <h4>{{ t(feature.label_key, default=feature.label) | e }}</h4>
+                            <p class="text-muted">{{ t(feature.description_key, default=feature.description) | e }}</p>
+                        </div>
+                    </a>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- Promotion Section -->
+        <section class="section-card promotion-card">
+            <div class="promotion-content">
+                <img src="/static/img/promotion_banner.png" alt="{{ t('general_special_offer', default='Special Offer') | e }}" class="promotion-image">
+                <div class="promotion-text">
+                    <h4>{{ t('general_special_announcement_title', default='Special Announcement!') | e }}</h4>
+                    <p>{{ t('general_special_announcement_description', default='Gain exclusive insights to optimize your business finances today!') | e }}</p>
+                    <a href="{{ url_for('general_bp.business_finance_tips') | e }}" class="btn btn-sm btn-outline-light">{{ t('general_learn_more', default='Learn More') | e }}</a>
+                </div>
+            </div>
+        </section>
+    {% endif %}
+</div>
+
+<style>
+.spacer { margin: 1.5rem 0; }
+.quick-action-card.disabled { opacity: 0.5; pointer-events: none; }
+.explore-card.disabled { opacity: 0.5; pointer-events: none; }
+.promotion-card { padding: 1.5rem; background: #f8f9fa; border-radius: 0.5rem; }
+.promotion-content { display: flex; align-items: center; gap: 1rem; }
+.promotion-image { width: 100px; height: 100px; object-fit: cover; border-radius: 0.25rem; }
+.promotion-text { flex-grow: 1; }
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(tooltipTriggerEl => {
+        new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Debug icons
+    document.querySelectorAll('.bi').forEach(icon => {
+        if (!icon.className.includes('bi-')) {
+            console.warn('Invalid or missing Bootstrap Icon class:', icon.className);
+        }
+    });
+
+    // Debug navigation duplication
+    const topNav = document.querySelector('.fintech-top-header');
+    const bottomNav = document.querySelector('.bottom-nav');
+    if (topNav && bottomNav) {
+        const topNavItems = topNav.querySelectorAll('.nav-item');
+        if (topNavItems.length > 0) {
+            console.warn('Unexpected navigation items in top-header:', topNavItems);
+        }
+    }
+
+    {% if current_user.is_authenticated %}
+        // Load financial data and recent activity
+        loadFinancialSummary();
+        loadRecentActivity();
+    {% endif %}
+});
+
+{% if current_user.is_authenticated %}
+let amountsVisible = true;
+let allActivities = [];
+let isShowingAllActivities = false;
+
+// Translation strings
+const translations = {
+    just_now: '{{ t("general_just_now", default="Just now") | e }}',
+    minutes_ago: '{{ t("general_minutes_ago", default="m ago") | e }}',
+    hours_ago: '{{ t("general_hours_ago", default="h ago") | e }}',
+    days_ago: '{{ t("general_days_ago", default="d ago") | e }}',
+    owed_to_you: '{{ t("general_owed_to_you", default="Owed to you") | e }}',
+    you_owe: '{{ t("general_you_owe", default="You owe") | e }}',
+    balanced: '{{ t("general_balanced", default="Balanced") | e }}',
+    no_recent_activity: '{{ t("general_no_recent_activity", default="No recent activity") | e }}',
+    start_by_adding_debt: '{{ t("general_start_adding", default="Start by adding a debt or transaction") | e }}',
+    view_all: '{{ t("general_view_all", default="View All") | e }}',
+    view_less: '{{ t("general_view_less", default="View Less") | e }}'
+};
+
+// Load financial data
+function loadFinancialSummary() {
+    Promise.all([
+        fetch('{{ url_for("business.debt_summary") | e }}', { credentials: 'include' })
+            .then(r => {
+                if (!r.ok) throw new Error('Debt summary fetch failed: ' + r.status);
+                return r.json();
+            })
+            .catch(error => {
+                console.error('Debt summary fetch error:', error);
+                return { totalIOwe: 0, totalIAmOwed: 0 };
+            }),
+        fetch('{{ url_for("business.cashflow_summary") | e }}', { credentials: 'include' })
+            .then(r => {
+                if (!r.ok) throw new Error('Cashflow summary fetch failed: ' + r.status);
+                return r.json();
+            })
+            .catch(error => {
+                console.error('Cashflow summary fetch error:', error);
+                // Preserve server-side values
+                return null;
+            })
+    ]).then(([debtData, cashflowData]) => {
+        console.log('Debt summary data:', debtData);
+        console.log('Cashflow summary data:', cashflowData);
+        updateDebtSummary(debtData);
+        if (cashflowData && 'totalPayments' in cashflowData && !isNaN(cashflowData.totalPayments)) {
+            updateCashflowSummary(cashflowData);
+        } else {
+            console.warn('Skipping cashflow update due to invalid or missing data');
+        }
+    }).catch(error => {
+        console.error('Error loading financial data:', error);
+    });
+}
+
+// Load recent activity
+function loadRecentActivity() {
+    fetch('{{ url_for("business.recent_activity") | e }}', { credentials: 'include' })
+        .then(response => {
+            if (!response.ok) throw new Error('Recent activity fetch failed: ' + response.status);
+            return response.json();
+        })
+        .then(activities => {
+            allActivities = activities;
+            renderRecentActivities(isShowingAllActivities ? activities : activities.slice(0, 2));
+            updateViewAllLink();
+        }).catch(error => {
+            console.error('Error loading recent activity:', error);
+            renderRecentActivities([]);
+        });
+}
+
+// Render recent activities
+function renderRecentActivities(activities) {
+    const activityList = document.getElementById('recentActivityList');
+    if (activities && activities.length > 0) {
+        activityList.innerHTML = activities.map(activity => `
+            <div class="recent-activity-card">
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="bi ${activity.icon || getActivityIcon(activity.type)} ${getActivityColor(activity.type)}"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-description fw-semibold">${activity.description}</div>
+                        <div class="activity-time text-muted">${formatTimeAgo(activity.timestamp)}</div>
+                    </div>
+                    ${activity.amount ? `<div class="activity-amount text-nowrap ms-2 fw-bold">${format_currency(activity.amount)}</div>` : ''}
+                </div>
+            </div>
+        `).join('');
+    } else {
+        activityList.innerHTML = `
+            <div class="recent-activity-card">
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="bi bi-info-circle text-muted"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-description fw-semibold">${translations.no_recent_activity}</div>
+                        <div class="activity-time text-muted">${translations.start_by_adding_debt}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Toggle between showing first two and all activities
+function toggleRecentActivities() {
+    isShowingAllActivities = !isShowingAllActivities;
+    renderRecentActivities(isShowingAllActivities ? allActivities : allActivities.slice(0, 2));
+    updateViewAllLink();
+}
+
+// Update the "View All" link text
+function updateViewAllLink() {
+    const viewAllLink = document.getElementById('viewAllActivities');
+    viewAllLink.textContent = isShowingAllActivities ? translations.view_less : translations.view_all;
+}
+
+function updateDebtSummary(data) {
+    const totalIOwe = data.totalIOwe || 0;
+    const totalIAmOwed = data.totalIAmOwed || 0;
+    const netPosition = totalIAmOwed - totalIOwe;
+
+    document.querySelector('#totalIOwe .amount-value').textContent = format_currency(totalIOwe);
+    document.querySelector('#totalIOwe .amount-value').dataset.amount = totalIOwe;
+
+    document.querySelector('#totalIAmOwed .amount-value').textContent = format_currency(totalIAmOwed);
+    document.querySelector('#totalIAmOwed .amount-value').dataset.amount = totalIAmOwed;
+
+    const netPositionEl = document.getElementById('netPosition');
+    const netStatusEl = document.getElementById('netStatus');
+
+    netPositionEl.textContent = '₦' + format_currency(Math.abs(netPosition));
+    netPositionEl.dataset.amount = netPosition;
+
+    if (netPosition > 0) {
+        netPositionEl.className = 'net-amount text-success';
+        netStatusEl.textContent = `(${translations.owed_to_you})`;
+        netStatusEl.className = 'net-status text-success';
+    } else if (netPosition < 0) {
+        netPositionEl.className = 'net-amount text-danger';
+        netStatusEl.textContent = `(${translations.you_owe})`;
+        netStatusEl.className = 'net-status text-danger';
+    } else {
+        netPositionEl.className = 'net-amount text-muted';
+        netStatusEl.textContent = `(${translations.balanced})`;
+        netStatusEl.className = 'net-status text-muted';
+    }
+}
+
+function updateCashflowSummary(data) {
+    console.log('Updating cashflow summary with:', data);
+    document.getElementById('netCashflow').textContent = '₦' + format_currency(data.netCashflow || document.getElementById('netCashflow').dataset.originalAmount);
+    document.getElementById('netCashflow').dataset.originalText = '₦' + format_currency(data.netCashflow || document.getElementById('netCashflow').dataset.originalAmount);
+    document.getElementById('totalReceipts').textContent = '₦' + format_currency(data.totalReceipts || document.getElementById('totalReceipts').dataset.originalAmount);
+    document.getElementById('totalReceipts').dataset.originalText = '₦' + format_currency(data.totalReceipts || document.getElementById('totalReceipts').dataset.originalAmount);
+    document.getElementById('totalPayments').textContent = '₦' + format_currency(data.totalPayments || document.getElementById('totalPayments').dataset.originalAmount);
+    document.getElementById('totalPayments').dataset.originalText = '₦' + format_currency(data.totalPayments || document.getElementById('totalPayments').dataset.originalAmount);
+}
+
+function getActivityIcon(type) {
+    const icons = {
+        'debtor_added': 'bi-person-plus',
+        'creditor_added': 'bi-person-plus',
+        'forecast_added': 'bi-file-earmark-plus',
+        'fund_added': 'bi-file-earmark-plus',
+        'investor_report_added': 'bi-file-earmark-plus',
+        'feedback_submitted': 'bi-star-fill',
+        'money_in': 'bi-arrow-down-circle',
+        'money_out': 'bi-arrow-up-circle'
+    };
+    return icons[type] || 'bi-circle';
+}
+
+function getActivityColor(type) {
+    const colors = {
+        'debtor_added': 'text-primary',
+        'creditor_added': 'text-primary',
+        'forecast_added': 'text-info',
+        'fund_added': 'text-info',
+        'investor_report_added': 'text-info',
+        'feedback_submitted': 'text-warning',
+        'money_in': 'text-success',
+        'money_out': 'text-danger'
+    };
+    return colors[type] || 'text-muted';
+}
+
+function formatTimeAgo(timestamp) {
+    const now = new Date();
+    const time = new Date(timestamp);
+    const diffInSeconds = Math.floor((now - time) / 1000);
+
+    if (diffInSeconds < 60) return translations.just_now;
+    if (diffInSeconds < 3600) return Math.floor(diffInSeconds / 60) + ' ' + translations.minutes_ago;
+    if (diffInSeconds < 86400) return Math.floor(diffInSeconds / 3600) + ' ' + translations.hours_ago;
+    return Math.floor(diffInSeconds / 86400) + ' ' + translations.days_ago;
+}
+
+window.toggleAmountVisibility = function() {
+    amountsVisible = !amountsVisible;
+    const icon = document.getElementById('visibilityIcon');
+    const amounts = document.querySelectorAll('.amount-value, .net-amount, .stat-card-value');
+
+    amounts.forEach(el => {
+        if (amountsVisible) {
+            if (el.classList.contains('amount-value')) {
+                el.textContent = format_currency(el.dataset.amount);
+            } else if (el.classList.contains('net-amount')) {
+                el.textContent = '₦' + format_currency(Math.abs(el.dataset.amount));
+            } else if (el.classList.contains('stat-card-value')) {
+                el.textContent = el.dataset.originalText || el.textContent;
+            }
+        } else {
+            if (!el.dataset.originalText) {
+                el.dataset.originalText = el.textContent;
+            }
+            el.textContent = '****';
+        }
+    });
+
+    icon.className = 'bi ' + (amountsVisible ? 'bi-eye' : 'bi-eye-slash');
+};
+
+function format_currency(value) {
+    if (!value && value !== 0) return '';
+    value = typeof value === "string" ? parseFloat(value) : value;
+    if (isNaN(value)) return '0';
+    return value.toLocaleString('en-NG', {maximumFractionDigits: 0});
+}
+{% endif %}
+</script>
+{% endblock %}

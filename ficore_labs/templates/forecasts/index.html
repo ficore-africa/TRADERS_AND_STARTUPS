@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+{% block title %}{{ t('forecasts_title', default='Financial Forecasts') }} - FiCore{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="page-title">
+        <h1>{{ t('forecasts_title', default='Financial Forecasts') }}</h1>
+        <small class="subtext">{{ t('forecasts_subtitle', default='Plan Your Financial Future') }}</small>
+    </div>
+    <div class="mb-4">
+        <a href="{{ url_for('forecasts.add') }}" 
+           class="btn btn-secondary" 
+           {% if not can_interact %}disabled data-bs-toggle="tooltip" title="{{ t('forecasts_subscription_required', default='Your trial or subscription has expired. Please subscribe to add forecasts.') }}"{% endif %}>
+            {{ t('forecasts_create_title', default='Add New Forecast') }}
+        </a>
+        <a href="{{ url_for('forecasts.manage') }}" 
+           class="btn btn-primary">
+            {{ t('forecasts_manage', default='Manage Forecasts') }}
+        </a>
+    </div>
+    {% if forecasts|length > 0 %}
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>{{ t('forecasts_title', default='Title') }}</th>
+                        <th>{{ t('forecasts_projected_revenue', default='Projected Revenue') }}</th>
+                        <th>{{ t('forecasts_projected_expenses', default='Projected Expenses') }}</th>
+                        <th>{{ t('forecasts_net_profit', default='Net Profit') }}</th>
+                        <th>{{ t('forecasts_date', default='Forecast Date') }}</th>
+                        <th>{{ t('general_actions', default='Actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for forecast in forecasts %}
+                        <tr>
+                            <td data-label="{{ t('forecasts_title', default='Title') }}">{{ forecast.title }}</td>
+                            <td data-label="{{ t('forecasts_projected_revenue', default='Projected Revenue') }}">{{ format_currency(forecast.projected_revenue) }}</td>
+                            <td data-label="{{ t('forecasts_projected_expenses', default='Projected Expenses') }}">{{ format_currency(forecast.projected_expenses) }}</td>
+                            <td data-label="{{ t('forecasts_net_profit', default='Net Profit') }}">{{ format_currency(forecast.projected_revenue - forecast.projected_expenses) }}</td>
+                            <td data-label="{{ t('forecasts_date', default='Forecast Date') }}">{{ format_date(forecast.forecast_date) }}</td>
+                            <td data-label="{{ t('general_actions', default='Actions') }}">
+                                <button class="btn btn-secondary btn-sm actions-btn"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#actionsModal"
+                                        data-id="{{ forecast._id }}"
+                                        data-title="{{ forecast.title }}"
+                                        data-projected_revenue="{{ forecast.projected_revenue }}"
+                                        data-projected_expenses="{{ forecast.projected_expenses }}"
+                                        data-net_profit="{{ forecast.projected_revenue - forecast.projected_expenses }}"
+                                        data-forecast_date="{{ format_date(forecast.forecast_date) }}"
+                                        data-description="{{ forecast.description or '' }}"
+                                        {% if not can_interact %}disabled data-bs-toggle="tooltip" title="{{ t('forecasts_subscription_required', default='Your trial or subscription has expired. Please subscribe to view forecast details.') }}"{% endif %}>
+                                    {{ t('general_actions', default='Actions') }}
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <p class="text-muted">{{ t('forecasts_no_records', default='No forecasts recorded yet') }}</p>
+            <p class="mt-2">{{ t('forecasts_create_first', default='Start by adding your first forecast.') }}</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Actions Modal -->
+<div class="modal fade" id="actionsModal" tabindex="-1" aria-labelledby="actionsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="actionsModalLabel">{{ t('forecasts_details', default='Forecast Details') }}</h5>
+                <button class="btn-close" data-bs-dismiss="modal" aria-label="{{ t('general_close', default='Close') }}"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>{{ t('forecasts_title', default='Title') }}:</strong> <span id="modalTitle"></span></p>
+                        <p><strong>{{ t('forecasts_projected_revenue', default='Projected Revenue') }}:</strong> <span id="modalProjectedRevenue"></span></p>
+                        <p><strong>{{ t('forecasts_projected_expenses', default='Projected Expenses') }}:</strong> <span id="modalProjectedExpenses"></span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>{{ t('forecasts_net_profit', default='Net Profit') }}:</strong> <span id="modalNetProfit"></span></p>
+                        <p><strong>{{ t('forecasts_date', default='Forecast Date') }}:</strong> <span id="modalForecastDate"></span></p>
+                        <p><strong>{{ t('general_description', default='Description') }}:</strong> <span id="modalDescription"></span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a id="viewBtn" class="btn btn-primary" href="#">{{ t('general_view', default='View') }}</a>
+                <button id="downloadBtn" class="btn btn-primary" 
+                        {% if not can_interact %}disabled data-bs-toggle="tooltip" title="{{ t('forecasts_subscription_required', default='Your trial or subscription has expired. Please subscribe to download reports.') }}"{% endif %}>
+                    {{ t('forecasts_download_report', default='Download Report') }}
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('general_close', default='Close') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Download Report Modal -->
+<div class="modal fade" id="downloadReportModal" tabindex="-1" aria-labelledby="downloadReportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="downloadReportModalLabel">{{ t('forecasts_download_report', default='Download Forecast Report') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ t('general_close', default='Close') }}"></button>
+            </div>
+            <div class="modal-body">
+                <p>{{ t('forecasts_download_report_confirm', default='Generate and download forecast report as PDF?') }}</p>
+                {% if not can_interact %}
+                    <div class="form-text">{{ t('forecasts_subscription_required', default='Your trial or subscription has expired. Please subscribe to download reports.') }}</div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <a id="confirmDownloadReportBtn" class="btn btn-primary" href="#"
+                   {% if not can_interact %}disabled data-bs-toggle="tooltip" title="{{ t('forecasts_subscription_required', default='Your trial or subscription has expired. Please subscribe to download reports.') }}"{% endif %}>
+                    {{ t('forecasts_download_report', default='Download Report') }}
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('general_cancel', default='Cancel') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<style>
+.modal-footer .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: clamp(0.875rem, 2vw, 0.9375rem);
+    box-shadow: var(--card-shadow);
+    transition: var(--transition-base);
+}
+
+.modal-footer.two-buttons .btn:first-child:not([data-bs-dismiss="modal"]) {
+    background: var(--button-primary-bg);
+    color: #ffffff;
+    border: none;
+}
+.modal-footer.two-buttons .btn:first-child:not([data-bs-dismiss="modal"]):hover,
+.modal-footer.two-buttons .btn:first-child:not([data-bs-dismiss="modal"]):focus {
+    background: var(--button-primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--card-shadow-hover);
+}
+.modal-footer.two-buttons .btn:last-child {
+    background: var(--button-secondary-bg);
+    color: var(--button-secondary-border);
+    border: 2px solid var(--button-secondary-border);
+}
+.modal-footer.two-buttons .btn:last-child:hover,
+.modal-footer.two-buttons .btn:last-child:focus {
+    background: var(--button-secondary-hover);
+    color: var(--text-color);
+    transform: translateY(-2px);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+
+    let currentForecastData = null;
+
+    function updateModalButtonClasses() {
+        const modalFooter = document.querySelector('#actionsModal .modal-footer');
+        const visibleButtons = Array.from(modalFooter.querySelectorAll('.btn')).filter(btn => btn.style.display !== 'none');
+        modalFooter.classList.remove('two-buttons');
+        if (visibleButtons.length === 2) {
+            modalFooter.classList.add('two-buttons');
+            visibleButtons.forEach((btn, index) => {
+                if (index === 0 && !btn.dataset.bsDismiss) {
+                    btn.classList.remove('btn-secondary');
+                    btn.classList.add('btn-primary');
+                } else if (btn.dataset.bsDismiss) {
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-secondary');
+                }
+            });
+        } else {
+            const viewBtn = document.getElementById('viewBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const closeBtn = modalFooter.querySelector('[data-bs-dismiss="modal"]');
+            [viewBtn, downloadBtn].forEach(btn => {
+                if (btn) {
+                    btn.classList.remove('btn-secondary');
+                    btn.classList.add('btn-primary');
+                }
+            });
+            if (closeBtn) {
+                closeBtn.classList.remove('btn-primary');
+                closeBtn.classList.add('btn-secondary');
+            }
+        }
+    }
+
+    document.querySelectorAll('.actions-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            currentForecastData = {
+                _id: button.dataset.id,
+                title: button.dataset.title,
+                projected_revenue: parseFloat(button.dataset.projected_revenue).toLocaleString(),
+                projected_expenses: parseFloat(button.dataset.projected_expenses).toLocaleString(),
+                net_profit: parseFloat(button.dataset.net_profit).toLocaleString(),
+                forecast_date: button.dataset.forecast_date,
+                description: button.dataset.description
+            };
+
+            document.getElementById('modalTitle').textContent = currentForecastData.title;
+            document.getElementById('modalProjectedRevenue').textContent = `{{ t('general_currency_symbol', default='₦') }}${currentForecastData.projected_revenue}`;
+            document.getElementById('modalProjectedExpenses').textContent = `{{ t('general_currency_symbol', default='₦') }}${currentForecastData.projected_expenses}`;
+            document.getElementById('modalNetProfit').textContent = `{{ t('general_currency_symbol', default='₦') }}${currentForecastData.net_profit}`;
+            document.getElementById('modalForecastDate').textContent = currentForecastData.forecast_date;
+            document.getElementById('modalDescription').textContent = currentForecastData.description || '-';
+            document.getElementById('viewBtn').href = `/forecasts/view_page/${currentForecastData._id}`;
+
+            updateModalButtonClasses();
+        });
+    });
+
+    document.getElementById('downloadBtn').addEvent="{% if can_interact %}click{% else %}null{% endif %}">(() => {
+        if (!currentForecastData) {
+            console.error('No forecast data available');
+            return;
+        }
+        document.getElementById('confirmDownloadReportBtn').setAttribute('href', `/forecasts/generate_report/${currentForecastData._id}`);
+        new bootstrap.Modal(document.getElementById('downloadReportModal')).show();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% from "_ficore_report_header.html" import ficore_report_header %}
+{% block title %}{{ t('forecasts_details', default='Forecast Details') }} - FiCore{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    {{ ficore_report_header(current_user) }}
+    <div class="page-title">
+        <h1>{{ t('forecasts_details', default='Forecast Details') }}</h1>
+        <small class="text-muted">{{ forecast.title }}</small>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>{{ t('forecasts_title', default='Title') }}:</strong> {{ forecast.title }}</p>
+                    <p><strong>{{ t('forecasts_projected_revenue', default='Projected Revenue') }}:</strong> {{ format_currency(forecast.projected_revenue) }}</p>
+                    <p><strong>{{ t('forecasts_projected_expenses', default='Projected Expenses') }}:</strong> {{ format_currency(forecast.projected_expenses) }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>{{ t('forecasts_net_profit', default='Net Profit') }}:</strong> {{ format_currency(forecast.projected_revenue - forecast.projected_expenses) }}</p>
+                    <p><strong>{{ t('forecasts_date', default='Forecast Date') }}:</strong> {{ format_date(forecast.forecast_date) }}</p>
+                    <p><strong>{{ t('general_description', default='Description') }}:</strong> {{ forecast.description or t('general_no_description', default='No description provided') }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="dropdown d-inline-block">
+                <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                        {% if not can_interact %}disabled data-bs-toggle="tooltip" title="{{ t('forecasts_subscription_required', default='Your trial or subscription has expired. Please subscribe to download reports.') }}"{% endif %}>
+                    {{ t('general_actions', default='Actions') }}
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item download-report-btn" 
+                           data-id="{{ forecast._id }}"
+                           href="#"
+                           {% if not can_interact %}disabled data-bs-toggle="tooltip" title="{{ t('forecasts_subscription_required', default='Your trial or subscription has expired. Please subscribe to download reports.') }}"{% endif %}>
+                           {{ t('forecasts_download_report', default='Download Report') }}
+                    </a></li>
+                    <li><a class="dropdown-item" 
+                           href="{{ url_for('forecasts.generate_report_csv', id=forecast._id) }}"
+                           {% if not can_interact %}disabled data-bs-toggle="tooltip" title="{{ t('forecasts_subscription_required', default='Your trial or subscription has expired. Please subscribe to download reports.') }}"{% endif %}>
+                           {{ t('forecasts_download_report_csv', default='Download Report CSV') }}
+                    </a></li>
+                </ul>
+            </div>
+            <a href="{{ url_for('forecasts.index') }}" 
+               class="btn btn-secondary btn-sm"
+               data-bs-toggle="tooltip" 
+               title="{{ t('general_back', default='Back') }}">
+                {{ t('general_back', default='Back') }}
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Download Report Modal -->
+<div class="modal fade" id="downloadReportModal" tabindex="-1" aria-labelledby="downloadReportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="downloadReportModalLabel">{{ t('forecasts_download_report', default='Download Forecast Report') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ t('general_close', default='Close') }}"></button>
+            </div>
+            <div class="modal-body">
+                <p>{{ t('forecasts_download_report_confirm', default='Generate and download forecast report as PDF for') }} {{ forecast.title }}?</p>
+                {% if not can_interact %}
+                    <div class="form-text">{{ t('forecasts_subscription_required', default='Your trial or subscription has expired. Please subscribe to download reports.') }}</div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <a id="confirmDownloadReportBtn" class="btn btn-primary" href="#"
+                   {% if not can_interact %}disabled data-bs-toggle="tooltip" title="{{ t('forecasts_subscription_required', default='Your trial or subscription has expired. Please subscribe to download reports.') }}"{% endif %}>
+                    {{ t('forecasts_download_report', default='Download Report') }}
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {{ t('general_cancel', default='Cancel') }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+
+    document.querySelectorAll('.download-report-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            {% if can_interact %}
+            const forecastId = button.dataset.id;
+            document.getElementById('confirmDownloadReportBtn').setAttribute('href', `/forecasts/generate_report/${forecastId}`);
+            new bootstrap.Modal(document.getElementById('downloadReportModal')).show();
+            {% endif %}
+        });
+    });
+});
+</script>
+{% endblock %}

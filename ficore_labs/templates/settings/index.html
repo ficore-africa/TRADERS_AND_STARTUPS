@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ t('settings_title', default='Settings') }} - FiCore{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">{{ t('settings_title', default='Settings') }}</h1>
+    <div class="d-grid gap-2">
+        <a href="{{ url_for('settings.profile') }}" class="btn btn-primary">{{ t('settings_profile', default='Profile') }}</a>
+        <a href="{{ url_for('kyc.submit') }}" class="btn btn-primary">{{ t('kyc_verification', default='KYC Verification') }}</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{{ t('creditors_details', default='Creditor Details') }} - FiCore{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="page-title">
+        <h1>{{ t('creditors_details', default='Creditor Details') }}</h1>
+        <small class="subtext">{{ creditor.name }} - {{ t('creditors_what_you_owe_subtext', default='Kuɗin da Mutane ke Bin Ka') }}</small>
+    </div>
+    {% if not can_interact %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            {{ t('creditors_subscription_required', default='Your trial or subscription has expired. Subscribe to manage your creditors.') }}
+            <a href="{{ url_for('subscribe_bp.subscribe') }}" class="alert-link">{{ t('general_subscribe_now', default='Subscribe Now') }}</a>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ t('general_close', default='Close') }}"></button>
+        </div>
+    {% endif %}
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>{{ t('creditors_creditor_name', default='Creditor Name') }}:</strong> {{ creditor.name }}</p>
+                    <p><strong>{{ t('creditors_amount_owed', default='Amount Owed') }}:</strong> {{ format_currency(creditor.amount_owed) }}</p>
+                    <p><strong>{{ t('general_contact', default='Contact') }}:</strong> {{ creditor.contact or 'N/A' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>{{ t('general_description', default='Description') }}:</strong> {{ creditor.description or t('general_no_description', default='No description provided') }}</p>
+                    <p><strong>{{ t('general_date_recorded', default='Date Recorded') }}:</strong> {{ format_date(creditor.created_at) }}</p>
+                    <p><strong>{{ t('general_reminders_sent', default='Reminders Sent') }}:</strong> {{ creditor.get('reminder_count', 0) }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="responsive-btn-group" role="group">
+                <a href="{{ url_for('creditors.index') }}" 
+                   class="btn btn-secondary btn-sm"
+                   data-bs-toggle="tooltip" 
+                   title="{{ t('general_back', default='Back') }}">
+                    {{ t('general_back', default='Back') }}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

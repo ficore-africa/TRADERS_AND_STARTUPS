@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h1>KYC Admin Panel</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Full Name</th>
+                <th>ID Type</th>
+                <th>ID Number</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in kyc_records %}
+            <tr>
+                <td>{{ record.user_id }}</td>
+                <td>{{ record.full_name }}</td>
+                <td>{{ record.id_type }}</td>
+                <td>{{ record.id_number }}</td>
+                <td>{{ record.status|capitalize }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('kyc.approve', kyc_id=record._id) }}" style="display:inline;">
+                        <button type="submit" class="btn btn-success">Approve</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('kyc.reject', kyc_id=record._id) }}" style="display:inline;">
+                        <button type="submit" class="btn btn-danger">Reject</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

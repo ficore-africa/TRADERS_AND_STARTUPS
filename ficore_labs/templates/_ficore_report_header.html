@@ -1,0 +1,12 @@
+{% macro ficore_report_header(user) %}
+<div class="ficore-header" style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem;">
+    <img src="{{ url_for('static', filename='img/ficore_logo.png') }}" alt="Ficore Africa" style="height: 60px;">
+    <div>
+        <h2 style="color: #b88a44; margin: 0;">Ficore Africa</h2>
+        <div style="font-size: 0.95rem; color: #333;">Empowering Africa's Businesses and Households. Contact: FicoreAfrica@gmail.com | +234-xxx-xxxx</div>
+        <div style="font-size: 0.93rem; color: #555; margin-top: 0.5rem;">
+            Username: {{ user.display_name or user._id }} | Email: {{ user.email | escape }}
+        </div>
+    </div>
+</div>
+{% endmacro %}

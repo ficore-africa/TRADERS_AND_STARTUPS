@@ -1,0 +1,103 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script>{% extends "base.html" %}
+{% block content %}
+<h1>{{ title }}</h1>
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+{% if current_user.is_trial_active or current_user.is_subscribed %}
+<h2>{{ trans('debtor_add', default='Add Debtor') }}</h2>
+<form method="POST" action="{{ url_for('admin.manage_debtors') }}">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        <label>{{ form.name.label }}</label>
+        {{ form.name }}
+    </div>
+    <div class="form-group">
+        <label>{{ form.amount.label }}</label>
+        {{ form.amount }}
+    </div>
+    <div class="form-group">
+        <label>{{ form.due_date.label }}</label>
+        {{ form.due_date }}
+    </div>
+    {{ form.submit }}
+</form>
+{% else %}
+<div class="alert alert-warning">
+    {{ trans('subscription_required', default='Your trial or subscription has expired. Please subscribe to continue managing debtors.') }}
+    <a href="{{ url_for('personal_bp.subscribe') }}" class="btn btn-primary">{{ trans('subscribe_now', default='Subscribe Now') }}</a>
+</div>
+{% endif %}
+<h2>{{ trans('debtor_list', default='Debtors List') }}</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>{{ trans('debtor_name', default='Name') }}</th>
+            <th>{{ trans('debtor_amount', default='Amount Owed') }}</th>
+            <th>{{ trans('debtor_due_date', default='Due Date') }}</th>
+            {% if current_user.is_trial_active or current_user.is_subscribed %}
+            <th>{{ trans('general_actions', default='Actions') }}</th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for debtor in debtors %}
+        <tr>
+            <td>{{ debtor.name }}</td>
+            <td>₦{{ debtor.amount | format_currency }}</td>
+            <td>{{ debtor.due_date.strftime('%Y-%m-%d') }}</td>
+            {% if current_user.is_trial_active or current_user.is_subscribed %}
+            <td>
+                <form action="{{ url_for('admin.delete_item', collection='debtors', item_id=debtor._id) }}" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-danger">{{ trans('admin_delete', default='Delete') }}</button>
+                </form>
+            </td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

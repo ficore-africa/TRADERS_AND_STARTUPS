@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}{{ t('reports_forecasts', default='Forecasts Report') }} - Business Finance{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>{{ t('reports_forecasts', default='Forecasts Report') }}</h1>
+    <small class="text-muted">{{ t('forecasts_description', default='Review projected revenue and expenses for strategic planning.') }}</small>
+    
+    {% if not can_interact %}
+    <div class="alert alert-warning mt-3">
+        {{ t('read_only_mode', default='Your trial has expired. You can view your data but cannot generate new reports. Subscribe to continue.') }}
+        <a href="{{ url_for('subscribe.index') }}" class="btn btn-primary btn-sm ms-2">{{ t('subscribe_now', default='Subscribe Now') }}</a>
+    </div>
+    {% endif %}
+
+    {% if can_interact %}
+    <form method="POST" class="mt-4">
+        {{ form.hidden_tag() }}
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label for="{{ form.start_date.id }}" class="form-label">{{ form.start_date.label }}</label>
+                {{ form.start_date(class="form-control") }}
+            </div>
+            <div class="col-md-4">
+                <label for="{{ form.end_date.id }}" class="form-label">{{ form.end_date.label }}</label>
+                {{ form.end_date(class="form-control") }}
+            </div>
+            <div class="col-md-4">
+                <label for="{{ form.format.id }}" class="form-label">{{ t('report_format', default='Format') }}</label>
+                {{ form.format(class="form-control") }}
+            </div>
+            <div class="col-md-12 mt-3">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </div>
+    </form>
+    {% endif %}
+
+    {% if forecasts %}
+    <div class="table-responsive mt-4">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>{{ t('general_date', default='Date') }}</th>
+                    <th>{{ t('forecasts_scenario', default='Scenario') }}</th>
+                    <th>{{ t('forecasts_projected_revenue', default='Projected Revenue') }}</th>
+                    <th>{{ t('forecasts_projected_expenses', default='Projected Expenses') }}</th>
+                    <th>{{ t('forecasts_period', default='Period') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for forecast in forecasts %}
+                <tr>
+                    <td>{{ forecast.created_at }}</td>
+                    <td>{{ forecast.scenario }}</td>
+                    <td>{{ forecast.projected_revenue | format_currency }}</td>
+                    <td>{{ forecast.projected_expenses | format_currency }}</td>
+                    <td>{{ forecast.period_start }} - {{ forecast.period_end }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="2">{{ t('reports_total_projected_revenue', default='Total Projected Revenue') }}</th>
+                    <th>{{ forecasts | sum(attribute='projected_revenue') | format_currency }}</th>
+                    <th>{{ forecasts | sum(attribute='projected_expenses') | format_currency }}</th>
+                    <th></th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    {% else %}
+    <p class="mt-4 text-muted">{{ t('no_data', default='No forecast data available for the selected period.') }}</p>
+    {% endif %}
+</div>
+{% endblock %}

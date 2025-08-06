@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+{% block title %}{{ t('settings_my_profile', default='My Profile') }} - FiCore{% endblock %}
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <a href="{{ url_for('dashboard.index') }}" class="profile-back-arrow">←</a>
+    </div>
+
+    <div class="profile-card profile-account-type-card">
+        <div class="profile-card-body">
+            <p class="profile-text">{{ t('settings_account_type', default='Account Type') }}: 
+                <strong>
+                    {% if user.role == 'trader' %}
+                        {{ t('settings_trader_account', default='Trader Account') }}
+                    {% elif user.role == 'startup' %}
+                        {{ t('settings_startup_account', default='Startup Account') }}
+                    {% elif user.role == 'admin' %}
+                        {{ t('settings_admin_account', default='Admin Account') }}
+                    {% endif %}
+                </strong> 
+                <span class="profile-info-icon" title="{{ t('settings_' + user.role + '_account_info', default=user.role|capitalize + ' account gives you access to specific features tailored to your role.') }}">ⓘ</span>
+            </p>
+        </div>
+    </div>
+
+    <div class="profile-card profile-kyc-status-card">
+        <div class="profile-card-body">
+            <h5 class="profile-heading">{{ t('kyc_status', default='KYC Status') }}</h5>
+            <p class="profile-text">{{ user.kyc_status|capitalize }}</p>
+            {% if user.kyc_status != 'approved' %}
+                <a href="{{ url_for('kyc.submit') }}" class="profile-btn profile-btn-primary">{{ t('submit_kyc', default='Submit KYC') }}</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="profile-grid">
+        {% if user.role == 'trader' %}
+            <button class="profile-btn profile-btn-primary profile-explore-tools-btn" onclick="location.href='{{ url_for('general_bp.home') }}'">
+                <i class="bi bi-briefcase profile-icon"></i> {{ t('settings_explore_business_tools', default='Explore Your Business Tools') }}
+            </button>
+            <small class="profile-text-muted profile-text-center">{{ t('settings_explore_business_description', default='Manage debtors, creditors, inventory, payments, and business analytics!') }}</small>
+        {% elif user.role == 'startup' %}
+            <button class="profile-btn profile-btn-primary profile-explore-tools-btn" onclick="location.href='{{ url_for('dashboard.index') }}'">
+                <i class="bi bi-rocket-takeoff profile-icon"></i> {{ t('settings_explore_startup_tools', default='Explore Your Startup Tools') }}
+            </button>
+            <small class="profile-text-muted profile-text-center">{{ t('settings_explore_startup_description', default='Track funds, manage forecasts, generate investor reports, and more!') }}</small>
+        {% elif user.role == 'admin' %}
+            <button class="profile-btn profile-btn-primary profile-explore-tools-btn" onclick="location.href='{{ url_for('admin.dashboard') }}'">
+                <i class="bi bi-gear profile-icon"></i> {{ t('settings_explore_admin_tools', default='Explore Admin Dashboard') }}
+            </button>
+            <small class="profile-text-muted profile-text-center">{{ t('settings_explore_admin_description', default='Access administrative tools to manage users, system settings, and analytics!') }}</small>
+        {% endif %}
+    </div>
+
+    <div class="profile-grid">
+        <button class="profile-btn profile-btn-outline-primary" onclick="location.href='{{ url_for('general_bp.feedback') }}'">
+            <i class="bi bi-chat-dots profile-icon"></i> {{ t('settings_provide_feedback', default='Provide Feedback') }}
+        </button>
+    </div>
+
+    <div class="profile-grid">
+        <button class="profile-btn profile-btn-outline-primary profile-subscription-status-btn" onclick="location.href='{{ url_for('subscribe_bp.subscription_status') }}'">
+            <i class="bi bi-card-checklist profile-icon"></i> {{ t('settings_subscription_status', default='Check Your Subscription Status') }}
+        </button>
+    </div>
+
+    <section class="profile-section">
+        <h2 class="profile-section-heading">{{ t('settings_business_data', default='Business Data') }}</h2>
+        <div class="profile-card">
+            <div class="profile-card-body">
+                <form method="POST" action="{{ url_for('settings.profile') }}">
+                    {{ form.csrf_token }}
+
+                    <div class="profile-form-group">
+                        <label for="full_name" class="profile-form-label">{{ t('settings_full_name', default='Full Name') }}</label>
+                        {{ form.full_name(placeholder=t('settings_full_name_placeholder', default='Enter your full name'), class='profile-form-control') }}
+                        {% if form.full_name.errors %}
+                            {% for error in form.full_name.errors %}
+                                <p class="profile-text-danger">{{ error }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="profile-form-group">
+                        <label for="phone" class="profile-form-label">{{ t('settings_phone_number', default='Phone Number') }}</label>
+                        {{ form.phone(placeholder=t('settings_phone_placeholder', default='+234xxxxxxxxx'), class='profile-form-control') }}
+                        {% if form.phone.errors %}
+                            {% for error in form.phone.errors %}
+                                <p class="profile-text-danger">{{ error }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="profile-form-group">
+                        <label for="email" class="profile-form-label">{{ t('general_email', default='Email') }}</label>
+                        {{ form.email(placeholder=t('settings_email_placeholder', default='your@email.com'), class='profile-form-control') }}
+                        {% if form.email.errors %}
+                            {% for error in form.email.errors %}
+                                <p class="profile-text-danger">{{ error }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    {% if user.role in ['trader', 'startup'] %}
+                    <hr class="profile-divider">
+                    <h5 class="profile-heading">{{ t('settings_business_information', default='Business Information') }}</h5>
+                    
+                    <div class="profile-form-group">
+                        <label for="business_name" class="profile-form-label">{{ t('settings_business_name', default='Business Name') }}</label>
+                        {{ form.business_name(placeholder=t('settings_business_name_placeholder', default='Your Business Name'), class='profile-form-control') }}
+                        {% if form.business_name.errors %}
+                            {% for error in form.business_name.errors %}
+                                <p class="profile-text-danger">{{ error }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="profile-form-group">
+                        <label for="business_address" class="profile-form-label">{{ t('settings_business_address', default='Business Address') }}</label>
+                        {{ form.business_address(placeholder=t('settings_business_address_placeholder', default='Your Business Address'), class='profile-form-control') }}
+                        {% if form.business_address.errors %}
+                            {% for error in form.business_address.errors %}
+                                <p class="profile-text-danger">{{ error }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="profile-form-group">
+                        <label for="industry" class="profile-form-label">{{ t('settings_industry', default='Industry') }}</label>
+                        {{ form.industry(placeholder=t('settings_industry_placeholder', default='e.g., Retail, Services, Manufacturing'), class='profile-form-control') }}
+                        {% if form.industry.errors %}
+                            {% for error in form.industry.errors %}
+                                <p class="profile-text-danger">{{ error }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="profile-form-group">
+                        <label for="products_services" class="profile-form-label">{{ t('settings_products_services', default='Products/Services') }}</label>
+                        {{ form.products_services(placeholder=t('settings_products_services_placeholder', default='e.g., Clothing, Consulting'), class='profile-form-control') }}
+                        {% if form.products_services.errors %}
+                            {% for error in form.products_services.errors %}
+                                <p class="profile-text-danger">{{ error }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <div class="profile-text-center">
+                        {{ form.submit(class='profile-btn profile-btn-primary') }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section class="profile-section">
+        <h2 class="profile-section-heading">{{ t('settings_app_settings', default='App Settings') }}</h2>
+        <div class="profile-card">
+            <div class="profile-card-body">
+                <div class="profile-toggle-item">
+                    <i class="bi bi-currency-dollar profile-icon-left"></i> {{ t('settings_show_kobo', default='Show kobo (Amounts in the format 00.00)') }}
+                    <div class="profile-form-check form-switch">
+                        <input class="profile-form-check-input" type="checkbox" id="showKoboToggle" {% if user.settings.get('show_kobo') %}checked{% endif %}>
+                        <label class="profile-form-check-label" for="showKoboToggle"></label>
+                    </div>
+                </div>
+                <div class="profile-toggle-item">
+                    <i class="bi bi-eye-slash profile-icon-left"></i> {{ t('settings_incognito_mode', default='Incognito mode (Hide balance)') }}
+                    <div class="profile-form-check form-switch">
+                        <input class="profile-form-check-input" type="checkbox" id="incognitoModeToggle" {% if user.settings.get('incognito_mode') %}checked{% endif %}>
+                        <label class="profile-form-check-label" for="incognitoModeToggle"></label>
+                    </div>
+                </div>
+                <div class="profile-toggle-item">
+                    <i class="bi bi-volume-up profile-icon-left"></i> {{ t('settings_app_sounds', default='App sounds') }}
+                    <div class="profile-form-check form-switch">
+                        <input class="profile-form-check-input" type="checkbox" id="appSoundsToggle" {% if user.settings.get('app_sounds') %}checked{% endif %}>
+                        <label class="profile-form-check-label" for="appSoundsToggle"></label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="profile-section">
+        <h2 class="profile-section-heading">{{ t('settings_security', default='Security') }}</h2>
+        <div class="profile-card">
+            <div class="profile-card-body">
+                <div class="profile-toggle-item">
+                    <i class="bi bi-fingerprint profile-icon-left"></i> {{ t('settings_use_fingerprint_password', default='Use Fingerprint ID (For password)') }}
+                    <div class="profile-form-check form-switch">
+                        <input class="profile-form-check-input" type="checkbox" id="fingerprintPasswordToggle" {% if user.security_settings.get('fingerprint_password') %}checked{% endif %}>
+                        <label class="profile-form-check-label" for="fingerprintPasswordToggle"></label>
+                    </div>
+                </div>
+                <div class="profile-toggle-item">
+                    <i class="bi bi-fingerprint profile-icon-left"></i> {{ t('settings_use_fingerprint_pin', default='Use Fingerprint ID (For transaction PIN)') }}
+                    <div class="profile-form-check form-switch">
+                        <input class="profile-form-check-input" type="checkbox" id="fingerprintPinToggle" {% if user.security_settings.get('fingerprint_pin') %}checked{% endif %}>
+                        <label class="profile-form-check-label" for="fingerprintPinToggle"></label>
+                    </div>
+                </div>
+                <div class="profile-toggle-item">
+                    <i class="bi bi-shield-lock profile-icon-left"></i> {{ t('settings_hide_sensitive_data', default='Hide sensitive data (Disable screenshots)') }}
+                    <div class="profile-form-check form-switch">
+                        <input class="profile-form-check-input" type="checkbox" id="hideSensitiveDataToggle" {% if user.security_settings.get('hide_sensitive_data') %}checked{% endif %}>
+                        <label class="profile-form-check-label" for="hideSensitiveDataToggle"></label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="profile-section">
+        <h2 class="profile-section-heading">{{ t('general_about', default='About') }}</h2>
+        <div class="profile-card">
+            <div class="profile-card-body">
+                <a href="{{ url_for('general_bp.contact') }}" class="profile-list-item">
+                    <i class="bi bi-headset profile-icon-left"></i> {{ t('settings_support', default='Support (Our contacts)') }}
+                    <i class="bi bi-chevron-right profile-icon-right"></i>
+                </a>
+                <a href="{{ url_for('general_bp.feedback') }}" class="profile-list-item">
+                    <i class="bi bi-star profile-icon-left"></i> {{ t('settings_rate_app', default='Rate the app (Tell us about your experience)') }}
+                    <i class="bi bi-chevron-right profile-icon-right"></i>
+                </a>
+                <a href="{{ url_for('general_bp.about') }}" class="profile-list-item">
+                    <i class="bi bi-info-circle profile-icon-left"></i> {{ t('settings_about_ficore', default='About FiCore') }}
+                    <i class="bi bi-chevron-right profile-icon-right"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <div class="profile-grid">
+        <button class="profile-btn profile-btn-danger" onclick="location.href='{{ url_for('users.logout') }}'">
+            <i class="bi bi-box-arrow-right profile-icon"></i> {{ t('general_logout', default='Log out') }}
+        </button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.profile-form-check-input[type="checkbox"]').forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                const settingName = this.id;
+                const value = this.checked;
+
+                if (settingName.includes('fingerprint') && value) {
+                    if (!navigator.credentials || !window.PublicKeyCredential) {
+                        alert('{{ t('settings_fingerprint_not_supported', default='Fingerprint authentication is not supported on this device.') }}');
+                        this.checked = false;
+                        return;
+                    }
+                }
+
+                fetch('/settings/api/update-user-setting', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        setting: settingName,
+                        value: value
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        alert('{{ t('settings_failed_to_update_setting', default='Failed to update setting') }}: ' + (data.message || '{{ t('general_unknown_error', default='Unknown error') }}'));
+                        this.checked = !value;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating setting:', error);
+                    alert('{{ t('general_error_occurred', default='An error occurred. Please try again.') }}');
+                    this.checked = !value;
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

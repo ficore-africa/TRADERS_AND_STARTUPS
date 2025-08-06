@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}{{ t('creditors_what_you_owe', default='What You Owe') }} - FiCore{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="page-title">
+        <h1>{{ t('creditors_what_you_owe', default='What You Owe') }}</h1>
+        <small class="subtext">{{ t('creditors_what_you_owe_subtext', default='Kuɗin da Mutane ke Bin Ka') }}</small>
+    </div>
+    {% if not can_interact %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            {{ t('creditors_subscription_required', default='Your trial or subscription has expired. Subscribe to manage your creditors.') }}
+            <a href="{{ url_for('subscribe_bp.subscribe') }}" class="alert-link">{{ t('general_subscribe_now', default='Subscribe Now') }}</a>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ t('general_close', default='Close') }}"></button>
+        </div>
+    {% endif %}
+    <div class="d-flex gap-2 mb-4">
+        <a href="{{ url_for('creditors.add') }}" class="btn btn-primary" {% if not can_interact %}disabled{% endif %}>{{ t('creditors_create_what_you_owe', default='Create What You Owe') }}</a>
+        <a href="{{ url_for('creditors.manage') }}" class="btn btn-secondary" {% if not can_interact %}disabled{% endif %}>{{ t('creditors_manage_title', default='Manage Creditors') }}</a>
+    </div>
+    {% if creditors|length > 0 %}
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>{{ t('creditors_creditor_name', default='Creditor Name') }}</th>
+                        <th>{{ t('creditors_amount_owed', default='Amount Owed') }}</th>
+                        <th>{{ t('general_contact', default='Contact') }}</th>
+                        <th>{{ t('general_created_at', default='Created At') }}</th>
+                        <th>{{ t('general_reminders', default='Reminders') }}</th>
+                        <th>{{ t('general_actions', default='Actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for creditor in creditors %}
+                        <tr>
+                            <td data-label="{{ t('creditors_creditor_name', default='Creditor Name') }}">{{ creditor.name }}</td>
+                            <td data-label="{{ t('creditors_amount_owed', default='Amount Owed') }}">{{ format_currency(creditor.amount_owed) }}</td>
+                            <td data-label="{{ t('general_contact', default='Contact') }}">{{ creditor.contact or '-' }}</td>
+                            <td data-label="{{ t('general_created_at', default='Created At') }}">{{ format_date(creditor.created_at) }}</td>
+                            <td data-label="{{ t('general_reminders', default='Reminders') }}">{{ creditor.get('reminder_count', 0) }}</td>
+                            <td data-label="{{ t('general_actions', default='Actions') }}">
+                                <button class="btn btn-secondary btn-sm actions-btn"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#actionsModal"
+                                        data-id="{{ creditor._id }}"
+                                        data-name="{{ creditor.name }}"
+                                        data-amount="{{ creditor.amount_owed }}"
+                                        data-contact="{{ creditor.contact or '' }}"
+                                        data-date="{{ format_date(creditor.created_at) }}"
+                                        data-reminders="{{ creditor.get('reminder_count', 0) }}"
+                                        data-description="{{ creditor.description or '' }}"
+                                        {% if not can_interact %}disabled{% endif %}>
+                                    {{ t('general_actions', default='Actions') }}
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <p class="text-muted">{{ t('creditors_no_what_you_owe', default='You don\'t owe anyone yet') }}</p>
+            <p class="mt-2">{{ t('creditors_create_what_you_owe_desc', default='Start by creating your first record.') }}</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Actions Modal -->
+<div class="modal fade" id="actionsModal" tabindex="-1" aria-labelledby="actionsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="actionsModalLabel">{{ t('creditors_what_you_owe', default='What You Owe') }}</h5>
+                <button class="btn-close" data-bs-dismiss="modal" aria-label="{{ t('general_close', default='Close') }}"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>{{ t('creditors_creditor_name', default='Creditor Name') }}:</strong> <span id="modalName"></span></p>
+                        <p><strong>{{ t('creditors_amount_owed', default='Amount Owed') }}:</strong> <span id="modalAmount"></span></p>
+                        <p><strong>{{ t('general_contact', default='Contact') }}:</strong> <span id="modalContact"></span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>{{ t('general_description', default='Description') }}:</strong> <span id="modalDescription"></span></p>
+                        <p><strong>{{ t('general_date', default='Date') }}:</strong> <span id="modalDate"></span></p>
+                        <p><strong>{{ t('general_reminders', default='Reminders') }}:</strong> <span id="modalReminders"></span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a id="viewBtn" class="btn btn-primary" href="#">{{ t('general_view', default='View') }}</a>
+                <button id="shareBtn" class="btn btn-primary" style="display: none;" {% if not can_interact %}disabled{% endif %}>{{ t('general_share_iou', default='Share IOU') }}</button>
+                <button id="downloadBtn" class="btn btn-primary" {% if not can_interact %}disabled{% endif %}>{{ t('general_download_iou', default='Download IOU') }}</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('general_close', default='Close') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const canInteract = {{ can_interact | tojson }};
+
+    // Initialize tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+
+    let currentCreditorData = null;
+
+    // Actions button functionality
+    document.querySelectorAll('.actions-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            if (!canInteract) {
+                return; // Prevent modal opening if not interactable
+            }
+            console.log('Actions button clicked:', button.dataset.id); // Debug
+            currentCreditorData = {
+                _id: button.dataset.id,
+                name: button.dataset.name,
+                amount_owed: parseFloat(button.dataset.amount).toLocaleString(),
+                contact: button.dataset.contact,
+                created_at: button.dataset.date,
+                reminders: button.dataset.reminders,
+                description: button.dataset.description
+            };
+
+            // Populate modal fields
+            document.getElementById('modalName').textContent = currentCreditorData.name;
+            document.getElementById('modalAmount').textContent = `{{ t('general_currency_symbol', default='₦') }}${currentCreditorData.amount_owed}`;
+            document.getElementById('modalContact').textContent = currentCreditorData.contact || '-';
+            document.getElementById('modalDescription').textContent = currentCreditorData.description || '-';
+            document.getElementById('modalDate').textContent = currentCreditorData.created_at;
+            document.getElementById('modalReminders').textContent = currentCreditorData.reminders;
+
+            // Update action buttons
+            document.getElementById('viewBtn').href = `/creditors/view/${currentCreditorData._id}`;
+            document.getElementById('shareBtn').style.display = currentCreditorData.contact ? 'inline-block' : 'none';
+            document.getElementById('downloadBtn').onclick = () => {
+                if (canInteract) {
+                    window.location.href = `/creditors/generate_iou/${currentCreditorData._id}`;
+                }
+            };
+        });
+    });
+
+    // Share button in modal
+    document.getElementById('shareBtn').addEventListener('click', () => {
+        if (!canInteract) {
+            return;
+        }
+        if (!currentCreditorData || !currentCreditorData.contact) {
+            alert('{{ t('general_no_contact', default='No contact provided for sharing') }}');
+            return;
+        }
+        
+        fetch(`/creditors/share/${currentCreditorData._id}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.open(data.whatsapp_link, '_blank');
+                    bootstrap.Modal.getInstance(document.getElementById('actionsModal')).hide();
+                } else {
+                    alert('{{ t('general_failed_to_share_iou', default='Failed to share IOU') }}: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error sharing IOU:', error);
+                alert('{{ t('general_error_sharing_iou', default='Error sharing IOU') }}');
+            });
+    });
+});
+</script>
+{% endblock %}

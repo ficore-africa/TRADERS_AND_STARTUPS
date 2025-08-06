@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}{{ t('business_finance_tips_title', default='Business Finance Tips') | e }}{% endblock %}
+{% block content %}
+<div class="finance-tips-page py-5">
+    <div class="container">
+        <h1 class="text-center mb-4 section-title">{{ t('business_finance_tips_title', default='Business Finance\'s 10 Essential Tips for Business Success') | e }}</h1>
+        <p class="text-center lead text-muted mb-5">{{ t('business_finance_tips_intro', default='Optimize your business finances with these actionable tips from Business Finance, tailored for Nigerian businesses.') | e }}</p>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card section-card">
+                    <div class="card-body">
+                        <h2 class="mb-4">{{ t('business_finance_tips_subtitle', default='10 Essential Tips to Grow Your Business Financially') | e }}</h2>
+                        <ol>
+                            <li><strong>{{ t('business_tip_1', default='Monitor Cash Flow Religiously') | e }}</strong>: {{ t('business_tip_1_desc', default='Track every Naira in and out to maintain liquidity.') | e }}</li>
+                            <li><strong>{{ t('business_tip_2', default='Set Clear Financial Goals') | e }}</strong>: {{ t('business_tip_2_desc', default='Define short- and long-term objectives for growth.') | e }}</li>
+                            <li><strong>{{ t('business_tip_3', default='Create a Business Budget') | e }}</strong>: {{ t('business_tip_3_desc', default='Plan expenses and revenue monthly to avoid surprises.') | e }}</li>
+                            <li><strong>{{ t('business_tip_4', default='Manage Debtors Proactively') | e }}</strong>: {{ t('business_tip_4_desc', default='Use Business Finance to track and follow up on owed payments.') | e }}</li>
+                            <li><strong>{{ t('business_tip_5', default='Negotiate with Creditors') | e }}</strong>: {{ t('business_tip_5_desc', default='Secure favorable terms to ease cash flow pressure.') | e }}</li>
+                            <li><strong>{{ t('business_tip_6', default='Automate Financial Reports') | e }}</strong>: {{ t('business_tip_6_desc', default='Leverage Business Finance tools for real-time insights.') | e }}</li>
+                            <li><strong>{{ t('business_tip_7', default='Minimize Unnecessary Costs') | e }}</strong>: {{ t('business_tip_7_desc', default='Review expenses regularly to cut waste.') | e }}</li>
+                            <li><strong>{{ t('business_tip_8', default='Build a Cash Reserve') | e }}</strong>: {{ t('business_tip_8_desc', default='Save consistently for unexpected challenges.') | e }}</li>
+                            <li><strong>{{ t('business_tip_9', default='Plan for Taxes Early') | e }}</strong>: {{ t('business_tip_9_desc', default='Use Business Finance’s taxation tools to stay compliant.') | e }}</li>
+                            <li><strong>{{ t('business_tip_10', default='Invest in Scalable Tools') | e }}</strong>: {{ t('business_tip_10_desc', default='Use Business Finance to streamline operations and grow efficiently.') | e }}</li>
+                        </ol>
+                        <div class="text-center mt-4">
+                            <a href="{{ url_for('users.signup') }}" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-title="{{ t('general_get_started_tooltip', default='Start your financial journey') | e }}">{{ t('general_get_started', default='Get Started') | e }}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.section-card {
+    padding: 2rem;
+    border-radius: 0.5rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+}
+.section-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+.card {
+    border: 1px solid #e9ecef;
+    border-radius: 0.5rem;
+    transition: transform 0.2s;
+}
+.card:hover {
+    transform: translateY(-5px);
+}
+[data-bs-toggle="tooltip"] {
+    z-index: 1000;
+}
+</style>
+
+{% block extra_scripts %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(tooltipTriggerEl => {
+        new bootstrap.Tooltip(tooltipTriggerEl, {
+            trigger: 'hover focus',
+            container: 'body'
+        });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

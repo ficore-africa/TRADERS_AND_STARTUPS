@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}{{ t('funds_manage', default='Manage Funds') }} - FiCore{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="page-title">
+        <h1>{{ t('funds_manage', default='Manage Funds') }}</h1>
+        <small class="subtext">{{ t('funds_subtitle', default='Track Your Funds') }}</small> <!-- Updated subtitle -->
+    </div>
+    <div class="mb-4">
+        <a href="{{ url_for('funds.index') }}" class="btn btn-secondary">{{ t('general_back', default='Back') }}</a>
+        <a href="{{ url_for('funds.add') }}" 
+           class="btn btn-primary"
+           {% if not can_interact %}disabled data-bs-toggle="tooltip" title="{{ t('funds_subscription_required', default='Your trial or subscription has expired. Please subscribe to add funds.') }}"{% endif %}>
+            {{ t('funds_create_title', default='Add New Fund') }}
+        </a>
+    </div>
+    {% if funds|length > 0 %}
+        <div class="mb-4">
+            <input type="text" id="searchInput" class="form-control" placeholder="{{ t('general_search', default='Search funds...') }}">
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered" id="fundsTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>{{ t('funds_source', default='Source') }}</th>
+                        <th>{{ t('funds_amount', default='Amount') }}</th>
+                        <th>{{ t('funds_category', default='Category') }}</th>
+                        <th>{{ t('general_created_at', default='Created At') }}</th>
+                        <th>{{ t('general_actions', default='Actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fund in funds %}
+                        <tr>
+                            <td data-label="{{ t('funds_source', default='Source') }}">{{ fund.source }}</td>
+                            <td data-label="{{ t('funds_amount', default='Amount') }}">{{ format_currency(fund.amount) }}</td>
+                            <td data-label="{{ t('funds_category', default='Category') }}">{{ fund.category|capitalize }}</td>
+                            <td data-label="{{ t('general_created_at', default='Created At') }}">{{ format_date(fund.created_at) }}</td>
+                            <td data-label="{{ t('general_actions', default='Actions') }}">
+                                <a href="{{ url_for('funds.edit', id=fund._id) }}" 
+                                   class="btn btn-primary btn-sm"
+                                   {% if not can_interact %}disabled data-bs-toggle="tooltip" title="{{ t('funds_subscription_required', default='Your trial or subscription has expired. Please subscribe to edit funds.') }}"{% endif %}>
+                                    {{ t('general_edit', default='Edit') }}
+                                </a>
+                                <form action="{{ url_for('funds.delete', id=fund._id) }}" method="POST" class="d-inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-danger btn-sm" 
+                                            onclick="return confirm('{{ t('general_confirm_delete', default='Are you sure?') }}')"
+                                            {% if not can_interact %}disabled data-bs-toggle="tooltip" title="{{ t('funds_subscription_required', default='Your trial or subscription has expired. Please subscribe to delete funds.') }}"{% endif %}>
+                                        {{ t('general_delete', default='Delete') }}
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <p class="text-muted">{{ t('funds_no_records', default='No funds recorded yet') }}</p>
+            <p class="mt-2">{{ t('funds_create_first', default='Start by adding your first fund.') }}</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+
+    const searchInput = document.getElementById('searchInput');
+    const table = document.getElementById('fundsTable');
+    const rows = table.getElementsByTagName('tr');
+
+    searchInput.addEventListener('input', function() {
+        const filter = searchInput.value.toLowerCase();
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            const cells = row.getElementsByTagName('td');
+            let match = false;
+            for (let j = 0; j < cells.length - 1; j++) {
+                if (cells[j].textContent.toLowerCase().includes(filter)) {
+                    match = true;
+                    break;
+                }
+            }
+            row.style.display = match ? '' : 'none';
+        }
+    });
+});
+</script>
+{% endblock %}

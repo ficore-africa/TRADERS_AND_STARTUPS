@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %}{{ t('general_login', default='Sign In') | e }}{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<div class="login-page">
+    <div class="login-page__container">
+        <div class="login-page__card">
+            <h1 class="text-2xl font-bold text-center text-gray-800 dark:text-gray-100 mb-4">{{ t('general_login', default='Sign In') | e }}</h1>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert bg-{{ 'red-100 text-red-700 border-red-500' if category in ['danger', 'error'] else 'green-100 text-green-700 border-green-500' }} border-l-4 rounded p-3 mb-4">
+                            {{ message | e }}
+                            {% if category in ['danger', 'error'] %}
+                                <p class="mt-1 text-sm">{{ t('general_check_credentials', default='Please check your username or email and password.') | e }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            <form method="POST" action="{{ url_for('users.login') }}" class="login-page__form" id="loginForm">
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    {{ form.username(class="form-control", placeholder=" ", required=True, id="username", autofocus=True, **{'aria-label': t('general_login_identifier', default='Username or Email')}) | safe }}
+                    <label class="floating-label" for="username">{{ t('general_login_identifier', default='Username or Email') | e }}</label>
+                    {% if form.username.errors %}
+                        <div class="text-red-600 text-sm mt-1">
+                            {% for error in form.username.errors %}
+                                {{ error | e }}<br>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="form-group password-container">
+                    {{ form.password(class="form-control", placeholder=" ", required=True, id="password") | safe }}
+                    <label class="floating-label" for="password">{{ t('general_password', default='Password') | e }}</label>
+                    <button type="button" id="togglePassword" class="toggle-password-btn" aria-label="{{ t('general_toggle_password_visibility', default='Toggle password visibility') | e }}">
+                        <i class="fas fa-eye eye-icon"></i>
+                        <i class="fas fa-eye-slash eye-slash-icon hidden"></i>
+                    </button>
+                    {% if form.password.errors %}
+                        <div class="text-red-600 text-sm mt-1">
+                            {% for error in form.password.errors %}
+                                {{ error | e }}<br>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="remember-container">
+                    {{ form.remember(class="h-4 w-4 text-indigo-600 border-gray-300 rounded", id="remember") | safe }}
+                    <label for="remember" class="text-sm text-gray-900 dark:text-gray-200">{{ t('general_remember_me', default='Remember me') | e }}</label>
+                </div>
+                <button type="submit" class="btn btn-primary" id="signInButton">{{ t('general_login', default='Sign In') | e }}</button>
+                <div class="links-container mt-3">
+                    <a href="{{ url_for('users.signup') }}" class="text-indigo-600 hover:text-indigo-500">{{ t('general_signup', default='Create an Account') | e }}</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    const eyeIcon = togglePassword.querySelector('.eye-icon');
+    const eyeSlashIcon = togglePassword.querySelector('.eye-slash-icon');
+    const signInButton = document.getElementById('signInButton');
+    const loginForm = document.getElementById('loginForm');
+
+    togglePassword.addEventListener('click', () => {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        eyeIcon.classList.toggle('hidden');
+        eyeSlashIcon.classList.toggle('hidden');
+    });
+
+    signInButton.addEventListener('click', (e) => {
+        if (!signInButton.classList.contains('loading')) {
+            signInButton.classList.add('loading');
+            signInButton.disabled = true;
+            loginForm.submit(); // Ensure form submission
+        }
+    });
+
+    // Reset button state on form submission failure
+    loginForm.addEventListener('submit', () => {
+        setTimeout(() => {
+            signInButton.classList.remove('loading');
+            signInButton.disabled = false;
+        }, 2000); // Reset after 2 seconds if submission fails
+    });
+</script>
+{% endblock %}

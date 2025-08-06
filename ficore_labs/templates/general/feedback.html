@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}{{ t('general_provide_feedback', default='Provide Feedback') }}{% endblock %}
+{% block content %}
+<div class="container my-5">
+    <h1 class="text-center mb-4">{{ t('general_provide_feedback', default='Provide Feedback') }}</h1>
+    {% if current_user.is_authenticated and not current_user.is_trial_active() %}
+        <div class="alert alert-warning text-center">
+            {{ t('general_subscription_required', default='Your trial has expired. Please subscribe to submit feedback.') }}
+            <a href="{{ url_for('general_bp.subscription_required') }}" class="btn btn-primary btn-sm ms-2">
+                {{ t('general_subscribe_now', default='Subscribe Now') }}
+            </a>
+        </div>
+    {% else %}
+        <div class="card">
+            <div class="card-body">
+                <form class="validate-form" method="POST" action="{{ url_for('general_bp.feedback') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="form-group mb-3">
+                        <label for="tool_name" class="form-label">{{ t('general_select_tool', default='Select Tool') }} <span class="text-danger">*</span></label>
+                        <select name="tool_name" id="tool_name" class="form-select" required>
+                            <option value="" disabled selected>{{ t('general_choose_option', default='Choose...') }}</option>
+                            <option value="profile">{{ t('general_profile', default='Profile') }}</option>
+                            <option value="debtors">{{ t('debtors_dashboard', default='Debtors') }}</option>
+                            <option value="creditors">{{ t('creditors_dashboard', default='Creditors') }}</option>
+                            <option value="receipts">{{ t('receipts_dashboard', default='Receipts') }}</option>
+                            <option value="payment">{{ t('payments_dashboard', default='Payments') }}</option>
+                            <option value="report">{{ t('reports_dashboard', default='Business Reports') }}</option>
+                            <option value="fund">{{ t('fund_tracking', default='Fund Tracking') }}</option>
+                            <option value="investor_report">{{ t('investor_reports', default='Investor Reports') }}</option>
+                            <option value="forecast">{{ t('forecast_scenario', default='Forecast & Scenario') }}</option>
+                        </select>
+                        <div class="invalid-feedback">{{ t('general_invalid_tool', default='Please select a valid tool') }}</div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="rating" class="form-label">{{ t('general_rating', default='Rating (1-5)') }} <span class="text-danger">*</span></label>
+                        <select name="rating" id="rating" class="form-select" required>
+                            <option value="" disabled selected>{{ t('general_select_rating', default='Select a rating (1-5)') }}</option>
+                            <option value="1">1 - {{ t('general_feedback_poor', default='Poor') }}</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5 - {{ t('general_feedback_excellent', default='Excellent') }}</option>
+                        </select>
+                        <div class="invalid-feedback">{{ t('general_invalid_rating', default='Please provide a rating between 1 and 5') }}</div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="comment" class="form-label">{{ t('general_comment', default='Comment') }}</label>
+                        <textarea name="comment" id="comment" class="form-control" rows="4" placeholder="{{ t('general_feedback_comment_placeholder', default='Your feedback (optional)') }}"></textarea>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">{{ t('general_submit', default='Submit') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

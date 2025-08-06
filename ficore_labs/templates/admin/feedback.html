@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}{{ t('admin_feedback_title', default='Manage Feedback') }}{% endblock %}
+{% block content %}
+<div class="container my-5">
+    <h1 class="text-center mb-4">{{ t('admin_feedback_title', default='Manage Feedback') }}</h1>
+    
+    <!-- Filter Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5>{{ t('general_filter_feedback', default='Filter Feedback') }}</h5>
+            <form method="POST" class="validate-form">
+                {{ form.hidden_tag() }}
+                <div class="row">
+                    <div class="col-md-5 mb-3">
+                        <label for="{{ form.tool_name.id }}" class="form-label">{{ t('general_select_tool', default='Select Tool') }}</label>
+                        {{ form.tool_name }}
+                        {% if form.tool_name.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.tool_name.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-5 mb-3">
+                        <label for="{{ form.user_id.id }}" class="form-label">{{ t('admin_user_id', default='User ID') }}</label>
+                        {{ form.user_id }}
+                        {% if form.user_id.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.user_id.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-2 mb-3 d-flex align-items-end">
+                        {{ form.submit(class="btn btn-primary w-100") }}
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Feedback Table -->
+    <div class="card">
+        <div class="card-body">
+            <h5>{{ t('admin_feedback_list', default='Feedback Entries') }}</h5>
+            {% if feedback_list %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>{{ t('admin_user_id', default='User ID') }}</th>
+                                <th>{{ t('general_select_tool', default='Tool') }}</th>
+                                <th>{{ t('general_rating', default='Rating') }}</th>
+                                <th>{{ t('general_comment', default='Comment') }}</th>
+                                <th>{{ t('general_timestamp', default='Timestamp') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for feedback in feedback_list %}
+                                <tr>
+                                    <td>{{ feedback.user_id or t('general_anonymous', default='Anonymous') }}</td>
+                                    <td>{{ t('general_' + feedback.tool_name, default=feedback.tool_name.capitalize()) }}</td>
+                                    <td>{{ feedback.rating }}</td>
+                                    <td>{{ feedback.comment or t('general_no_comment', default='No comment') }}</td>
+                                    <td>{{ feedback.timestamp }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-center">{{ t('admin_no_feedback', default='No feedback found') }}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

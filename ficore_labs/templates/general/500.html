@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}{{ t('general_internal_server_error', default='Internal Server Error') }}{% endblock %}
+{% block content %}
+<div class="container text-center">
+    <div class="navbar mb-4">
+        <h1>500 - {{ t('general_internal_server_error', default='Internal Server Error') }}</h1>
+    </div>
+    <p>{{ t('general_something_went_wrong', default='Something went wrong') }}</p>
+    <a href="{{ url_for('index') }}" class="btn btn-primary">{{ t('general_return_to_home', default='Return to Home') }}</a>
+</div>
+{% endblock %}

@@ -1,0 +1,378 @@
+{% extends 'base.html' %}
+{% block title %}{{ t('general_welcome', default='Welcome to Ficore Africa') | e }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="section-card welcome-section-card text-center mt-5">
+        <h1 class="section-title display-4 fw-bold">{{ t('general_welcome', default='Welcome to Ficore Africa') | e }}</h1>
+        <p class="lead text-muted mb-4">{{ t('general_business_finance_desc', default='Simplified business finance, built for traders, startups, and modern entrepreneurs.') | e }}</p>
+        <div class="btn-group btn-group-vertical d-md-flex mb-4">
+            <a href="{{ url_for('users.signup') }}" class="btn btn-primary btn-lg mx-2" data-bs-toggle="tooltip" data-bs-title="{{ t('general_signup_tooltip', default='Create your Ficore Africa account') | e }}">
+                <i class="bi bi-person-plus me-2"></i>{{ t('general_signup', default='Sign Up') | e }}
+            </a>
+            <a href="{{ url_for('users.login') }}" class="btn btn-outline-primary btn-lg mx-2" data-bs-toggle="tooltip" data-bs-title="{{ t('general_login_tooltip', default='Log in to your account') | e }}">
+                <i class="bi bi-box-arrow-in-right me-2"></i>{{ t('general_login', default='Log In') | e }}
+            </a>
+        </div>
+    </div>
+
+    <!-- Who We Serve -->
+    <div class="section-card mt-5">
+        <h3 class="section-title">{{ t('general_who_we_serve', default='Who We Serve') | e }}</h3>
+        <p class="text-muted">{{ t('general_who_we_serve_desc', default='Ficore Africa empowers individuals, businesses, and agents with tailored financial tools.') | e }}</p>
+        <div class="row">
+            <div class="col-md-6">
+                <a href="{{ url_for('users.signup') }}" class="tool-card-link">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5>{{ t('general_trader', default='Business Owners') | e }}</h5>
+                            <p>{{ t('general_trader_desc', default='Streamline debtors, creditors, and financial reports.') | e }}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6">
+                <a href="{{ url_for('users.signup') }}" class="tool-card-link">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5>{{ t('general_startup', default='Startups') | e }}</h5>
+                            <p>{{ t('general_startup_desc', default='Track funds, forecast scenarios, and generate investor reports.') | e }}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Explore Our Tools -->
+    <div class="section-card mt-5">
+        <h3 class="section-title">{{ t('general_our_tools', default='Explore Our Tools') | e }}</h3>
+        <p class="text-muted">{{ t('general_tools_desc', default='Powerful tools to manage your finances effectively.') | e }}</p>
+        {% if explore_features_for_template %}
+            {% set categories = ['Business', 'Startup'] %}
+            {% for category in categories %}
+                {% set category_tools = explore_features_for_template | selectattr('category', 'equalto', category) | list %}
+                {% if category_tools %}
+                    <h4>{{ t('general_' + category | lower + '_tools', default=category + ' Tools') | e }}</h4>
+                    <div class="row">
+                        {% for tool in category_tools %}
+                            <div class="col-md-4 mb-3">
+                                <a href="{{ tool.get('url', url_for('users.login')) }}" class="tool-card-link">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5>{{ t(tool.get('label_key', ''), default=tool.get('label', 'Tool')) | e }}</h5>
+                                            <p>{{ t(tool.get('description_key', ''), default=tool.get('description', 'Description not available')) | e }}</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+            {% if not categories %}
+                <p class="text-muted">{{ t('general_no_tools_available', default='No tools available at the moment.') | e }}</p>
+            {% endif %}
+        {% else %}
+            <p class="text-muted">{{ t('general_no_tools_available', default='No tools available at the moment.') | e }}</p>
+        {% endif %}
+    </div>
+
+    <!-- Why Ficore Africa -->
+    <div class="section-card why-section mt-5">
+        <h2 class="section-title text-center"><i class="bi bi-info-circle-fill me-2 text-primary"></i>{{ t('general_why_ficore_africa', default='Why Ficore Africa?') | e }}</h2>
+        <p class="text-center text-muted mb-4">{{ t('general_ficore_africa_highlight', default='Nigeria’s #1 Localized Financial Management Platform') | e }}</p>
+        <div class="row row-cols-1 row-cols-md-4 g-4">
+            <div class="col">
+                <div class="why-item text-center">
+                    <p class="text-muted">
+                        {{ t('general_localized', default='Built for Nigeria with Naira support and regional insights') | e }}
+                    </p>
+                </div>
+            </div>
+            <div class="col">
+                <div class="why-item text-center">
+                    <p class="text-muted">
+                        {{ t('general_empowers', default='Empowers businesses and startups') | e }}
+                    </p>
+                </div>
+            </div>
+            <div class="col">
+                <div class="why-item text-center">
+                    <p class="text-muted">
+                        {{ t('general_actionable', default='Actionable insights for smarter decisions') | e }}
+                    </p>
+                </div>
+            </div>
+            <div class="col">
+                <div class="why-item text-center">
+                    <p class="text-muted">
+                        {{ t('general_secure', default='Advisory-only – we don’t access your funds') | e }}
+                    </p>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <span class="animated-counter display-5 fw-bold text-primary" data-count="150+">150+</span>
+                <span class="fs-5">{{ t('general_users_served', default='Users Served') | e }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Testimonials -->
+    <div class="section-card testimonials-section mt-5">
+        <h2 class="section-title text-center"><i class="bi bi-quote me-2 text-primary"></i>{{ t('general_testimonials', default='What Our Users Say') | e }}</h2>
+        <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <div class="testimonial text-center">
+                        <img src="{{ url_for('static', filename='img/default_avatar.png') | e }}" alt="{{ t('general_testimonial_avatar', default='User Avatar') | e }}" class="avatar-circle gradient-bg mx-auto mb-3" data-initials="MU">
+                        <p class="text-muted">{{ t('general_impressed_features', default='Ficore Africa’s sales recorder and expenses tracking tools are intuitive and perfect for managing my business finances!') | e }}</p>
+                        <p class="name fw-bold">User, {{ t('general_trader', default='Business Owner') | e }}</p>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <div class="testimonial text-center">
+                        <img src="{{ url_for('static', filename='img/default_avatar.png') | e }}" alt="{{ t('general_testimonial_avatar', default='User Avatar') | e }}" class="avatar-circle gradient-bg mx-auto mb-3" data-initials="AA">
+                        <p class="text-muted">{{ t('general_business_finance_praise', default='Managing my startup’s funds, forecasts, and investor reports has never been easier!') | e }}</p>
+                        <p class="name fw-bold">User, {{ t('general_startup', default='Startup') | e }}</p>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">{{ t('general_previous', default='Previous') | e }}</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">{{ t('general_next', default='Next') | e }}</span>
+            </button>
+        </div>
+        <div class="text-center mt-4">
+            <a href="{{ url_for('general_bp.about') }}" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" data-bs-title="{{ t('general_about_business_finance_tooltip', default='Learn more about Business Finance') | e }}">{{ t('general_about_business_finance', default='Learn More About Us') | e }}</a>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="section-card faq-section mt-5">
+        <h2 class="section-title text-center"><i class="bi bi-question-circle-fill me-2 text-primary"></i>{{ t('general_faq', default='Frequently Asked Questions') | e }}</h2>
+        <div class="accordion" id="faqAccordion">
+            <div class="accordion-item">
+                <h3 class="accordion-header" id="faqFundHandling">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFundHandling" aria-expanded="true" aria-controls="collapseFundHandling">
+                        {{ t('general_faq_fund_handling', default='Does Ficore Africa store or manage my money?') | e }}
+                    </button>
+                </h3>
+                <div id="collapseFundHandling" class="accordion-collapse collapse show" aria-labelledby="faqFundHandling" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        {{ t('general_faq_fund_handling_answer', default='No. Ficore Africa provides advisory and tracking tools only. Your money stays with you.') | e }}
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h3 class="accordion-header" id="faqRoles">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRoles" aria-expanded="false" aria-controls="collapseRoles">
+                        {{ t('general_faq_roles', default='What types of users can use Ficore Africa?') | e }}
+                    </button>
+                </h3>
+                <div id="collapseRoles" class="accordion-collapse collapse" aria-labelledby="faqRoles" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        {{ t('general_faq_roles_answer', default='Ficore Africa supports business owners with debtor, creditor, and report management, and startups with fund tracking, forecasting, and investor reporting.') | e }}
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h3 class="accordion-header" id="faqBusinessStartup">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBusinessStartup" aria-expanded="false" aria-controls="collapseBusinessStartup">
+                        {{ t('general_faq_business_startup', default='How does Ficore Africa support businesses and startups?') | e }}
+                    </button>
+                </h3>
+                <div id="collapseBusinessStartup" class="accordion-collapse collapse" aria-labelledby="faqBusinessStartup" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        {{ t('general_faq_business_startup_answer', default='Business owners can track debtors, creditors, and generate reports, while startups can manage funds, forecasts, and investor reports. Sign up to explore these tools.') | e }}
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h3 class="accordion-header" id="faqFreeTrial">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFreeTrial" aria-expanded="false" aria-controls="collapseFreeTrial">
+                        {{ t('general_faq_free_trial', default='Is there a free trial?') | e }}
+                    </button>
+                </h3>
+                <div id="collapseFreeTrial" class="accordion-collapse collapse" aria-labelledby="faqFreeTrial" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        {{ t('general_faq_free_trial_answer', default='Yes, Ficore Africa offers a free trial for new users. After the trial, you can subscribe to continue using all features or view your data in read-only mode.') | e }}
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h3 class="accordion-header" id="faqSubscription">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSubscription" aria-expanded="false" aria-controls="collapseSubscription">
+                        {{ t('general_faq_subscription', default='How does the subscription work?') | e }}
+                    </button>
+                </h3>
+                <div id="collapseSubscription" class="accordion-collapse collapse" aria-labelledby="faqSubscription" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        {{ t('general_faq_subscription_answer', default='After the free trial, a subscription is required to access all features. Non-subscribed users can view their data in read-only mode. Visit the subscription page for details.') | e }}
+                        <a href="{{ url_for('subscribe_bp.subscribe') }}" class="btn btn-link btn-sm">{{ t('general_subscribe', default='Subscribe Now') | e }}</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="section-card mt-5 text-center">
+        <h3 class="section-title">{{ t('general_ready_to_start', default='Ready to Take Control of Your Finances?') | e }}</h3>
+        <p class="text-muted">{{ t('general_signup_prompt', default='Sign up today to access tools for business management or startup growth.') | e }}</p>
+        <div class="btn-group btn-group-vertical d-md-flex mb-3">
+            <a href="{{ url_for('users.signup') }}" class="btn btn-primary mx-2" data-bs-toggle="tooltip" data-bs-title="{{ t('general_get_started_tooltip', default='Start your financial journey') | e }}">{{ t('general_get_started', default='Get Started') | e }}</a>
+            <a href="{{ url_for('users.login') }}" class="btn btn-outline-primary mx-2" data-bs-toggle="tooltip" data-bs-title="{{ t('general_login_tooltip', default='Log in to your account') | e }}">{{ t('general_login', default='Log In') | e }}</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.section-card {
+    padding: 2rem;
+    border-radius: 0.5rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+}
+.welcome-section-card {
+    margin-top: 3rem;
+}
+.section-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+.tool-card-link {
+    text-decoration: none;
+    color: inherit;
+}
+.card {
+    border: 1px solid #e9ecef;
+    border-radius: 0.5rem;
+    transition: transform 0.2s, background 0.3s, box-shadow 0.3s;
+}
+.card:hover {
+    transform: translateY(-5px);
+    background: #bee3f8;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    cursor: pointer;
+}
+[data-bs-toggle="tooltip"] {
+    z-index: 1000;
+}
+.avatar-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.gradient-bg {
+    background: linear-gradient(135deg, #007bff, #6610f2);
+}
+.carousel-item {
+    padding: 1rem;
+}
+.why-item {
+    padding: 1rem;
+}
+</style>
+
+{% block extra_scripts %}
+{% set translations = {
+    'just_now': t('general_just_now', default='Just now') | e,
+    'minutes_ago': t('general_minutes_ago', default='m ago') | e,
+    'hours_ago': t('general_hours_ago', default='h ago') | e,
+    'days_ago': t('general_days_ago', default='d ago') | e
+} %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(tooltipTriggerEl => {
+        new bootstrap.Tooltip(tooltipTriggerEl, {
+            trigger: 'hover focus',
+            container: 'body'
+        });
+    });
+
+    // Debug icons
+    document.querySelectorAll('.bi').forEach(icon => {
+        if (!icon.className.includes('bi-')) {
+            console.warn('Invalid or missing Bootstrap Icon class:', icon.className);
+        }
+    });
+
+    // Initialize Bootstrap carousel
+    const carousel = document.getElementById('testimonialCarousel');
+    if (carousel) {
+        try {
+            new bootstrap.Carousel(carousel, {
+                interval: 5000,
+                ride: 'carousel',
+                touch: true
+            });
+        } catch (error) {
+            console.error('Failed to initialize carousel:', error);
+        }
+    }
+
+    // Animated counter
+    const counter = document.querySelector('.animated-counter');
+    if (counter) {
+        const target = counter.getAttribute('data-count');
+        if (target) {
+            counter.textContent = target;
+        } else {
+            counter.textContent = '0';
+        }
+    }
+
+    // Navbar touch handling
+    const navbarToggler = document.querySelector('.navbar-toggler');
+    const navbarCollapse = document.querySelector('#navbarNav');
+    if (navbarToggler && navbarCollapse) {
+        document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                if (navbarCollapse.classList.contains('show')) {
+                    navbarToggler.click();
+                }
+            });
+        });
+        document.addEventListener('touchstart', (event) => {
+            if (!navbarCollapse.contains(event.target) && !navbarToggler.contains(event.target) && navbarCollapse.classList.contains('show')) {
+                navbarToggler.click();
+            }
+        });
+        navbarCollapse.addEventListener('show.bs.collapse', () => {
+            console.log('Navbar opened');
+            navbarToggler.setAttribute('aria-expanded', 'true');
+        });
+        navbarCollapse.addEventListener('hide.bs.collapse', () => {
+            console.log('Navbar closed');
+            navbarToggler.setAttribute('aria-expanded', 'false');
+        });
+    } else {
+        console.warn('Navbar toggler or collapse element not found');
+    }
+});
+
+function formatTimeAgo(timestamp) {
+    const translations = {{ translations | tojson }};
+    const now = new Date();
+    const time = new Date(timestamp);
+    const diffInSeconds = Math.floor((now - time) / 1000);
+    if (diffInSeconds < 60) return translations.just_now;
+    if (diffInSeconds < 3600) return Math.floor(diffInSeconds / 60) + ' ' + translations.minutes_ago;
+    if (diffInSeconds < 86400) return Math.floor(diffInSeconds / 3600) + ' ' + translations.hours_ago;
+    return Math.floor(diffInSeconds / 86400) + ' ' + translations.days_ago;
+}
+</script>
+{% endblock %}
+{% endblock %}

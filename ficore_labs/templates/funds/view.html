@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% from "_ficore_report_header.html" import ficore_report_header %}
+{% block title %}{{ t('funds_details', default='Fund Details') }} - FiCore{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    {{ ficore_report_header(current_user) }}
+    <div class="page-title">
+        <h1>{{ t('funds_details', default='Fund Details') }}</h1>
+        <small class="text-muted">{{ fund.source }}</small>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>{{ t('funds_source', default='Source') }}:</strong> {{ fund.source }}</p>
+                    <p><strong>{{ t('funds_amount', default='Amount') }}:</strong> {{ format_currency(fund.amount) }}</p>
+                    <p><strong>{{ t('funds_category', default='Category') }}:</strong> {{ fund.category|capitalize }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>{{ t('general_description', default='Description') }}:</strong> {{ fund.description or t('general_no_description', default='No description provided') }}</p>
+                    <p><strong>{{ t('funds_date_recorded', default='Date Recorded') }}:</strong> {{ format_date(fund.created_at) }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="dropdown d-inline-block">
+                <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                        {% if not can_interact %}disabled data-bs-toggle="tooltip" title="{{ t('funds_subscription_required', default='Your trial or subscription has expired. Please subscribe to download reports.') }}"{% endif %}>
+                    {{ t('general_actions', default='Actions') }}
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item download-report-btn" 
+                           data-id="{{ fund._id }}"
+                           href="#"
+                           {% if not can_interact %}disabled data-bs-toggle="tooltip" title="{{ t('funds_subscription_required', default='Your trial or subscription has expired. Please subscribe to download reports.') }}"{% endif %}>
+                           {{ t('funds_download_report', default='Download Report') }}
+                    </a></li>
+                    <li><a class="dropdown-item" 
+                           href="{{ url_for('funds.generate_report_csv', id=fund._id) }}"
+                           {% if not can_interact %}disabled data-bs-toggle="tooltip" title="{{ t('funds_subscription_required', default='Your trial or subscription has expired. Please subscribe to download reports.') }}"{% endif %}>
+                           {{ t('funds_download_report_csv', default='Download Report CSV') }}
+                    </a></li>
+                </ul>
+            </div>
+            <a href="{{ url_for('funds.index') }}" 
+               class="btn btn-secondary btn-sm"
+               data-bs-toggle="tooltip" 
+               title="{{ t('general_back', default='Back') }}">
+                {{ t('general_back', default='Back') }}
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Download Report Modal -->
+<div class="modal fade" id="downloadReportModal" tabindex="-1" aria-labelledby="downloadReportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="downloadReportModalLabel">{{ t('funds_download_report', default='Download Fund Report') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ t('general_close', default='Close') }}"></button>
+            </div>
+            <div class="modal-body">
+                <p>{{ t('funds_download_report_confirm', default='Generate and download fund report as PDF for') }} {{ fund.source }}?</p>
+                {% if not can_interact %}
+                    <div class="form-text">{{ t('funds_subscription_required', default='Your trial or subscription has expired. Please subscribe to download reports.') }}</div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <a id="confirmDownloadReportBtn" class="btn btn-primary" href="#"
+                   {% if not can_interact %}disabled data-bs-toggle="tooltip" title="{{ t('funds_subscription_required', default='Your trial or subscription has expired. Please subscribe to download reports.') }}"{% endif %}>
+                    {{ t('funds_download_report', default='Download Report') }}
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {{ t('general_cancel', default='Cancel') }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+
+    document.querySelectorAll('.download-report-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            {% if can_interact %}
+            const fundId = button.dataset.id;
+            document.getElementById('confirmDownloadReportBtn').setAttribute('href', `/funds/generate_report/${fundId}`);
+            new bootstrap.Modal(document.getElementById('downloadReportModal')).show();
+            {% endif %}
+        });
+    });
+});
+</script>
+{% endblock %}

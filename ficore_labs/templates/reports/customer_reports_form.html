@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ t('reports_customer_reports', default='Customer Reports') }} - Business Finance{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>{{ t('reports_customer_reports', default='Customer Reports') }}</h1>
+    <small class="text-muted">{{ t('customer_reports_description', default='View aggregated data on customer financial activities.') }}</small>
+    
+    <form method="POST" class="mt-4">
+        {{ form.hidden_tag() }}
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label for="{{ form.role.id }}" class="form-label">{{ form.role.label }}</label>
+                {{ form.role(class="form-control") }}
+            </div>
+            <div class="col-md-6">
+                <label for="{{ form.format.id }}" class="form-label">{{ t('report_format', default='Format') }}</label>
+                {{ form.format(class="form-control") }}
+            </div>
+            <div class="col-md-12 mt-3">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

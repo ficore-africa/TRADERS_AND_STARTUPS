@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="{{ lang | e }}">
+<head>
+    {% extends 'base.html' %}
+    {% block title %}{{ title | e }}{% endblock %}
+    {% block extra_head %}
+    <style>
+        .profile-subscription-steps {
+            margin-top: 1.5rem;
+            padding-left: 1.5rem;
+            list-style-type: decimal;
+        }
+        .profile-subscription-steps li {
+            margin-bottom: 0.75rem;
+            color: var(--text-color);
+        }
+        .profile-subscription-steps li strong {
+            color: var(--accent-blue);
+        }
+    </style>
+    {% endblock %}
+</head>
+<body>
+    {% block content %}
+    <div class="profile-container">
+        <div class="profile-header">
+            <a href="{{ url_for('settings.profile') }}" class="profile-back-arrow">←</a>
+            <h1>{{ t('subscribe_status_title', default='Subscription Status') | e }}</h1>
+        </div>
+
+        <div class="profile-card">
+            <div class="profile-card-body">
+                <h5 class="profile-heading">{{ t('subscribe_current_status', default='Your Current Subscription Status') | e }}</h5>
+                <div class="profile-text-center">
+                    {% if current_user.is_subscribed %}
+                        <p class="profile-text profile-text-success">
+                            {{ t('subscribe_already_subscribed', default='You are already subscribed! Your plan is active until ') | e }}{{ current_user.subscription_end | format_date | e }}
+                        </p>
+                        <p class="profile-text">
+                            {{ t('subscribe_plan', default='Plan') | e }}: {{ current_user.subscription_plan|capitalize | e }}
+                        </p>
+                        <p class="profile-text">
+                            {{ t('subscribe_positive_feedback', default='Thank you for being a valued subscriber! Enjoy full access to all FiCore features.') | e }}
+                        </p>
+                    {% elif current_user.is_trial and not is_trial_expired(current_user.trial_end, current_user.is_trial, current_user.is_subscribed, current_user.subscription_end) %}
+                        <p class="profile-text">
+                            {{ t('subscribe_trial_active', default='Your trial is active until ') | e }}{{ current_user.trial_end | format_date | e }}
+                        </p>
+                        <p class="profile-text profile-text-warning">
+                            {{ t('subscribe_trial_encouragement', default='Enjoying FiCore? Subscribe now to continue accessing all features after your trial ends!') | e }}
+                        </p>
+                        <a href="{{ url_for('subscribe_bp.subscribe') }}" class="profile-btn profile-btn-primary">
+                            {{ t('subscribe_button', default='Subscribe Now') | e }}
+                        </a>
+                    {% else %}
+                        <p class="profile-text profile-text-warning">
+                            {{ t('subscribe_trial_expired', default='Your trial has expired. Subscribe to continue using all features.') | e }}
+                        </p>
+                        <p class="profile-text">
+                            {{ t('subscribe_guidance', default='Follow these steps to subscribe and unlock full access:') | e }}
+                        </p>
+                        <ol class="profile-subscription-steps">
+                            <li>{{ t('subscribe_step_1', default='Click the "Subscribe Now" button below.') | e }}</li>
+                            <li>{{ t('subscribe_step_2', default='Choose a plan (Monthly or Yearly) that suits your needs.') | e }}</li>
+                            <li>{{ t('subscribe_step_3', default='Complete the secure payment process via Paystack.') | e }}</li>
+                            <li>{{ t('subscribe_step_4', default='Enjoy uninterrupted access to all FiCore features!') | e }}</li>
+                        </ol>
+                        <a href="{{ url_for('subscribe_bp.subscribe') }}" class="profile-btn profile-btn-primary">
+                            {{ t('subscribe_button', default='Subscribe Now') | e }}
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+</body>
+</html>

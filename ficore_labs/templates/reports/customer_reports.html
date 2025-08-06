@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ t('reports_customer_reports', default='Customer Reports') }} - Business Finance{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>{{ t('reports_customer_reports', default='Customer Reports') }}</h1>
+    <small class="text-muted">{{ t('customer_reports_description', default='View aggregated data on customer financial activities.') }}</small>
+    
+    {% if report_data %}
+    <div class="table-responsive mt-4">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>{{ t('general_username', default='Username') }}</th>
+                    <th>{{ t('general_email', default='Email') }}</th>
+                    <th>{{ t('general_role', default='Role') }}</th>
+                    <th>{{ t('general_is_trial', default='Is Trial') }}</th>
+                    <th>{{ t('general_trial_end', default='Trial End') }}</th>
+                    <th>{{ t('general_is_subscribed', default='Is Subscribed') }}</th>
+                    <th>{{ t('reports_total_debtors', default='Total Debtors') }}</th>
+                    <th>{{ t('reports_total_creditors', default='Total Creditors') }}</th>
+                    <th>{{ t('reports_total_receipts', default='Total Receipts') }}</th>
+                    <th>{{ t('reports_total_payments', default='Total Payments') }}</th>
+                    <th>{{ t('reports_latest_fund', default='Latest Fund') }}</th>
+                    <th>{{ t('reports_latest_forecast', default='Latest Forecast Revenue') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in report_data %}
+                <tr>
+                    <td>{{ data.username }}</td>
+                    <td>{{ data.email }}</td>
+                    <td>{{ t(data.role, default=data.role) }}</td>
+                    <td>{{ data.is_trial }}</td>
+                    <td>{{ data.trial_end }}</td>
+                    <td>{{ data.is_subscribed }}</td>
+                    <td>{{ data.total_debtors | format_currency }}</td>
+                    <td>{{ data.total_creditors | format_currency }}</td>
+                    <td>{{ data.total_receipts | format_currency }}</td>
+                    <td>{{ data.total_payments | format_currency }}</td>
+                    <td>{{ data.latest_fund_amount }}</td>
+                    <td>{{ data.latest_forecast_revenue }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="mt-4 text-muted">{{ t('no_data', default='No customer data available.') }}</p>
+    {% endif %}
+</div>
+{% endblock %}
