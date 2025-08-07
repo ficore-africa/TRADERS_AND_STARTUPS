@@ -22,7 +22,7 @@ def exempt_crawlers():
 general_bp = Blueprint('general_bp', __name__, url_prefix='/general')
 
 @general_bp.route('/landing')
-@limiter.limit("100 per minute", exempt_when=exempt_crawlers)
+@limiter.limit("500 per minute", exempt_when=exempt_crawlers)
 def landing():
     """Render the public landing page."""
     if current_user.is_authenticated:
@@ -346,3 +346,4 @@ def feedback():
     
     # Handle GET request
     return render_template('general/feedback.html', tool_options=tool_options, title=trans('general_feedback', lang=lang))
+
