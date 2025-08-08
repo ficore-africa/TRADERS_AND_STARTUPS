@@ -4,7 +4,7 @@ import uuid
 import os
 import certifi
 from datetime import datetime, timedelta, timezone
-from zoneinfo import ZoneInfo  # Added ZoneInfo import
+from zoneinfo import ZoneInfo
 from flask import session, has_request_context, current_app, url_for, request
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -190,7 +190,6 @@ _TRADER_NAV = [
 ]
 
 _STARTUP_NAV = [
-
     {
         "endpoint": "general_bp.home",
         "label": "Home",
@@ -305,38 +304,81 @@ def generate_tools_with_urls(tools):
 
 def get_explore_features():
     """
-    Returns a list of selected features for the landing page, categorized by Business and Startups, limited to three tools each.
+    Returns a list of features for the explore section based on user role.
+    - Unauthenticated: 3 trader and 3 startup tools for marketing.
+    - Authenticated-trader: Only trader tools.
+    - Authenticated-startup: Only startup tools.
+    - Authenticated-admin: All tools (admin + startup).
     """
     try:
         features = []
-        # Define selected tools for Business (Traders)
-        business_tool_keys = ["debtors_dashboard", "receipts_dashboard", "business_reports"]
-        for tool in TRADER_TOOLS:
-            if tool["label_key"] in business_tool_keys:
+        user_role = 'unauthenticated'
+        if has_request_context() and current_user.is_authenticated:
+            user_role = current_user.role
+
+        if user_role == 'unauthenticated':
+            # Unauthenticated: 3 trader and 3 startup tools for marketing
+            business_tool_keys = ["debtors_dashboard", "receipts_dashboard", "business_reports"]
+            for tool in TRADER_TOOLS:
+                if tool["label_key"] in business_tool_keys:
+                    features.append({
+                        "category": "Business",
+                        "label_key": tool["label_key"],
+                        "description_key": tool["description_key"],
+                        "label": tool["label"],
+                        "description": tool.get("description", "Description not available"),
+                        "url": tool["url"] if tool["url"] != "#" else url_for("users.login", _external=True)
+                    })
+            startup_tool_keys = ["funds_dashboard", "forecasts_dashboard", "investor_reports_dashboard"]
+            for tool in STARTUP_TOOLS:
+                if tool["label_key"] in startup_tool_keys:
+                    features.append({
+                        "category": "Startup",
+                        "label_key": tool["label_key"],
+                        "description_key": tool["description_key"],
+                        "label": tool["label"],
+                        "description": tool.get("description", "Description not available"),
+                        "url": tool["url"] if tool["url"] != "#" else url_for("users.login", _external=True)
+                    })
+        elif user_role == 'trader':
+            # Authenticated-trader: Only trader tools
+            for tool in TRADER_TOOLS:
                 features.append({
                     "category": "Business",
                     "label_key": tool["label_key"],
                     "description_key": tool["description_key"],
                     "label": tool["label"],
                     "description": tool.get("description", "Description not available"),
-                    "url": tool["url"] if tool["url"] != "#" else url_for("users.login", _external=True)
+                    "url": tool["url"]
                 })
-        # Define selected tools for Startups
-        startup_tool_keys = ["funds_dashboard", "forecasts_dashboard", "investor_reports_dashboard"]
-        for tool in STARTUP_TOOLS:
-            if tool["label_key"] in startup_tool_keys:
+        elif user_role == 'startup':
+            # Authenticated-startup: Only startup tools
+            for tool in STARTUP_TOOLS:
                 features.append({
                     "category": "Startup",
                     "label_key": tool["label_key"],
                     "description_key": tool["description_key"],
                     "label": tool["label"],
                     "description": tool.get("description", "Description not available"),
-                    "url": tool["url"] if tool["url"] != "#" else url_for("users.login", _external=True)
+                    "url": tool["url"]
                 })
-        logger.info("Successfully retrieved selected explore features for Business and Startups", extra={'session_id': 'no-session-id'})
+        elif user_role == 'admin':
+            # Authenticated-admin: All tools (admin + startup)
+            for tool in ADMIN_TOOLS + STARTUP_TOOLS:
+                category = "Admin" if tool in ADMIN_TOOLS else "Startup"
+                features.append({
+                    "category": category,
+                    "label_key": tool["label_key"],
+                    "description_key": tool["description_key"],
+                    "label": tool["label"],
+                    "description": tool.get("description", "Description not available"),
+                    "url": tool["url"]
+                })
+
+        logger.info(f"Retrieved explore features for role: {user_role}", extra={'session_id': session.get('sid', 'no-session-id'), 'user_role': user_role})
         return features
     except Exception as e:
-        logger.error(f"Error retrieving explore features: {str(e)}", extra={'session_id': 'no-session-id'})
+        logger.error(f"Error retrieving explore features for role {user_role}: {str(e)}", extra={'session_id': session.get('sid', 'no-session-id'), 'user_role': user_role})
         return []
 
 def get_limiter():
@@ -354,7 +396,7 @@ def log_tool_usage(action, tool_name=None, details=None, user_id=None, db=None, 
             'user_id': str(user_id) if user_id else None,
             'session_id': effective_session_id,
             'action': details.get('action') if details else None,
-            'timestamp': datetime.now(timezone.utc),  # Updated to timezone-aware
+            'timestamp': datetime.now(timezone.utc),
             'ip_address': request.remote_addr if has_request_context() else 'unknown',
             'user_agent': request.headers.get('User-Agent') if has_request_context() else 'unknown'
         }
@@ -369,7 +411,7 @@ def create_anonymous_session():
         with current_app.app_context():
             session['sid'] = str(uuid.uuid4())
             session['is_anonymous'] = True
-            session['created_at'] = datetime.now(timezone.utc).isoformat()  # Updated to timezone-aware
+            session['created_at'] = datetime.now(timezone.utc).isoformat()
             if 'lang' not in session:
                 session['lang'] = 'en'
             session.modified = True
@@ -587,7 +629,7 @@ def log_user_action(action, details=None, user_id=None):
                 'session_id': session_id,
                 'action': action,
                 'details': details or {},
-                'timestamp': datetime.now(timezone.utc),  # Updated to timezone-aware
+                'timestamp': datetime.now(timezone.utc),
                 'ip_address': request.remote_addr if has_request_context() else None,
                 'user_agent': request.headers.get('User-Agent') if has_request_context() else None
             }
