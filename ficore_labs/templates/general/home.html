@@ -70,7 +70,7 @@
                         <i class="bi bi-arrow-down-circle text-success"></i>
                     </div>
                     <div class="snapshot-info">
-                        <div class="snapshot-label fw-bold">{{ t('general_receipts_mtd', default='Receipts (MTD)') | e }}</div>
+                        <div class="snapshot-label fw-bold">{{ t('general_receipts_mtd', default='Sales (MTD)') | e }}</div>
                         <div class="stat-card-value" id="totalReceipts" data-original-amount="{{ total_receipts }}">₦{{ format_currency(total_receipts) }}</div>
                     </div>
                 </div>
@@ -79,7 +79,7 @@
                         <i class="bi bi-arrow-up-circle text-danger"></i>
                     </div>
                     <div class="snapshot-info">
-                        <div class="snapshot-label fw-bold">{{ t('general_payments_mtd', default='Payments (MTD)') | e }}</div>
+                        <div class="snapshot-label fw-bold">{{ t('general_payments_mtd', default='Expenses (MTD)') | e }}</div>
                         <div class="stat-card-value" id="totalPayments" data-original-amount="{{ total_payments }}">₦{{ format_currency(total_payments) }}</div>
                     </div>
                 </div>
