@@ -118,6 +118,7 @@ def home():
             ]
         else:
             # Use all startup/admin tools for explore features
+            tool_list = STARTUP_TOOLS if user.role == "startup" else ADMIN_TOOLS
             explore_features_for_template = [
                 {
                     "label_key": tool["label_key"],
@@ -127,7 +128,7 @@ def home():
                     "url": tool["url"],
                     "icon": tool["icon"]
                 }
-                for tool in STARTUP_TOOLS if user.role == "startup" else ADMIN_TOOLS
+                for tool in tool_list
             ]
         is_read_only = False
 
