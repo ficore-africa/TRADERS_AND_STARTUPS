@@ -135,7 +135,7 @@
 
         <!-- Explore Features -->
         <div class="section-card explore-section">
-            <h3 class="section-title">{{ t('general_explore_features', default='Explore Features') | e }}</h3>
+            <h3 class="section-title">{{ t('general_explore_all_features', default='Explore Features') | e }}</h3>
             {% for feature in explore_features_for_template %}
                 {% if not is_read_only or feature.url == url_for('business.view_data') %}
                     <a href="{{ feature.url | default('#') | e }}" class="explore-card text-decoration-none {{ 'disabled' if is_read_only and feature.url != url_for('business.view_data') }}" aria-label="{{ t(feature.label_key, default=feature.label) | e }}" {% if is_read_only and feature.url != url_for('business.view_data') %}aria-disabled="true"{% endif %}>
