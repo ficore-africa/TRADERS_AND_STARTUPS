@@ -10,7 +10,7 @@ from flask import current_app
 import utils
 from users.routes import get_post_login_redirect  # Import the redirect helper
 
-# Use the existing limiter from utils
+# Use the existing limiter and tools from utils
 from utils import limiter, TRADER_TOOLS, STARTUP_TOOLS, ADMIN_TOOLS
 
 # Exempt crawlers from rate limiting
@@ -99,36 +99,44 @@ def home():
         net_cashflow = getattr(user, "net_cashflow", 0) or 0
         total_receipts = getattr(user, "total_receipts", 0) or 0
         total_payments = getattr(user, "total_payments", 0) or 0
-        tools_for_template = STARTUP_TOOLS if user.role == "startup" else TRADER_TOOLS if user.role == "trader" else ADMIN_TOOLS
+        tools_for_template = STARTUP_TOOLS if user.role == "startup" else TRADER_TOOLS if user.role == "trader" else STARTUP_TOOLS + ADMIN_TOOLS
         
-        # Assign role-specific explore features
+        # Assign role-specific explore features using utils definitions
         if user.role == "trader":
-            # Select specific trader tools for explore features
-            trader_feature_keys = ["debtors_dashboard", "receipts_dashboard", "business_reports"]
             explore_features_for_template = [
                 {
                     "label_key": tool["label_key"],
                     "description_key": tool["description_key"],
                     "label": tool["label"],
-                    "description": tool.get("description", "Description not available"),
+                    "description": trans(tool["description_key"], default="Description not available"),
                     "url": tool["url"],
                     "icon": tool["icon"]
                 }
-                for tool in TRADER_TOOLS if tool["label_key"] in trader_feature_keys
+                for tool in TRADER_TOOLS
             ]
-        else:
-            # Use all startup/admin tools for explore features
-            tool_list = STARTUP_TOOLS if user.role == "startup" else ADMIN_TOOLS
+        elif user.role == "startup":
             explore_features_for_template = [
                 {
                     "label_key": tool["label_key"],
                     "description_key": tool["description_key"],
                     "label": tool["label"],
-                    "description": tool.get("description", "Description not available"),
+                    "description": trans(tool["description_key"], default="Description not available"),
                     "url": tool["url"],
                     "icon": tool["icon"]
                 }
-                for tool in tool_list
+                for tool in STARTUP_TOOLS
+            ]
+        else:  # Admin
+            explore_features_for_template = [
+                {
+                    "label_key": tool["label_key"],
+                    "description_key": tool["description_key"],
+                    "label": tool["label"],
+                    "description": trans(tool["description_key"], default="Description not available"),
+                    "url": tool["url"],
+                    "icon": tool["icon"]
+                }
+                for tool in STARTUP_TOOLS + ADMIN_TOOLS
             ]
         is_read_only = False
 
