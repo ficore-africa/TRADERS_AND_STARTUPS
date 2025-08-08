@@ -519,7 +519,7 @@ GENERAL_TRANSLATIONS = {
         'general_start_general_dashboard': 'Start General Dashboard',
         'general_wealth_tracking_group': 'Wealth Tracking',
         'general_wealth_tracking_subtext': 'Track your assets and liabilities',
-        'general_explore_features': 'Explore All Features',
+        'general_explore_all_features': 'Explore All Features',
         'general_news_desc': 'Stay updated with the latest financial news',
         'general_why_ficore': 'Why Choose FiCore?',
         'general_localized': 'Localized for your needs',
