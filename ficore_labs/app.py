@@ -276,7 +276,7 @@ def create_app():
 
     # Initialize extensions
     setup_logging(app)
-    compress.init_app(app)
+    compress init_app(app)
     csrf.init_app(app)
     limiter.init_app(app)
     babel.init_app(app)
@@ -382,6 +382,12 @@ def create_app():
             except Exception as e:
                 logger.error(f'Failed to initialize navigation: {str(e)}', extra={'session_id': session.get('sid', 'no-session-id'), 'ip_address': request.remote_addr})
                 raise
+
+    # Ensure session['lang'] is set early and respected
+    @app.before_request
+    def ensure_lang_in_session():
+        if 'lang' not in session:
+            session['lang'] = 'en'  # Default language
 
     # Define format_currency filter
     def format_currency(value):
@@ -558,15 +564,16 @@ def create_app():
             flash('Error fetching your data.', 'danger')
             return redirect(url_for('index'))
 
-    @app.route('/set_language/<lang>', methods=['GET'])
+    @app.route('/set_language/<lang>', methods=['POST'])
     @ensure_session_id
     def set_language(lang):
         valid_langs = ['en', 'ha']
-        session['lang'] = lang if lang in valid_langs else 'en'
+        lang = lang if lang in valid_langs else 'en'
+        session['lang'] = lang
         session['last_activity'] = datetime.now(timezone.utc).isoformat()
         session.modified = True
         logger.info(f"Language set to {session['lang']} for session {session.get('sid', 'no-session-id')}", extra={'session_id': session.get('sid', 'no-session-id'), 'ip_address': request.remote_addr})
-        return redirect(request.referrer or url_for('index'))
+        return jsonify({'success': True, 'lang': session['lang']})
 
     @app.errorhandler(404)
     def page_not_found(e):
