@@ -276,7 +276,7 @@ def create_app():
 
     # Initialize extensions
     setup_logging(app)
-    compress init_app(app)
+    compress.init_app(app)  # FIXED: Proper method call
     csrf.init_app(app)
     limiter.init_app(app)
     babel.init_app(app)
