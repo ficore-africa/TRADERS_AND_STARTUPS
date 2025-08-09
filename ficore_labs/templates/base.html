@@ -14,6 +14,47 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-icons.min.css') | e }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha384-PPIZEGYM1v8zp5Py7UjFb79S58UeqCL9pYVnVPURKEqvioPROaVA植物
+
+System: The provided HTML code is a Jinja2 template for a web application called "Ficore Africa," designed to support business finance functionalities like inventory management, debtors, creditors, forecasts, funds, and investor reports, primarily targeting traders and startups in Africa. The template includes a responsive header, navigation bar, main content area, footer, and a notification modal, with support for language toggling (English/Hausa), dark mode, and user authentication features. It uses Bootstrap 5.3.3, Bootstrap Icons, Font Awesome, and custom CSS/JS for styling and interactivity. The template also includes a confetti animation, toast notifications, and global error handling for 401/403 errors.
+
+The specific task requested is to modify the `toggleLanguage` function in the JavaScript section to make the language toggle "instant" like the dark mode toggle. This involves updating the UI immediately without a page reload, sending an asynchronous request to update the user's language preference on the backend, and optionally showing a toast notification. If server-rendered content needs updating, it can be handled via AJAX/fetch or deferred to a later reload.
+
+### Analysis of the Task
+The original `toggleLanguage` function reloads the entire page after sending a request to update the language. The goal is to:
+1. Instantly update the language text in the UI (e.g., "ENGLISH" to "HAUSA" or vice versa).
+2. Send the backend request asynchronously without triggering a full page reload.
+3. Display a toast notification to confirm the language switch.
+4. Optionally, allow for partial page updates via AJAX if server-rendered content needs to change, or defer content updates to the next navigation.
+
+The provided solution modifies the `toggleLanguage` function to achieve these goals. It:
+- Immediately updates the language text in the UI.
+- Sends a `GET` request to the backend to persist the language preference.
+- Shows a toast notification for user feedback.
+- Avoids a full page reload, with a note that server-rendered content updates would require additional AJAX/fetch calls or a deferred reload.
+
+Since the request does not specify additional requirements for updating server-rendered content, the solution focuses on the instant UI update and background request, keeping the implementation simple and aligned with the existing template structure.
+
+### Updated File
+Below is the complete updated `base.html` file with the modified `toggleLanguage` function integrated into the JavaScript section. All other parts of the file—HTML structure, CSS, and other JavaScript functions—remain unchanged to preserve the original functionality and design.
+
+```html
+<!DOCTYPE html>
+<html lang="{{ current_lang | default('en') | e }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ t('general_app_description', default='Business Finance: Empowering financial growth for traders and startups') | e }}">
+    <meta name="keywords" content="business finance, inventory management, debtors, creditors, forecasts, funds, investor reports, Africa">
+    <meta name="author" content="Business Finance">
+    <meta name="csrf-token" content="{{ csrf_token() | e }}">
+    <meta name="robots" content="index, follow">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{% block title %}{{ t('general_app_title', default='Ficore Africa') | e }}{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-icons.min.css') | e }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha384-PPIZEGYM1v8zp5Py7UjFb79S58UeqCL9pYVnVPURKEqvioPROaVAJKKLzvH2rDnI" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') | e }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/newbasefilelooks.css') | e }}">
@@ -578,6 +619,14 @@
             const currentLang = languageTexts[0].textContent.toLowerCase() === 'english' ? 'en' : 'ha';
             const newLang = currentLang === 'en' ? 'ha' : 'en';
             const newLangText = newLang === 'en' ? 'ENGLISH' : 'HAUSA';
+
+            // Instantly update UI
+            languageTexts.forEach(text => text.textContent = newLangText);
+
+            // Show toast notification
+            showToast(`Language switched to ${newLangText}.`, 'success');
+
+            // Send request in the background, but don't wait for it to reload the page
             try {
                 const response = await fetch('{{ url_for("set_language", lang="") }}' + newLang, {
                     method: 'GET',
@@ -586,10 +635,11 @@
                     }
                 });
                 if (!response.ok) throw new Error('Failed to toggle language');
-                languageTexts.forEach(text => text.textContent = newLangText);
-                window.location.reload();
+                // Optionally, refresh only parts of the page (AJAX) or reload later if you need server content to update
+                // window.location.reload(); // Only if necessary
             } catch (error) {
                 console.error('Failed to toggle language:', error);
+                showToast('Failed to update language on server.', 'error');
             }
         }
 
