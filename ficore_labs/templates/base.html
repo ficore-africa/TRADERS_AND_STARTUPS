@@ -291,6 +291,20 @@
         .profile-avatar-container:hover .edit-profile-pic-icon {
             opacity: 1;
         }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            min-width: 200px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: white;
+            z-index: 1050;
+            opacity: 0.9;
+        }
+        .toast-info { background-color: #17a2b8; }
+        .toast-error { background-color: #dc3545; }
+        .toast-success { background-color: #28a745; }
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
@@ -423,6 +437,37 @@
             };
         })();
 
+        // Language toggle function
+        function getCsrfToken() {
+            return document.querySelector('meta[name="csrf-token"]')?.content || '';
+        }
+
+        async function toggleLanguage() {
+            if (window.isAuthenticatedContentBlocked) return;
+            const languageTexts = document.querySelectorAll('#languageText, #navLanguageText');
+            const currentLang = languageTexts[0].textContent.toLowerCase() === 'english' ? 'en' : 'ha';
+            const newLang = currentLang === 'en' ? 'ha' : 'en';
+            try {
+                const response = await fetch('{{ url_for("set_language", lang="") }}' + newLang, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCsrfToken()
+                    }
+                });
+                if (!response.ok) throw new Error('Language change failed');
+                const result = await response.json();
+                if (result.success) {
+                    languageTexts.forEach(text => text.textContent = newLang === 'en' ? 'ENGLISH' : 'HAUSA');
+                    window.location.reload(); // Ensures all translations update
+                } else {
+                    showToast('Language update failed', 'error');
+                }
+            } catch (error) {
+                showToast('Could not change language', 'error');
+                console.error('Language toggle error:', error);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize tooltips for all toggle buttons
             document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(tooltipTriggerEl => {
@@ -455,7 +500,6 @@
                 const collapse = new bootstrap.Collapse(navbarCollapse, { toggle: false });
                 document.querySelectorAll('.navbar-nav .nav-link, .navbar-nav .btn-link').forEach(link => {
                     link.addEventListener('click', function(e) {
-                        // Only auto-close if the menu is shown and the link is not a dropdown toggle
                         if (navbarCollapse.classList.contains('show')) {
                             collapse.hide();
                             navbarToggler.setAttribute('aria-expanded', 'false');
@@ -463,9 +507,8 @@
                     });
                 });
 
-                // FIX: Close menu on outside click/tap or scroll down
+                // Close menu on outside click/tap or scroll down
                 document.addEventListener('click', function(event) {
-                    // If menu is open and click is outside the nav/navbar toggler, close it
                     if (navbarCollapse.classList.contains('show')) {
                         const isClickInsideNav = navbarCollapse.contains(event.target) || navbarToggler.contains(event.target);
                         if (!isClickInsideNav) {
@@ -475,16 +518,15 @@
                     }
                 }, true);
 
-                // FIX: Close menu on scroll down (typical mobile UX)
                 let lastScrollTop = 0;
                 window.addEventListener('scroll', function() {
                     if (navbarCollapse.classList.contains('show')) {
                         let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                        if (scrollTop > lastScrollTop) { // Scrolling down
+                        if (scrollTop > lastScrollTop) {
                             collapse.hide();
                             navbarToggler.setAttribute('aria-expanded', 'false');
                         }
-                        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // For Mobile or negative scrolling
+                        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
                     }
                 }, false);
             }
@@ -520,7 +562,7 @@
                         return;
                     }
 
-                    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                    if (file.size > 5 * 1024 * 1024) {
                         showToast('{{ t("settings_image_too_large", default="Image size must be less than 5MB.") | e }}', 'error');
                         return;
                     }
@@ -567,31 +609,6 @@
                 new bootstrap.Tooltip(darkModeToggle);
             });
         };
-
-        async function toggleLanguage() {
-            if (window.isAuthenticatedContentBlocked) return;
-            const languageTexts = document.querySelectorAll('#languageText, #navLanguageText');
-            if (!languageTexts.length) {
-                console.error('Language text element not found.');
-                return;
-            }
-            const currentLang = languageTexts[0].textContent.toLowerCase() === 'english' ? 'en' : 'ha';
-            const newLang = currentLang === 'en' ? 'ha' : 'en';
-            const newLangText = newLang === 'en' ? 'ENGLISH' : 'HAUSA';
-            try {
-                const response = await fetch('{{ url_for("set_language", lang="") }}' + newLang, {
-                    method: 'GET',
-                    headers: {
-                        'X-CSRFToken': getCsrfToken()
-                    }
-                });
-                if (!response.ok) throw new Error('Failed to toggle language');
-                languageTexts.forEach(text => text.textContent = newLangText);
-                window.location.reload();
-            } catch (error) {
-                console.error('Failed to toggle language:', error);
-            }
-        }
 
         async function loadNotificationCount() {
             if (window.isAuthenticatedContentBlocked) return;
@@ -697,14 +714,6 @@
                 `;
                 console.error('Failed to load notifications:', error);
             }
-        }
-
-        function getCsrfToken() {
-            const token = document.querySelector('meta[name="csrf-token"]')?.content;
-            if (!token) {
-                console.error('CSRF token not found in meta tag');
-            }
-            return token || '';
         }
 
         function getNotificationIcon(type) {
