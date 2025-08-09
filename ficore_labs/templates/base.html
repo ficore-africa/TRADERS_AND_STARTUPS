@@ -578,14 +578,6 @@
             const currentLang = languageTexts[0].textContent.toLowerCase() === 'english' ? 'en' : 'ha';
             const newLang = currentLang === 'en' ? 'ha' : 'en';
             const newLangText = newLang === 'en' ? 'ENGLISH' : 'HAUSA';
-
-            // Instantly update UI
-            languageTexts.forEach(text => text.textContent = newLangText);
-
-            // Show toast notification
-            showToast(`Language switched to ${newLangText}.`, 'success');
-
-            // Send request in the background, but don't wait for it to reload the page
             try {
                 const response = await fetch('{{ url_for("set_language", lang="") }}' + newLang, {
                     method: 'GET',
@@ -594,11 +586,10 @@
                     }
                 });
                 if (!response.ok) throw new Error('Failed to toggle language');
-                // Optionally, refresh only parts of the page (AJAX) or reload later if you need server content to update
-                // window.location.reload(); // Only if necessary
+                languageTexts.forEach(text => text.textContent = newLangText);
+                window.location.reload();
             } catch (error) {
                 console.error('Failed to toggle language:', error);
-                showToast('Failed to update language on server.', 'error');
             }
         }
 
