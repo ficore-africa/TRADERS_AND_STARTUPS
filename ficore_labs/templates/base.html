@@ -32,7 +32,7 @@
                 <div class="profile-link-container">
                     <a href="{{ url_for('dashboard.index') | e }}" class="profile-link" aria-label="{{ t('general_user_profile', default='User Profile') | e }}">
                         <div class="profile-avatar-container">
-                            <img src="{{ current_user.profile_picture if current_user.profile_picture else url_for('static', filename='img/default_profile.png') | e }}" alt="{{ t('general_user_profile_picture', default='User Profile Picture') | e }}" class="profile-avatar">
+                            <img src="{{ current_user.profile_picture if current_user.profile_picture else url_for('static', filename='img/default_profile.png') | e }}" alt="{{ t('general_user_profile', default='User Profile') | e }}" class="profile-avatar">
                             <label for="profile_picture" class="edit-profile-pic-icon">✎</label>
                         </div>
                         <span class="greeting-text">{{ t('general_hi_user', default='Hi') | e }}, {{ current_user.display_name | default(current_user.id) | e }}</span>
@@ -47,19 +47,19 @@
             {% endif %}
         </div>
         <div class="header-right">
-            <button class="icon-btn help-icon-btn" onclick="location.href='{% if current_user.is_authenticated %}{{ url_for('settings.profile') | e }}{% else %}{{ url_for('general_bp.contact') | e }}{% endif %}'" data-bs-toggle="tooltip" data-bs-title="{{ t('general_help_tooltip', default='Get help') | e }}" aria-label="{{ t('general_help', default='HELP') | e }}">
+            <button class="icon-btn help-icon-btn" onclick="location.href='{% if current_user.is_authenticated %}{{ url_for('settings.profile') | e }}{% else %}{{ url_for('general_bp.contact') | e }}{% endif %}'" data-bs-toggle="tooltip" data-bs-title="{{ t('general_help_tooltip', default='Get Help') | e }}">
                 <i class="bi bi-question-circle"></i>
                 <span class="help-text">{{ t('general_help', default='HELP') | e }}</span>
             </button>
-            <button class="icon-btn language-toggle" id="languageToggle" onclick="toggleLanguage()" data-bs-toggle="tooltip" data-bs-title="{{ t('general_language_toggle_tooltip', default='Toggle language') | e }}" aria-label="{{ t('general_language_toggle', default='Toggle language') | e }}">
+            <button class="icon-btn language-toggle" id="languageToggle" onclick="toggleLanguage()" data-bs-toggle="tooltip" data-bs-title="{{ t('general_language_toggle_tooltip', default='Toggle language') | e }}">
                 <i class="bi bi-globe"></i>
                 <span id="languageText">{{ 'ENGLISH' if current_lang == 'en' else 'HAUSA' }}</span>
             </button>
-            <button class="icon-btn" id="darkModeToggle" onclick="toggleDarkMode()" data-bs-toggle="tooltip" data-bs-title="{{ t('general_mode_toggle_tooltip_switch_to_dark', default='Switch to dark mode') | e }}" aria-label="{{ t('general_mode_toggle_dark', default='Toggle dark mode') | e }}">
+            <button class="icon-btn" id="darkModeToggle" onclick="toggleDarkMode()" data-bs-toggle="tooltip" data-bs-title="{{ t('general_mode_toggle_tooltip_switch_to_dark', default='Switch to dark mode') | e }}">
                 <i class="bi bi-moon-stars"></i>
             </button>
             {% if current_user.is_authenticated %}
-                <button class="icon-btn notification-bell" id="notificationBell" data-bs-toggle="modal" data-bs-target="#notificationModal" data-bs-toggle="tooltip" data-bs-title="{{ t('general_notifications_tooltip', default='View notifications') | e }}" aria-label="{{ t('general_notifications', default='Notifications') | e }}">
+                <button class="icon-btn notification-bell" id="notificationBell" data-bs-toggle="modal" data-bs-target="#notificationModal" data-bs-toggle="tooltip" data-bs-title="{{ t('general_notification_tooltip', default='View notifications') | e }}">
                     <i class="bi bi-bell"></i>
                     <span class="notification-badge badge bg-danger rounded-circle d-none" id="notificationBadge">0</span>
                 </button>
@@ -77,19 +77,19 @@
                     <ul class="navbar-nav">
                         {% for item in navigation %}
                             <li class="nav-item">
-                                <a class="nav-link {% if request.endpoint == item.endpoint %}active{% endif %}" href="{{ item.url | e }}" data-bs-toggle="tooltip" data-bs-title="{{ t(item.tooltip_key, default=item.label) | e }}" aria-current="{% if request.endpoint == item.endpoint %}page{% endif %}">
+                                <a class="nav-link {% if request.endpoint == item.endpoint %}active{% endif %}" href="{{ item.url | e }}" data-bs-toggle="tooltip" data-bs-title="{{ t(item.tooltip_key, default=item.tooltip) | e }}">
                                     <i class="bi {{ item.icon | default('bi-question-circle') | e }} me-2"></i>{{ t(item.label_key, default=item.label) | e }}
                                 </a>
                             </li>
                         {% endfor %}
                         <li class="nav-item">
-                            <button class="nav-link btn btn-link language-toggle" id="navLanguageToggle" onclick="toggleLanguage()" data-bs-toggle="tooltip" data-bs-title="{{ t('general_language_toggle_tooltip', default='Toggle language') | e }}" aria-label="{{ t('general_language_toggle', default='Toggle language') | e }}">
+                            <button class="nav-link btn btn-link language-toggle" id="navLanguageToggle" onclick="toggleLanguage()" data-bs-toggle="tooltip" data-bs-title="{{ t('general_language_toggle_tooltip', default='Toggle language') | e }}">
                                 <i class="bi bi-globe"></i>
                                 <span id="navLanguageText">{{ 'ENGLISH' if current_lang == 'en' else 'HAUSA' }}</span>
                             </button>
                         </li>
                         <li class="nav-item">
-                            <button class="nav-link btn btn-link" id="navDarkModeToggle" onclick="toggleDarkMode()" data-bs-toggle="tooltip" data-bs-title="{{ t('general_mode_toggle_tooltip_switch_to_dark', default='Switch to dark mode') | e }}" aria-label="{{ t('general_mode_toggle_dark', default='Toggle dark mode') | e }}">
+                            <button class="nav-link btn btn-link" id="navDarkModeToggle" onclick="toggleDarkMode()" data-bs-toggle="tooltip" data-bs-title="{{ t('general_mode_toggle_tooltip_switch_to_dark', default='Switch to dark mode') | e }}">
                                 <i class="bi bi-moon-stars"></i>
                             </button>
                         </li>
@@ -107,25 +107,25 @@
                     <ul class="navbar-nav">
                         {% for item in navigation %}
                             <li class="nav-item">
-                                <a class="nav-link {% if request.endpoint == item.endpoint %}active{% endif %}" href="{{ item.url | e }}" data-bs-toggle="tooltip" data-bs-title="{{ t(item.tooltip_key, default=item.label) | e }}" aria-current="{% if request.endpoint == item.endpoint %}page{% endif %}">
+                                <a class="nav-link {% if request.endpoint == item.endpoint %}active{% endif %}" href="{{ item.url | e }}" data-bs-toggle="tooltip" data-bs-title="{{ t(item.tooltip_key, default=item.tooltip) | e }}">
                                     <i class="bi {{ item.icon | default('bi-question-circle') | e }} me-2"></i>{{ t(item.label_key, default=item.label) | e }}
                                 </a>
                             </li>
                         {% endfor %}
                         {% if not current_user.is_subscribed and not current_user.is_trial_active() %}
                             <li class="nav-item">
-                                <a class="nav-link {% if request.endpoint == 'subscribe_bp.subscribe' %}active{% endif %}" href="{{ url_for('subscribe_bp.subscribe') | e }}" data-bs-toggle="tooltip" data-bs-title="{{ t('subscribe_tooltip', default='Subscribe to continue') | e }}" aria-current="{% if request.endpoint == 'subscribe_bp.subscribe' %}page{% endif %}">
+                                <a class="nav-link {% if request.endpoint == 'subscribe_bp.subscribe' %}active{% endif %}" href="{{ url_for('subscribe_bp.subscribe') | e }}" data-bs-toggle="tooltip" data-bs-title="{{ t('subscribe_tooltip', default='Subscribe for full access') | e }}">
                                     <i class="bi bi-star-fill me-2"></i>{{ t('subscribe_title', default='Subscribe') | e }}
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link {% if request.endpoint == 'view_data' %}active{% endif %}" href="{{ url_for('view_data') | e }}" data-bs-toggle="tooltip" data-bs-title="{{ t('view_data_tooltip', default='View your data') | e }}" aria-current="{% if request.endpoint == 'view_data' %}page{% endif %}">
+                                <a class="nav-link {% if request.endpoint == 'view_data' %}active{% endif %}" href="{{ url_for('view_data') | e }}" data-bs-toggle="tooltip" data-bs-title="{{ t('view_data_tooltip', default='View your data') | e }}">
                                     <i class="bi bi-eye me-2"></i>{{ t('view_data_title', default='View Data') | e }}
                                 </a>
                             </li>
                         {% endif %}
                         <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'users.logout' %}active{% endif %}" href="{{ url_for('users.logout') | e }}" data-bs-toggle="tooltip" data-bs-title="{{ t('general_logout_tooltip', default='Log out of your account') | e }}" aria-current="{% if request.endpoint == 'users.logout' %}page{% endif %}">
+                            <a class="nav-link {% if request.endpoint == 'users.logout' %}active{% endif %}" href="{{ url_for('users.logout') | e }}" data-bs-toggle="tooltip" data-bs-title="{{ t('general_logout_tooltip', default='Logout') | e }}">
                                 <i class="bi bi-box-arrow-right me-2"></i>{{ t('general_logout', default='Logout') | e }}
                             </a>
                         </li>
@@ -194,8 +194,8 @@
         <div class="footer-wrapper">
             <footer class="footer" role="contentinfo">
                 <div class="container-fluid">
-                    <p>{{ t('general_about_app', default='About Business Finance') | e }}: {{ t('general_empowering_financial_growth', default='Empowering financial growth for traders and startups since 2025') | e }}</p>
-                    <p class="footer-disclaimer"><i class="bi bi-shield-fill-check me-2" aria-hidden="true"></i> {{ t('general_disclaimer', default='Business Finance is not a bank and does not hold or move funds.') | e }} <a href="{{ url_for('general_bp.about') | e }}">{{ t('general_learn_more', default='Learn more') | e }}</a></p>
+                    <p>{{ t('general_about_app', default='About Business Finance') | e }}: {{ t('general_empowering_financial_growth', default='Empowering financial growth for traders and startups since 2023.') | e }}</p>
+                    <p class="footer-disclaimer"><i class="bi bi-shield-fill-check me-2" aria-hidden="true"></i> {{ t('general_disclaimer', default='Business Finance is not a bank and does not hold or transfer money.') | e }}</p>
                     <div class="footer-links">
                         <a href="{{ url_for('general_bp.terms') | e }}">{{ t('general_terms_of_service', default='Terms of Service') | e }}</a>
                         <a href="{{ url_for('general_bp.privacy') | e }}">{{ t('general_privacy_policy', default='Privacy Policy') | e }}</a>
@@ -293,7 +293,7 @@
         }
     </style>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script>
         // Custom confetti effect
         function launchConfetti() {
@@ -453,14 +453,40 @@
             const navbarCollapse = document.querySelector('#navbarNav');
             if (navbarToggler && navbarCollapse) {
                 const collapse = new bootstrap.Collapse(navbarCollapse, { toggle: false });
-                document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
-                    link.addEventListener('click', () => {
+                document.querySelectorAll('.navbar-nav .nav-link, .navbar-nav .btn-link').forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        // Only auto-close if the menu is shown and the link is not a dropdown toggle
                         if (navbarCollapse.classList.contains('show')) {
                             collapse.hide();
                             navbarToggler.setAttribute('aria-expanded', 'false');
                         }
                     });
                 });
+
+                // FIX: Close menu on outside click/tap or scroll down
+                document.addEventListener('click', function(event) {
+                    // If menu is open and click is outside the nav/navbar toggler, close it
+                    if (navbarCollapse.classList.contains('show')) {
+                        const isClickInsideNav = navbarCollapse.contains(event.target) || navbarToggler.contains(event.target);
+                        if (!isClickInsideNav) {
+                            collapse.hide();
+                            navbarToggler.setAttribute('aria-expanded', 'false');
+                        }
+                    }
+                }, true);
+
+                // FIX: Close menu on scroll down (typical mobile UX)
+                let lastScrollTop = 0;
+                window.addEventListener('scroll', function() {
+                    if (navbarCollapse.classList.contains('show')) {
+                        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                        if (scrollTop > lastScrollTop) { // Scrolling down
+                            collapse.hide();
+                            navbarToggler.setAttribute('aria-expanded', 'false');
+                        }
+                        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // For Mobile or negative scrolling
+                    }
+                }, false);
             }
 
             // Dark mode initialization
