@@ -244,5 +244,10 @@ def register_translation(app):
         if has_request_context() and 'lang' not in session:
             # Default to 'en' or use request headers/user settings as needed
             session['lang'] = request.accept_languages.best_match(['en', 'ha'], 'en')
+            session.modified = True
+            logger.info(
+                f"Set default language to {session['lang']} for session {session.get('sid', 'no-session-id')}",
+                extra={'session_id': session.get('sid', 'no-session-id'), 'ip_address': request.remote_addr}
+            )
 
 __all__ = ['trans', 'get_translations', 'get_all_translations', 'get_module_translations', 'register_translation']
