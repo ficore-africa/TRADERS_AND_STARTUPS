@@ -44,7 +44,7 @@ GENERAL_TRANSLATIONS = {
         'general_app_title': 'FiCore Records',
         'general_app_logo': 'App Logo',
         'general_help_tooltip': 'Help',
-        'general_business_finance_desc': 'Manage your business finances with ease',
+        'general_business_finance_desc': 'Simplified business finance, built for traders, startups, and modern entrepreneurs.',
         'general_startup_desc': 'Tools to help startups grow and succeed',
         'general_startup_tools': 'Startup Tools',
         'general_why_ficore_africa': 'Why FiCore Africa?',
