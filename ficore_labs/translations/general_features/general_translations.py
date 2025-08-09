@@ -6,6 +6,9 @@ GENERAL_TRANSLATIONS = {
         'general_identifier_length': 'Username or Email must be at least 4 characters',
         'general_remember_me': 'Remember Me',
         'general_startup': 'Startup',
+        'general_net_cashflow_mtd':'Receipts (MTD)',
+        'general_receipts_mtd':'Receipts (MTD)',
+        'general_payments_mtd':'Payments (MTD)',
         'general_technology': 'Technology',
         'reports_start_date': 'Start Date',
         'reports_end_date': 'End Date',
@@ -1254,6 +1257,10 @@ GENERAL_TRANSLATIONS = {
         'general_testimonial_avatar': 'Shaidar Mai Amfani',
         'general_business_finance_praise': 'Amintaccen kasuwanci a duk Afirka',
         'general_about_business_finance_tooltip': 'Game da Kuɗin Kasuwanci',
+        
+        'general_net_cashflow_mtd':'Kudaden Shiga da Fita (MTD)',
+        'general_receipts_mtd':'Kudaden Shiga (MTD)',
+        'general_payments_mtd':'Kudaden Fita (MTD)',
 
         # Financial Tools
         'profile': 'Bayani',
