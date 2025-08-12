@@ -41,7 +41,7 @@ GENERAL_TRANSLATIONS = {
         'fund_tracking': 'Fund Tracking',
         'investor_reports': 'Investor Reports',
         'forecast_scenario': 'Forecast Scenario',
-        'general_app_title': 'FiCore Records',
+        'general_app_title': 'FiCore Africa',
         'general_app_logo': 'App Logo',
         'general_help_tooltip': 'Help',
         'general_business_finance_desc': 'Simplified business finance, built for traders, startups, and modern entrepreneurs.',
