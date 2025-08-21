@@ -549,7 +549,7 @@ GENERAL_TRANSLATIONS = {
         'general_invalid_request': 'Invalid request',
         'general_error_acknowledging_consent': 'Error acknowledging consent',
         'general_network_error': 'Network error occurred',
-        'general_app_description': 'FiCore: Your all-in-one financial management toolkit',
+        'general_app_description': 'Simplified Finance: Empowering business growth for traders and startups',
         'general_welcome_to_ficore': 'Welcome to FiCore',
         'general_consent_banner': 'We use cookies to improve your experience. By continuing, you agree to our terms.',
         'general_accept': 'Accept',
