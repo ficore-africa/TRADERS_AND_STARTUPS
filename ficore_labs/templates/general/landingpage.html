@@ -21,26 +21,34 @@
     <div class="section-card mt-5">
         <h3 class="section-title">{{ t('general_who_we_serve', default='Who We Serve') | e }}</h3>
         <p class="text-muted">{{ t('general_who_we_serve_desc', default='Ficore Africa empowers individuals, businesses, and agents with tailored financial tools.') | e }}</p>
-        <div class="row">
-            <div class="col-md-6">
-                <a href="{{ url_for('users.signup') }}" class="tool-card-link">
-                    <div class="card mb-3">
-                        <div class="card-body">
-                            <h5>{{ t('general_trader', default='Business Owners') | e }}</h5>
+        <div class="accordion" id="whoWeServeAccordion">
+            <div class="accordion-item">
+                <h3 class="accordion-header" id="businessOwners">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBusinessOwners" aria-expanded="true" aria-controls="collapseBusinessOwners">
+                        {{ t('general_trader', default='Business Owners') | e }}
+                    </button>
+                </h3>
+                <div id="collapseBusinessOwners" class="accordion-collapse collapse show" aria-labelledby="businessOwners" data-bs-parent="#whoWeServeAccordion">
+                    <div class="accordion-body">
+                        <a href="{{ url_for('users.signup') }}" class="tool-card-link">
                             <p>{{ t('general_trader_desc', default='Streamline debtors, creditors, and financial reports.') | e }}</p>
-                        </div>
+                        </a>
                     </div>
-                </a>
+                </div>
             </div>
-            <div class="col-md-6">
-                <a href="{{ url_for('users.signup') }}" class="tool-card-link">
-                    <div class="card mb-3">
-                        <div class="card-body">
-                            <h5>{{ t('general_startup', default='Startups') | e }}</h5>
+            <div class="accordion-item">
+                <h3 class="accordion-header" id="startups">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStartups" aria-expanded="false" aria-controls="collapseStartups">
+                        {{ t('general_startup', default='Startups') | e }}
+                    </button>
+                </h3>
+                <div id="collapseStartups" class="accordion-collapse collapse" aria-labelledby="startups" data-bs-parent="#whoWeServeAccordion">
+                    <div class="accordion-body">
+                        <a href="{{ url_for('users.signup') }}" class="tool-card-link">
                             <p>{{ t('general_startup_desc', default='Track funds, forecast scenarios, and generate investor reports.') | e }}</p>
-                        </div>
+                        </a>
                     </div>
-                </a>
+                </div>
             </div>
         </div>
     </div>
@@ -51,26 +59,38 @@
         <p class="text-muted">{{ t('general_tools_desc', default='Powerful tools to manage your finances effectively.') | e }}</p>
         {% if explore_features_for_template %}
             {% set categories = ['Business', 'Startup'] %}
-            {% for category in categories %}
-                {% set category_tools = explore_features_for_template | selectattr('category', 'equalto', category) | list %}
-                {% if category_tools %}
-                    <h4>{{ t('general_' + category | lower + '_tools', default=category + ' Tools') | e }}</h4>
-                    <div class="row">
-                        {% for tool in category_tools %}
-                            <div class="col-md-4 mb-3">
-                                <a href="{{ tool.get('url', url_for('users.login')) }}" class="tool-card-link">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <h5>{{ t(tool.get('label_key', ''), default=tool.get('label', 'Tool')) | e }}</h5>
-                                            <p>{{ t(tool.get('description_key', ''), default=tool.get('description', 'Description not available')) | e }}</p>
-                                        </div>
+            <div class="accordion" id="exploreToolsAccordion">
+                {% for category in categories %}
+                    {% set category_tools = explore_features_for_template | selectattr('category', 'equalto', category) | list %}
+                    {% if category_tools %}
+                        <div class="accordion-item">
+                            <h3 class="accordion-header" id="tools{{ category }}">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTools{{ category }}" aria-expanded="false" aria-controls="collapseTools{{ category }}">
+                                    {{ t('general_' + category | lower + '_tools', default=category + ' Tools') | e }}
+                                </button>
+                            </h3>
+                            <div id="collapseTools{{ category }}" class="accordion-collapse collapse" aria-labelledby="tools{{ category }}" data-bs-parent="#exploreToolsAccordion">
+                                <div class="accordion-body">
+                                    <div class="row">
+                                        {% for tool in category_tools %}
+                                            <div class="col-md-4 mb-3">
+                                                <a href="{{ tool.get('url', url_for('users.login')) }}" class="tool-card-link">
+                                                    <div class="card">
+                                                        <div class="card-body">
+                                                            <h5>{{ t(tool.get('label_key', ''), default=tool.get('label', 'Tool')) | e }}</h5>
+                                                            <p>{{ t(tool.get('description_key', ''), default=tool.get('description', 'Description not available')) | e }}</p>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        {% endfor %}
                                     </div>
-                                </a>
+                                </div>
                             </div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
             {% if not categories %}
                 <p class="text-muted">{{ t('general_no_tools_available', default='No tools available at the moment.') | e }}</p>
             {% endif %}
