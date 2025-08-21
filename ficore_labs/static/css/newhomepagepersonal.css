@@ -518,3 +518,14 @@
         padding: 1.5rem;
     }
 }
+#exploreToolsAccordion .accordion-body .card {
+    padding: 1rem;
+    font-size: 0.9rem;
+    min-height: auto;
+}
+
+#whoWeServeAccordion .accordion-body .card {
+    padding: 0.8rem;
+    font-size: 0.85rem;
+    min-height: auto;
+}
