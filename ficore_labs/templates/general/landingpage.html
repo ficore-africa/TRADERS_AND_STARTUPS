@@ -20,7 +20,6 @@
     <!-- Who We Serve -->
     <div class="section-card mt-5">
         <h3 class="section-title">{{ t('general_who_we_serve', default='Who We Serve') | e }}</h3>
-        <p class="text-muted">{{ t('general_who_we_serve_desc', default='Ficore Africa empowers individuals, businesses, and agents with tailored financial tools.') | e }}</p>
         <div class="accordion" id="whoWeServeAccordion">
             <div class="accordion-item">
                 <h3 class="accordion-header" id="businessOwners">
@@ -31,7 +30,7 @@
                 <div id="collapseBusinessOwners" class="accordion-collapse collapse show" aria-labelledby="businessOwners" data-bs-parent="#whoWeServeAccordion">
                     <div class="accordion-body">
                         <a href="{{ url_for('users.signup') }}" class="tool-card-link">
-                            <p>{{ t('general_trader_desc', default='Streamline debtors, creditors, and financial reports.') | e }}</p>
+                            <h5>{{ t('general_trader', default='Business Owners') | e }}</h5>
                         </a>
                     </div>
                 </div>
@@ -45,7 +44,7 @@
                 <div id="collapseStartups" class="accordion-collapse collapse" aria-labelledby="startups" data-bs-parent="#whoWeServeAccordion">
                     <div class="accordion-body">
                         <a href="{{ url_for('users.signup') }}" class="tool-card-link">
-                            <p>{{ t('general_startup_desc', default='Track funds, forecast scenarios, and generate investor reports.') | e }}</p>
+                            <h5>{{ t('general_startup', default='Startups') | e }}</h5>
                         </a>
                     </div>
                 </div>
@@ -56,7 +55,6 @@
     <!-- Explore Our Tools -->
     <div class="section-card mt-5">
         <h3 class="section-title">{{ t('general_our_tools', default='Explore Our Tools') | e }}</h3>
-        <p class="text-muted">{{ t('general_tools_desc', default='Powerful tools to manage your finances effectively.') | e }}</p>
         {% if explore_features_for_template %}
             {% set categories = ['Business', 'Startup'] %}
             <div class="accordion" id="exploreToolsAccordion">
@@ -78,7 +76,6 @@
                                                     <div class="card">
                                                         <div class="card-body">
                                                             <h5>{{ t(tool.get('label_key', ''), default=tool.get('label', 'Tool')) | e }}</h5>
-                                                            <p>{{ t(tool.get('description_key', ''), default=tool.get('description', 'Description not available')) | e }}</p>
                                                         </div>
                                                     </div>
                                                 </a>
@@ -87,7 +84,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </ div>
                     {% endif %}
                 {% endfor %}
             </div>
