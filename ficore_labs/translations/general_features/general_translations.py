@@ -550,7 +550,7 @@ GENERAL_TRANSLATIONS = {
         'general_error_acknowledging_consent': 'Error acknowledging consent',
         'general_network_error': 'Network error occurred',
         'general_app_description': 'Simplified Finance: Empowering business growth for traders and startups',
-        'general_welcome_to_ficore': 'Welcome to FiCore',
+        'general_welcome_to_ficore': 'Welcome',
         'general_consent_banner': 'We use cookies to improve your experience. By continuing, you agree to our terms.',
         'general_accept': 'Accept',
         'general_all_in_one_toolkit': 'All-in-One Financial Toolkit',
