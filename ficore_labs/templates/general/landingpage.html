@@ -14,6 +14,9 @@
             <a href="{{ url_for('users.login') }}" class="btn btn-outline-primary btn-lg mx-2" data-bs-toggle="tooltip" data-bs-title="{{ t('general_login_tooltip', default='Log in to your account') | e }}">
                 <i class="bi bi-box-arrow-in-right me-2"></i>{{ t('general_login', default='Log In') | e }}
             </a>
+            <a href="https://ficore-labs-records.onrender.com" target="_blank" class="btn btn-primary btn-lg mx-2" data-bs-toggle="tooltip" data-bs-title="{{ t('general_personal_finance_tooltip', default='Manage your personal finances') | e }}">
+                <i class="bi bi-wallet2 me-2"></i>{{ t('general_personal_finance', default='Personal Finance App') | e }}
+            </a>
         </div>
     </div>
 
@@ -84,7 +87,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </ div>
+                        </div>
                     {% endif %}
                 {% endfor %}
             </div>
