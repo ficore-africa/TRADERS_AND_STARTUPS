@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 from models import create_feedback, get_mongo_db, get_user
 from flask import current_app
 import utils
-from users.routes import get_post_login_redirect  # Import the redirect helper
+from users.routes import get_post_login_redirect
 
 # Use the existing limiter from utils
 from utils import limiter
@@ -46,8 +46,7 @@ def landing():
             title=trans('general_welcome', lang=session.get('lang', 'en'), default='Welcome'),
             explore_features_for_template=explore_features
         ))
-        # Enable caching for unauthenticated users (public landing page)
-        response.headers['Cache-Control'] = 'public, max-age=300'  # Cache for 5 minutes
+        response.headers['Cache-Control'] = 'public, max-age=300'
         response.headers['Pragma'] = 'no-cache'
         response.headers['Expires'] = '0'
         return response
@@ -89,13 +88,9 @@ def home():
             flash(trans('general_subscription_required', default='Your trial has expired. Please subscribe to continue.'), 'warning')
             return redirect(url_for('subscribe_bp.subscribe'))
         
-        # Convert naive trial_end to timezone-aware
         if user.trial_end and user.trial_end.tzinfo is None:
             user.trial_end = user.trial_end.replace(tzinfo=ZoneInfo("UTC"))
 
-        # --- NEW: Provide all variables needed by the template, with sensible defaults ---
-        # These could be pulled from the DB, computed, or set to 0 if not available.
-        # You may want to replace these with actual logic.
         total_i_owe = getattr(user, "total_i_owe", 0) or 0
         total_i_am_owed = getattr(user, "total_i_am_owed", 0) or 0
         net_cashflow = getattr(user, "net_cashflow", 0) or 0
@@ -103,7 +98,7 @@ def home():
         total_payments = getattr(user, "total_payments", 0) or 0
         tools_for_template = utils.STARTUP_TOOLS if user.role == "startup" else utils.TRADER_TOOLS if user.role == "trader" else utils.ADMIN_TOOLS
         explore_features_for_template = utils.get_explore_features()
-        is_read_only = False  # You can set this based on trial/subscription logic
+        is_read_only = False
 
         return render_template(
             'general/home.html',
@@ -235,7 +230,6 @@ def feedback():
         extra={'session_id': session.get('sid', 'no-session-id'), 'user_id': current_user.id if current_user.is_authenticated else 'anonymous', 'ip_address': request.remote_addr}
     )
 
-    # Updated tool options to reflect only core business finance modules
     tool_options = [
         ['profile', trans('general_profile', default='Profile')],
         ['debtors', trans('debtors_dashboard', default='Debtors')],
@@ -256,7 +250,6 @@ def feedback():
 
             valid_tools = [option[0] for option in tool_options]
             
-            # Validate inputs
             if not tool_name or tool_name not in valid_tools:
                 current_app.logger.error(
                     f'Invalid feedback tool: {tool_name}',
@@ -273,14 +266,12 @@ def feedback():
                 flash(trans('general_invalid_input', default='Please provide a rating between 1 and 5'), 'danger')
                 return render_template('general/feedback.html', tool_options=tool_options, title=trans('general_feedback', lang=lang))
             
-            # Check trial/subscription status for authenticated users
             if current_user.is_authenticated:
                 user = get_user(get_mongo_db(), current_user.id)
                 if not user.is_trial_active():
                     flash(trans('general_subscription_required', default='Your trial has expired. Please subscribe to submit feedback.'), 'warning')
                     return redirect(url_for('subscribe_bp.subscribe'))
             
-            # Store feedback
             with current_app.app_context():
                 db = get_mongo_db()
                 feedback_entry = {
@@ -293,7 +284,6 @@ def feedback():
                 }
                 create_feedback(db, feedback_entry)
                 
-                # Log audit entry
                 db.audit_logs.insert_one({
                     'admin_id': 'system',
                     'action': 'submit_feedback',
@@ -344,5 +334,97 @@ def feedback():
             flash(trans('general_error', default='Error occurred during feedback submission'), 'danger')
             return render_template('general/feedback.html', tool_options=tool_options, title=trans('general_feedback', lang=lang)), 500
     
-    # Handle GET request
     return render_template('general/feedback.html', tool_options=tool_options, title=trans('general_feedback', lang=lang))
+
+@general_bp.route('/waitlist', methods=['GET', 'POST'])
+@utils.limiter.limit('10 per minute')
+def waitlist():
+    """Public waitlist page for collecting user information."""
+    lang = session.get('lang', 'en')
+    current_app.logger.info(
+        'Handling waitlist',
+        extra={'session_id': session.get('sid', 'no-session-id'), 'user_id': current_user.id if current_user.is_authenticated else 'anonymous', 'ip_address': request.remote_addr}
+    )
+
+    if request.method == 'POST':
+        try:
+            full_name = utils.sanitize_input(request.form.get('full_name', '').strip(), max_length=100)
+            whatsapp_number = utils.sanitize_input(request.form.get('whatsapp_number', '').strip(), max_length=20)
+            email = utils.sanitize_input(request.form.get('email', '').strip(), max_length=100)
+            business_type = utils.sanitize_input(request.form.get('business_type', '').strip(), max_length=200)
+
+            # Basic validation
+            if not full_name or len(full_name) < 2:
+                flash(trans('general_invalid_input', default='Please provide a valid full name'), 'danger')
+                return render_template('general/waitlist.html', title=trans('general_waitlist', lang=lang, default='Join Our Waitlist'))
+
+            if not whatsapp_number or not email:
+                flash(trans('general_invalid_input', default='Please provide both WhatsApp number and email address'), 'danger')
+                return render_template('general/waitlist.html', title=trans('general_waitlist', lang=lang, default='Join Our Waitlist'))
+
+            # Store waitlist entry
+            with current_app.app_context():
+                db = get_mongo_db()
+                waitlist_entry = {
+                    'user_id': str(current_user.id) if current_user.is_authenticated else None,
+                    'session_id': session.get('sid', 'no-session-id'),
+                    'full_name': full_name,
+                    'whatsapp_number': whatsapp_number,
+                    'email': email,
+                    'business_type': business_type or None,
+                    'timestamp': datetime.now(timezone.utc)
+                }
+                db.waitlist.insert_one(waitlist_entry)
+                
+                # Log audit entry
+                db.audit_logs.insert_one({
+                    'admin_id': 'system',
+                    'action': 'submit_waitlist',
+                    'details': {
+                        'user_id': str(current_user.id) if current_user.is_authenticated else None,
+                        'full_name': full_name,
+                        'email': email
+                    },
+                    'timestamp': datetime.now(timezone.utc)
+                })
+            
+            current_app.logger.info(
+                f'Waitlist entry submitted: name={full_name}, email={email}',
+                extra={'session_id': session.get('sid', 'no-session-id'), 'user_id': current_user.id if current_user.is_authenticated else 'anonymous', 'ip_address': request.remote_addr}
+            )
+            flash(trans('general_thank_you_waitlist', default='Thank you for joining our waitlist! We’ll be in touch soon.'), 'success')
+            return redirect(url_for('general_bp.landing'))
+        
+        except CSRFError as e:
+            current_app.logger.error(
+                f'CSRF error in waitlist submission: {str(e)}',
+                extra={'session_id': session.get('sid', 'no-session-id'), 'user_id': current_user.id if current_user.is_authenticated else 'anonymous', 'ip_address': request.remote_addr}
+            )
+            flash(trans('general_csrf_error', default='Invalid CSRF token. Please try again.'), 'danger')
+            return render_template('general/waitlist.html', title=trans('general_waitlist', lang=lang, default='Join Our Waitlist')), 400
+        except ValueError as e:
+            current_app.logger.error(
+                f'Error processing waitlist: {str(e)}',
+                extra={'session_id': session.get('sid', 'no-session-id'), 'user_id': current_user.id if current_user.is_authenticated else 'anonymous', 'ip_address': request.remote_addr}
+            )
+            flash(trans('general_error', default='Error occurred during waitlist submission'), 'danger')
+            return render_template('general/waitlist.html', title=trans('general_waitlist', lang=lang, default='Join Our Waitlist')), 400
+        except TemplateNotFound as e:
+            current_app.logger.error(
+                f"Template not found: {str(e)}",
+                extra={'session_id': session.get('sid', 'no-session-id'), 'user_id': current_user.id if current_user.is_authenticated else 'anonymous', 'ip_address': request.remote_addr}
+            )
+            return render_template(
+                'error/404.html',
+                error=str(e),
+                title=trans('general_waitlist', lang=lang, default='Join Our Waitlist')
+            ), 404
+        except Exception as e:
+            current_app.logger.error(
+                f'Error processing waitlist: {str(e)}',
+                extra={'session_id': session.get('sid', 'no-session-id'), 'user_id': current_user.id if current_user.is_authenticated else 'anonymous', 'ip_address': request.remote_addr}
+            )
+            flash(trans('general_error', default='Error occurred during waitlist submission'), 'danger')
+            return render_template('general/waitlist.html', title=trans('general_waitlist', lang=lang, default='Join Our Waitlist')), 500
+
+    return render_template('general/waitlist.html', title=trans('general_waitlist', lang=lang, default='Join Our Waitlist'))
