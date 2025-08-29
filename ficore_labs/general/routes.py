@@ -1,6 +1,9 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, session, request, jsonify, make_response
 from flask_login import login_required, current_user
+from flask_wtf import FlaskForm
 from flask_wtf.csrf import CSRFError
+from wtforms import StringField, SubmitField
+from wtforms.validators import DataRequired, Email, Length
 from translations import trans
 from jinja2.exceptions import TemplateNotFound
 from datetime import datetime, timezone
@@ -18,6 +21,14 @@ def exempt_crawlers():
     user_agent = request.user_agent.string
     return user_agent.startswith("facebookexternalhit") or \
            user_agent.startswith("Mozilla/5.0+(compatible; UptimeRobot")
+
+# Define WaitlistForm class within this file
+class WaitlistForm(FlaskForm):
+    full_name = StringField('Full Name', validators=[DataRequired(), Length(min=2, max=100)])
+    whatsapp_number = StringField('WhatsApp Number', validators=[DataRequired(), Length(max=20)])
+    email = StringField('Email', validators=[DataRequired(), Email(), Length(max=100)])
+    business_type = StringField('Business Type', validators=[Length(max=200)])
+    submit = SubmitField('Submit')
 
 general_bp = Blueprint('general_bp', __name__, url_prefix='/general')
 
@@ -342,100 +353,75 @@ def waitlist():
     """Public waitlist page for collecting user information."""
     lang = session.get('lang', 'en')
     current_app.logger.info(
-        'Handling waitlist',
+        'Rendering waitlist page',
         extra={'session_id': session.get('sid', 'no-session-id'), 'user_id': current_user.id if current_user.is_authenticated else 'anonymous', 'ip_address': request.remote_addr}
     )
 
+    form = WaitlistForm()  # Instantiate the form
+
     if request.method == 'POST':
-        try:
-            full_name = utils.sanitize_input(request.form.get('full_name', '').strip(), max_length=100)
-            whatsapp_number = utils.sanitize_input(request.form.get('whatsapp_number', '').strip(), max_length=20)
-            email = utils.sanitize_input(request.form.get('email', '').strip(), max_length=100)
-            business_type = utils.sanitize_input(request.form.get('business_type', '').strip(), max_length=200)
+        if form.validate_on_submit():
+            try:
+                # Get form data
+                full_name = form.full_name.data
+                whatsapp_number = form.whatsapp_number.data
+                email = form.email.data
+                business_type = form.business_type.data or None
 
-            # Basic validation
-            if not full_name or len(full_name) < 2:
-                flash(trans('general_invalid_input', default='Please provide a valid full name'), 'danger')
-                return render_template('general/waitlist.html', title=trans('general_waitlist', lang=lang, default='Join Our Waitlist'))
+                # Check for uniqueness of email and WhatsApp number
+                with current_app.app_context():
+                    db = get_mongo_db()
+                    if get_waitlist_entries(db, {'email': email}):
+                        flash(trans('general_waitlist_duplicate_error', default='Email already exists in waitlist'), 'danger')
+                        return render_template('general/waitlist.html', title=trans('general_waitlist', lang=lang, default='Join Our Waitlist'), form=form)
+                    if get_waitlist_entries(db, {'whatsapp_number': whatsapp_number}):
+                        flash(trans('general_waitlist_duplicate_error', default='WhatsApp number already exists in waitlist'), 'danger')
+                        return render_template('general/waitlist.html', title=trans('general_waitlist', lang=lang, default='Join Our Waitlist'), form=form)
 
-            if not whatsapp_number or not email:
-                flash(trans('general_invalid_input', default='Please provide both WhatsApp number and email address'), 'danger')
-                return render_template('general/waitlist.html', title=trans('general_waitlist', lang=lang, default='Join Our Waitlist'))
-
-            # Check for uniqueness of email and WhatsApp number
-            with current_app.app_context():
-                db = get_mongo_db()
-                if get_waitlist_entries(db, {'email': email}):
-                    flash(trans('general_waitlist_duplicate_error', default='Email already exists in waitlist'), 'danger')
-                    return render_template('general/waitlist.html', title=trans('general_waitlist', lang=lang, default='Join Our Waitlist'))
-                if get_waitlist_entries(db, {'whatsapp_number': whatsapp_number}):
-                    flash(trans('general_waitlist_duplicate_error', default='WhatsApp number already exists in waitlist'), 'danger')
-                    return render_template('general/waitlist.html', title=trans('general_waitlist', lang=lang, default='Join Our Waitlist'))
-
-            # Store waitlist entry
-            with current_app.app_context():
-                db = get_mongo_db()
-                waitlist_entry = {
-                    'full_name': full_name,
-                    'whatsapp_number': whatsapp_number,
-                    'email': email,
-                    'business_type': business_type or None,
-                    'created_at': datetime.now(timezone.utc),
-                    'updated_at': datetime.now(timezone.utc),
-                    'session_id': session.get('sid', 'no-session-id'),
-                    'user_id': str(current_user.id) if current_user.is_authenticated else None
-                }
-                create_waitlist_entry(db, waitlist_entry)
-                
-                # Log audit entry
-                db.audit_logs.insert_one({
-                    'admin_id': 'system',
-                    'action': 'submit_waitlist',
-                    'details': {
-                        'user_id': str(current_user.id) if current_user.is_authenticated else None,
+                # Store waitlist entry
+                with current_app.app_context():
+                    db = get_mongo_db()
+                    waitlist_entry = {
                         'full_name': full_name,
-                        'email': email
-                    },
-                    'timestamp': datetime.now(timezone.utc)
-                })
+                        'whatsapp_number': whatsapp_number,
+                        'email': email,
+                        'business_type': business_type,
+                        'created_at': datetime.now(timezone.utc),
+                        'updated_at': datetime.now(timezone.utc),
+                        'session_id': session.get('sid', 'no-session-id'),
+                        'user_id': str(current_user.id) if current_user.is_authenticated else None
+                    }
+                    create_waitlist_entry(db, waitlist_entry)
+                    
+                    # Log audit entry
+                    db.audit_logs.insert_one({
+                        'admin_id': 'system',
+                        'action': 'submit_waitlist',
+                        'details': {
+                            'user_id': str(current_user.id) if current_user.is_authenticated else None,
+                            'full_name': full_name,
+                            'email': email
+                        },
+                        'timestamp': datetime.now(timezone.utc)
+                    })
+                
+                current_app.logger.info(
+                    f'Waitlist entry submitted: name={full_name}, email={email}',
+                    extra={'session_id': session.get('sid', 'no-session-id'), 'user_id': current_user.id if current_user.is_authenticated else 'anonymous', 'ip_address': request.remote_addr}
+                )
+                flash(trans('general_thank_you_waitlist', default='Thank you for joining our waitlist! We’ll be in touch soon.'), 'success')
+                return redirect(url_for('general_bp.landing'))
             
-            current_app.logger.info(
-                f'Waitlist entry submitted: name={full_name}, email={email}',
-                extra={'session_id': session.get('sid', 'no-session-id'), 'user_id': current_user.id if current_user.is_authenticated else 'anonymous', 'ip_address': request.remote_addr}
-            )
-            flash(trans('general_thank_you_waitlist', default='Thank you for joining our waitlist! We’ll be in touch soon.'), 'success')
-            return redirect(url_for('general_bp.landing'))
-        
-        except CSRFError as e:
-            current_app.logger.error(
-                f'CSRF error in waitlist submission: {str(e)}',
-                extra={'session_id': session.get('sid', 'no-session-id'), 'user_id': current_user.id if current_user.is_authenticated else 'anonymous', 'ip_address': request.remote_addr}
-            )
-            flash(trans('general_csrf_error', default='Invalid CSRF token. Please try again.'), 'danger')
-            return render_template('general/waitlist.html', title=trans('general_waitlist', lang=lang, default='Join Our Waitlist')), 400
-        except ValueError as e:
-            current_app.logger.error(
-                f'Error processing waitlist: {str(e)}',
-                extra={'session_id': session.get('sid', 'no-session-id'), 'user_id': current_user.id if current_user.is_authenticated else 'anonymous', 'ip_address': request.remote_addr}
-            )
-            flash(str(e), 'danger')
-            return render_template('general/waitlist.html', title=trans('general_waitlist', lang=lang, default='Join Our Waitlist')), 400
-        except TemplateNotFound as e:
-            current_app.logger.error(
-                f"Template not found: {str(e)}",
-                extra={'session_id': session.get('sid', 'no-session-id'), 'user_id': current_user.id if current_user.is_authenticated else 'anonymous', 'ip_address': request.remote_addr}
-            )
-            return render_template(
-                'error/404.html',
-                error=str(e),
-                title=trans('general_waitlist', lang=lang, default='Join Our Waitlist')
-            ), 404
-        except Exception as e:
-            current_app.logger.error(
-                f'Error processing waitlist: {str(e)}',
-                extra={'session_id': session.get('sid', 'no-session-id'), 'user_id': current_user.id if current_user.is_authenticated else 'anonymous', 'ip_address': request.remote_addr}
-            )
-            flash(trans('general_error', default='Error occurred during waitlist submission'), 'danger')
-            return render_template('general/waitlist.html', title=trans('general_waitlist', lang=lang, default='Join Our Waitlist')), 500
-
-    return render_template('general/waitlist.html', title=trans('general_waitlist', lang=lang, default='Join Our Waitlist'))
+            except Exception as e:
+                current_app.logger.error(
+                    f'Error processing waitlist: {str(e)}',
+                    extra={'session_id': session.get('sid', 'no-session-id'), 'user_id': current_user.id if current_user.is_authenticated else 'anonymous', 'ip_address': request.remote_addr}
+                )
+                flash(trans('general_error', default='Error occurred during waitlist submission'), 'danger')
+                return render_template('general/waitlist.html', title=trans('general_waitlist', lang=lang, default='Join Our Waitlist'), form=form), 500
+        else:
+            # Form validation failed
+            flash(trans('general_invalid_input', default='Please correct the errors in the form'), 'danger')
+            return render_template('general/waitlist.html', title=trans('general_waitlist', lang=lang, default='Join Our Waitlist'), form=form)
+    
+    return render_template('general/waitlist.html', title=trans('general_waitlist', lang=lang, default='Join Our Waitlist'), form=form)
