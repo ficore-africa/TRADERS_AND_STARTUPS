@@ -10,23 +10,34 @@
         <div class="card p-4">
             <form method="POST" action="{{ url_for('general_bp.waitlist') }}">
                 {{ form.csrf_token }}
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <ul>
+                            {% for field, errors in form.errors.items() %}
+                                {% for error in errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
                 <div class="mb-3">
-                    <label for="full_name" class="form-label">{{ t('general_full_name', default='Full Name') | e }}</label>
-                    <input type="text" class="form-control" id="full_name" name="full_name" required>
+                    {{ form.full_name.label(class="form-label") }}
+                    {{ form.full_name(class="form-control", required=True) }}
                 </div>
                 <div class="mb-3">
-                    <label for="whatsapp_number" class="form-label">{{ t('general_whatsapp_number', default='WhatsApp Number') | e }}</label>
-                    <input type="tel" class="form-control" id="whatsapp_number" name="whatsapp_number" required>
+                    {{ form.whatsapp_number.label(class="form-label") }}
+                    {{ form.whatsapp_number(class="form-control", required=True) }}
                 </div>
                 <div class="mb-3">
-                    <label for="email" class="form-label">{{ t('general_email', default='Email Address') | e }}</label>
-                    <input type="email" class="form-control" id="email" name="email" required>
+                    {{ form.email.label(class="form-label") }}
+                    {{ form.email(class="form-control", required=True) }}
                 </div>
                 <div class="mb-3">
-                    <label for="business_type" class="form-label">{{ t('general_business_type', default='What type of business do you run? (Optional)') | e }}</label>
-                    <input type="text" class="form-control" id="business_type" name="business_type">
+                    {{ form.business_type.label(class="form-label") }}
+                    {{ form.business_type(class="form-control") }}
                 </div>
-                <button type="submit" class="btn btn-primary w-100">{{ t('general_submit', default='Submit') | e }}</button>
+                {{ form.submit(class="btn btn-primary w-100") }}
             </form>
         </div>
     </div>
