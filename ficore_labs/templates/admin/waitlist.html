@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Waitlist Signups</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Full Name</th>
+            <th>WhatsApp Number</th>
+            <th>Email</th>
+            <th>Business Type</th>
+            <th>Created At</th>
+            <th>Updated At</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in entries %}
+        <tr>
+            <td>{{ entry.id }}</td>
+            <td>{{ entry.full_name }}</td>
+            <td>{{ entry.whatsapp_number }}</td>
+            <td>{{ entry.email }}</td>
+            <td>{{ entry.business_type or 'N/A' }}</td>
+            <td>{{ entry.created_at }}</td>
+            <td>{{ entry.updated_at }}</td>
+            <td>
+                <a href="{{ url_for('admin.contact_signup', entry_id=entry.id) }}">Contact</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{{ url_for('admin.export_waitlist') }}" class="btn btn-primary">Export to CSV</a>
+{% endblock %}
