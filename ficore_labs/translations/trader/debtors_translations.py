@@ -4,7 +4,7 @@ Debtors management translations for accounting tools
 
 DEBTORS_TRANSLATIONS = {
     'en': {
-        'debtors_dashboard': 'Customers',
+        'debtors_dashboard': 'Debtors',
         'debtors_dashboard_desc': 'Manage money owed to you by others.',
         'debtors_tooltip': 'Manage money owed to you by debtors.',
         'debtors_list': 'Debtors List',
