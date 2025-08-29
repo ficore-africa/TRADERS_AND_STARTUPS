@@ -54,7 +54,8 @@ def migrate_naive_datetimes():
             'kyc_records': ['created_at', 'updated_at'],
             'sessions': ['created_at', 'expires_at'],  # Assuming sessions collection exists
             'tool_usage': ['timestamp'],  # Assuming tool_usage collection exists
-            'reminder_logs': ['timestamp']  # Assuming reminder_logs collection exists
+            'reminder_logs': ['timestamp'],  # Assuming reminder_logs collection exists
+            'waitlist': ['created_at', 'updated_at']  # Added for waitlist collection
         }
 
         for collection_name, datetime_fields in datetime_fields_by_collection.items():
@@ -402,6 +403,28 @@ def initialize_app_data(app):
                     'indexes': [
                         {'key': [('user_id', ASCENDING)], 'unique': True},
                         {'key': [('status', ASCENDING)]},
+                        {'key': [('created_at', DESCENDING)]}
+                    ]
+                },
+                'waitlist': {
+                    'validator': {
+                        '$jsonSchema': {
+                            'bsonType': 'object',
+                            'required': ['full_name', 'whatsapp_number', 'email', 'created_at', 'updated_at'],
+                            'properties': {
+                                '_id': {'bsonType': 'objectId'},
+                                'full_name': {'bsonType': 'string'},
+                                'whatsapp_number': {'bsonType': 'string'},
+                                'email': {'bsonType': 'string', 'pattern': r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'},
+                                'business_type': {'bsonType': ['string', 'null']},
+                                'created_at': {'bsonType': 'date'},
+                                'updated_at': {'bsonType': 'date'}
+                            }
+                        }
+                    },
+                    'indexes': [
+                        {'key': [('email', ASCENDING)], 'unique': True},
+                        {'key': [('whatsapp_number', ASCENDING)], 'unique': True},
                         {'key': [('created_at', DESCENDING)]}
                     ]
                 }
@@ -1356,6 +1379,74 @@ def to_dict_kyc_record(record):
         'id_number': record.get('id_number', ''),
         'uploaded_id_photo_url': record.get('uploaded_id_photo_url', ''),
         'status': record.get('status', ''),
+        'created_at': record.get('created_at'),
+        'updated_at': record.get('updated_at')
+    }
+
+def create_waitlist_entry(db, waitlist_data):
+    """
+    Create a new waitlist entry in the waitlist collection.
+    
+    Args:
+        db: MongoDB database instance
+        waitlist_data: Dictionary containing waitlist information
+    
+    Returns:
+        str: ID of the created waitlist entry
+    """
+    try:
+        required_fields = ['full_name', 'whatsapp_number', 'email', 'created_at', 'updated_at']
+        if not all(field in waitlist_data for field in required_fields):
+            raise ValueError(trans('general_missing_waitlist_fields', default='Missing required waitlist fields'))
+        result = db.waitlist.insert_one(waitlist_data)
+        logger.info(f"{trans('general_waitlist_created', default='Created waitlist entry with ID')}: {result.inserted_id}", 
+                   extra={'session_id': waitlist_data.get('session_id', 'no-session-id')})
+        return str(result.inserted_id)
+    except DuplicateKeyError:
+        logger.error(f"Duplicate email or WhatsApp number in waitlist: {waitlist_data.get('email')}", 
+                    exc_info=True, extra={'session_id': waitlist_data.get('session_id', 'no-session-id')})
+        raise ValueError(trans('general_waitlist_duplicate_error', default='Email or WhatsApp number already exists in waitlist'))
+    except Exception as e:
+        logger.error(f"{trans('general_waitlist_creation_error', default='Error creating waitlist entry')}: {str(e)}", 
+                    exc_info=True, extra={'session_id': waitlist_data.get('session_id', 'no-session-id')})
+        raise
+
+def get_waitlist_entries(db, filter_kwargs):
+    """
+    Retrieve waitlist entries based on filter criteria.
+    
+    Args:
+        db: MongoDB database instance
+        filter_kwargs: Dictionary of filter criteria (e.g., {'email': 'user@example.com'})
+    
+    Returns:
+        list: List of waitlist entries
+    """
+    try:
+        return list(db.waitlist.find(filter_kwargs).sort('created_at', DESCENDING))
+    except Exception as e:
+        logger.error(f"{trans('general_waitlist_fetch_error', default='Error getting waitlist entries')}: {str(e)}", 
+                    exc_info=True, extra={'session_id': 'no-session-id'})
+        raise
+
+def to_dict_waitlist(record):
+    """
+    Convert waitlist record to dictionary.
+    
+    Args:
+        record: Waitlist document
+    
+    Returns:
+        dict: Waitlist dictionary
+    """
+    if not record:
+        return {'full_name': None, 'email': None}
+    return {
+        'id': str(record.get('_id', '')),
+        'full_name': record.get('full_name', ''),
+        'whatsapp_number': record.get('whatsapp_number', ''),
+        'email': record.get('email', ''),
+        'business_type': record.get('business_type', None),
         'created_at': record.get('created_at'),
         'updated_at': record.get('updated_at')
     }
