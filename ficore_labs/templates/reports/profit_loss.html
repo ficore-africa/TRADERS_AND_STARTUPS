@@ -72,7 +72,7 @@
                 </tr>
                 <tr>
                     <th colspan="3">{{ t('reports_net_profit', default='Net Profit') }}</th>
-                    <th>{{ (cashflows | selectattr('type', 'equalto', 'receipt') | sum(attribute='amount')) - (cashflows | selectattr('type', 'equalto', 'payment') | sum(attribute='amount')) | format_currency }}</th>
+                    <th>{{ ((cashflows | selectattr('type', 'equalto', 'receipt') | sum(attribute='amount') | float) - (cashflows | selectattr('type', 'equalto', 'payment') | sum(attribute='amount') | float)) | format_currency }}</th>
                     <th></th>
                 </tr>
             </tfoot>
