@@ -1,6 +1,6 @@
 import logging
 from bson import ObjectId, errors
-from flask import Blueprint, render_template, redirect, url_for, flash, request, session, Response
+from flask import Blueprint, render_template, redirect, url_for, flash, request, session, Response, send_file
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, FloatField, SelectField, SubmitField, DateField, validators
@@ -14,7 +14,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
 from io import BytesIO
 import csv
-from models import get_records, get_cashflows, get_feedback, to_dict_feedback
+from models import get_records, get_cashflows, get_feedback, to_dict_feedback, get_waitlist_entries, to_dict_waitlist
 
 logger = logging.getLogger(__name__)
 
@@ -863,6 +863,97 @@ def manage_forecasts():
                      extra={'session_id': session.get('sid', 'no-session-id'), 'user_id': current_user.id})
         flash(trans('admin_database_error', default='An error occurred while accessing the database'), 'danger')
         return render_template('error/500.html'), 500
+
+@admin_bp.route('/waitlist', methods=['GET'])
+@login_required
+@utils.requires_role('admin')
+def view_waitlist():
+    try:
+        db = utils.get_mongo_db()
+        entries = get_waitlist_entries(db, {})
+        return render_template('admin/waitlist.html', entries=[to_dict_waitlist(e) for e in entries])
+    except Exception as e:
+        logger.error(f"Error viewing waitlist: {str(e)}", exc_info=True)
+        flash(trans('general_error', default='An error occurred while loading the waitlist'))
+        return redirect(url_for('home'))
+
+@admin_bp.route('/waitlist/export', methods=['GET'])
+@login_required
+@utils.requires_role('admin')
+def export_waitlist():
+    try:
+        db = utils.get_mongo_db()
+        entries = get_waitlist_entries(db, {})
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(['ID', 'Full Name', 'WhatsApp Number', 'Email', 'Business Type', 'Created At', 'Updated At'])
+        for entry in entries:
+            dict_entry = to_dict_waitlist(entry)
+            writer.writerow([
+                dict_entry['id'],
+                dict_entry['full_name'],
+                dict_entry['whatsapp_number'],
+                dict_entry['email'],
+                dict_entry['business_type'],
+                dict_entry['created_at'],
+                dict_entry['updated_at']
+            ])
+        output.seek(0)
+        return send_file(
+            io.BytesIO(output.getvalue().encode('utf-8')),
+            mimetype='text/csv',
+            as_attachment=True,
+            download_name=f'waitlist_{datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")}.csv'
+        )
+    except Exception as e:
+        logger.error(f"Error exporting waitlist: {str(e)}", exc_info=True)
+        flash(trans('general_error', default='An error occurred while exporting the waitlist'))
+        return redirect(url_for('admin.view_waitlist'))
+
+@admin_bp.route('/waitlist/contact/<string:entry_id>', methods=['GET', 'POST'])
+@login_required
+@utils.requires_role('admin')
+def contact_signup(entry_id):
+    try:
+        db = utils.get_mongo_db()
+        entry = db.waitlist.find_one({'_id': ObjectId(entry_id)})
+        if not entry:
+            flash(trans('general_not_found', default='Waitlist entry not found'))
+            return redirect(url_for('admin.view_waitlist'))
+        
+        dict_entry = to_dict_waitlist(entry)
+        
+        if request.method == 'POST':
+            message = request.form.get('message')
+            method = request.form.get('method')  # 'email' or 'whatsapp'
+            
+            if not message or not method:
+                flash(trans('general_missing_fields', default='Missing required fields'))
+                return render_template('admin/contact.html', entry=dict_entry)
+            
+            # Placeholder for sending message
+            # Implement actual sending logic here, e.g., using external services
+            # For email: send_email(dict_entry['email'], 'Message from Admin', message)
+            # For whatsapp: send_whatsapp(dict_entry['whatsapp_number'], message)
+            # Assuming send_email and send_whatsapp are defined in utils.py or similar
+            
+            # Log the action
+            audit_data = {
+                'admin_id': current_user.id,
+                'action': f'Contacted waitlist signup via {method}',
+                'details': {'entry_id': entry_id, 'method': method, 'message': message},
+                'timestamp': datetime.now(timezone.utc)
+            }
+            log_audit_action('contact_waitlist', audit_data['details'])
+            
+            flash(trans('general_message_sent', default='Message sent successfully'))
+            return redirect(url_for('admin.view_waitlist'))
+        
+        return render_template('admin/contact.html', entry=dict_entry)
+    except Exception as e:
+        logger.error(f"Error contacting waitlist signup {entry_id}: {str(e)}", exc_info=True)
+        flash(trans('general_error', default='An error occurred while contacting the signup'))
+        return redirect(url_for('admin.view_waitlist'))
 
 def generate_customer_report_pdf(users):
     """Generate a PDF report of customer data."""
