@@ -54,6 +54,14 @@ logger = SessionAdapter(root_logger, {})
 # Navigation lists
 _TRADER_TOOLS = [
     {
+    "endpoint": "dashboard.index",
+    "label": "Dashboard",
+    "label_key": "dashboard_summary",
+    "description_key": "dashboard_summary_desc",
+    "tooltip_key": "dashboard_tooltip",
+    "icon": "bi-bar-chart-line"
+    },
+    {
         "endpoint": "debtors.index",
         "label": "Debtors",
         "label_key": "debtors_dashboard",
@@ -96,6 +104,14 @@ _TRADER_TOOLS = [
 ]
 
 _STARTUP_TOOLS = [
+    {
+    "endpoint": "dashboard.index",
+    "label": "Dashboard",
+    "label_key": "dashboard_summary",
+    "description_key": "dashboard_summary_desc",
+    "tooltip_key": "dashboard_tooltip",
+    "icon": "bi-bar-chart-line"
+    },
     {
         "endpoint": "debtors.index",
         "label": "Debtors",
@@ -225,6 +241,14 @@ _STARTUP_NAV = [
 ]
 
 _ADMIN_TOOLS = [
+    {
+    "endpoint": "dashboard.index",
+    "label": "Dashboard",
+    "label_key": "dashboard_summary",
+    "description_key": "dashboard_summary_desc",
+    "tooltip_key": "dashboard_tooltip",
+    "icon": "bi-bar-chart-line"
+    },
     {
         "endpoint": "admin.dashboard",
         "label": "Dashboard",
